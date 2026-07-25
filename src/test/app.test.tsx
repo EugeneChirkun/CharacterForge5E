@@ -18,7 +18,9 @@ test('character list renders and opens reference character', async () => {
   await userEvent.click(
     screen.getByRole('button', { name: /open character/i }),
   );
-  expect(await screen.findByText('Summary')).toBeInTheDocument();
+  expect(
+    await screen.findByRole('heading', { name: 'Summary' }),
+  ).toBeInTheDocument();
   expect(location.hash).toBe('#/character/reference');
 });
 test('mobile navigation switches sections', async () => {

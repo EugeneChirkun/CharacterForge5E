@@ -28,9 +28,9 @@ Preview a production build with `npm run dev -- --host` or `npx vite preview` af
 
 ## GitHub Pages
 
-1. Push the repository to GitHub and make `main` the deployment branch (or edit the workflow trigger).
-2. In **Settings → Pages**, select **GitHub Actions** as the source.
-3. Push to `main` or run **Test and deploy Pages** manually under Actions.
+1. In **Repository Settings → Pages → Build and deployment → Source**, select **GitHub Actions**.
+2. Merge changes into `master` (which creates a push to `master`) or run **Build and deploy GitHub Pages** manually under Actions.
+3. The production deployment workflow does not run for pull requests.
 4. The workflow installs the locked dependencies with `npm ci`, lints, tests,
    builds, uploads `dist`, and deploys it to Pages.
 
