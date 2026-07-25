@@ -33,6 +33,8 @@ function isState(v: unknown): v is StoredApplicationState {
     !!c &&
     typeof c === 'object' &&
     (c as Record<string, unknown>).id === 'reference' &&
+    !!(c as Record<string, unknown>).skills &&
+    typeof (c as Record<string, unknown>).skills === 'object' &&
     Array.isArray((c as Record<string, unknown>).spellSlots) &&
     Array.isArray((c as Record<string, unknown>).resources)
   );
