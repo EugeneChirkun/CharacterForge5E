@@ -72,7 +72,7 @@ export function CharacterSheetPage() {
           {section === 'summary' && <Summary c={character} />}{' '}
           {section === 'actions' && <Actions />}{' '}
           {section === 'spells' && <Spells c={character} onSlots={update} />}{' '}
-          {section === 'features' && <Features />}{' '}
+          {section === 'features' && <Features c={character} />}{' '}
           {section === 'inventory' && <Inventory />}
         </div>
       </main>

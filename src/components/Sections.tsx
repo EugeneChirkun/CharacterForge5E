@@ -167,48 +167,57 @@ export function Spells({
           <input type="checkbox" /> Concentration
         </label>
       </div>
-      {[
-        ['Cantrips', 'Verdant Spark'],
-        ['Prepared spells', 'Mending Breeze'],
-        ['Always-prepared Circle spells', 'Woodland Veil'],
-      ].map(([h, n]) => (
-        <article className="panel spell" key={h}>
-          <div>
-            <h3>{h}</h3>
-            <strong>{n}</strong>
-            <p>Minimal fictional spell placeholder.</p>
-          </div>
-          <label>
-            <input type="checkbox" defaultChecked /> Prepared
-          </label>
-        </article>
-      ))}
+      {c.spells
+        .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
+        .map((s) => (
+          <article className="panel spell" key={s.id}>
+            <div>
+              <h3>
+                {s.level === 0
+                  ? 'Cantrip'
+                  : s.alwaysPrepared
+                    ? 'Always prepared'
+                    : 'Prepared spell'}
+              </h3>
+              <strong>{s.name}</strong>
+              <p>
+                {s.sources.map((x) => (
+                  <span className="badge" key={x}>
+                    {x[0].toUpperCase() + x.slice(1)}{' '}
+                  </span>
+                ))}
+              </p>
+            </div>
+            <label>
+              <input type="checkbox" defaultChecked /> Prepared
+            </label>
+          </article>
+        ))}
     </section>
   );
 }
-export function Features() {
+export function Features({ c }: { c: CharacterViewModel }) {
   return (
     <section>
       <h2>Features</h2>
       <div className="info-grid">
-        {[
-          'Tiefling traits',
-          'Chthonic Legacy',
-          'Druid features',
-          'Circle of the Land features',
-          'Background features',
-          'Feats',
-        ].map((x) => (
-          <article className="panel" key={x}>
-            <h3>{x}</h3>
-            <div className="feature">
-              <strong>{x} reference</strong>
-              <small>
-                Short UI placeholder; rules content will be added separately.
-              </small>
-            </div>
-          </article>
-        ))}
+        {(['class', 'subclass', 'species', 'background', 'feat'] as const).map(
+          (x) => (
+            <article className="panel" key={x}>
+              <h3>{x}</h3>
+              <div className="feature">
+                {c.features
+                  .filter((f) => f.sourceType === x)
+                  .map((f) => (
+                    <div key={f.id}>
+                      <strong>{f.name}</strong>
+                      <small>{f.summary}</small>
+                    </div>
+                  ))}
+              </div>
+            </article>
+          ),
+        )}
       </div>
     </section>
   );

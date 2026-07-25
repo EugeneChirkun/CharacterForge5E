@@ -6,6 +6,11 @@ import {
 } from '../../domain/character';
 import { skillNames } from '../../domain/skills';
 import type { CharacterViewModel } from './character.types';
+import { defaultRuleRegistry } from '../../domain/rules';
+
+const toughPerLevel = defaultRuleRegistry.features['tough-durability'].effects
+  .filter((effect) => effect.type === 'modify-hit-points-per-level')
+  .map((effect) => ({ source: 'Tough feat rule', amount: effect.amount }));
 
 export const referenceBuild: CharacterBuild = {
   id: 'reference',
@@ -26,7 +31,7 @@ export const referenceBuild: CharacterBuild = {
       level: index + 1,
       baseHitPoints: index === 0 ? 8 : 5,
     })),
-    perLevelBonuses: [{ source: 'Tough', amount: 2 }],
+    perLevelBonuses: toughPerLevel,
     flatBonuses: [],
   },
   savingThrowProficiencies: ['intelligence', 'wisdom'],
@@ -38,17 +43,54 @@ export const referenceBuild: CharacterBuild = {
   ],
   spellcasting: {
     ability: 'wisdom',
-    slotProgression: { 8: { 1: 4, 2: 3, 3: 3, 4: 2 } },
+    slotProgression: {
+      1: { 1: 2 },
+      2: { 1: 3 },
+      3: { 1: 4, 2: 2 },
+      4: { 1: 4, 2: 3 },
+      5: { 1: 4, 2: 3, 3: 2 },
+      6: { 1: 4, 2: 3, 3: 3 },
+      7: { 1: 4, 2: 3, 3: 3, 4: 1 },
+      8: { 1: 4, 2: 3, 3: 3, 4: 2 },
+    },
   },
   feats: ['Tough'],
+  class: { classId: 'druid', level: 8, subclassId: 'circle-of-the-land' },
+  species: {
+    speciesId: 'tiefling',
+    optionId: 'chthonic',
+    spellcastingAbility: 'wisdom',
+  },
+  backgroundId: 'farmer',
+  featIds: ['tough'],
+  cantripIds: ['druidcraft', 'guidance', 'produce-flame'],
+  preparedSpellIds: [
+    'animal-friendship',
+    'cure-wounds',
+    'entangle',
+    'faerie-fire',
+    'goodberry',
+    'healing-word',
+    'speak-with-animals',
+    'barkskin',
+    'lesser-restoration',
+    'moonbeam',
+    'pass-without-trace',
+    'call-lightning',
+  ],
 };
 export const referenceSession: CharacterSession = {
   currentHp: 46,
   temporaryHp: 4,
   spentHitDice: 0,
   spentSpellSlots: { 1: 2, 2: 2, 3: 1, 4: 2 },
-  resources: { 'wild-shape': 0, 'nature-aid': 0, token: 0 },
+  resources: {
+    'wild-shape': 0,
+    'chthonic-false-life-use': 0,
+    'chthonic-ray-of-enfeeblement-use': 0,
+  },
   conditions: [],
+  selections: { circleOfTheLand: { landType: 'temperate' } },
 };
 
 const computed = computeCharacter(referenceBuild, referenceSession);
@@ -94,27 +136,34 @@ export const referenceCharacter: CharacterViewModel = {
     maximum: slot.maximum,
   })),
   resources: [
-    {
-      id: 'wild-shape',
-      name: 'Wild Shape',
-      current: 0,
-      maximum: 2,
-      recovery: 'short',
-    },
+    ...computed.activeResources.map((r) => ({
+      id: r.id,
+      name: r.name,
+      current: r.remaining,
+      maximum: r.maximum,
+      recovery: r.recovery.includes('short')
+        ? ('short' as const)
+        : ('long' as const),
+    })),
     {
       id: 'nature-aid',
-      name: 'Nature Aid',
+      name: 'Legacy saved resource',
       current: 0,
       maximum: 1,
       recovery: 'long',
     },
-    {
-      id: 'token',
-      name: 'Story Token',
-      current: 0,
-      maximum: 1,
-      recovery: 'manual',
-    },
+  ],
+  features: computed.activeFeatures,
+  spells: computed.spells.map((s) => ({
+    id: s.spellId,
+    name: s.name,
+    level: s.level,
+    sources: s.sourceTypes,
+    alwaysPrepared: s.alwaysPrepared,
+  })),
+  diagnostics: [
+    ...computed.ruleDiagnostics.map((d) => d.type),
+    ...computed.spellDiagnostics.map((d) => d.type),
   ],
 };
 export const freshReferenceCharacter = () =>
