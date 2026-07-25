@@ -3,6 +3,7 @@ import type {
   AbilityName,
   CharacterViewModel,
 } from '../features/characters/character.types';
+import { skillNames } from '../domain/skills';
 const labels: Record<AbilityName, string> = {
   strength: 'Strength',
   dexterity: 'Dexterity',
@@ -53,7 +54,15 @@ export function Summary({ c }: { c: CharacterViewModel }) {
       </div>
       <div className="info-grid">
         {[
-          ['Skills', 'Animal Handling, Nature, Perception'],
+          [
+            'Skills',
+            skillNames
+              .map(
+                (skill) =>
+                  `${skill.replace(/([A-Z])/g, ' $1')} ${signed(c.skills[skill])}`,
+              )
+              .join(', '),
+          ],
           ['Senses', 'Darkvision, passive awareness'],
           ['Proficiencies', 'Light armor, herbalism kit'],
           ['Languages', 'Common, Infernal, Druidic'],

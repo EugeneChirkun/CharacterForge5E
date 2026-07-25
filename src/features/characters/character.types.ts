@@ -1,10 +1,6 @@
-export type AbilityName =
-  | 'strength'
-  | 'dexterity'
-  | 'constitution'
-  | 'intelligence'
-  | 'wisdom'
-  | 'charisma';
+import type { AbilityName } from '../../domain/abilities';
+import type { SkillName } from '../../domain/skills';
+export type { AbilityName } from '../../domain/abilities';
 export type LandType = 'arid' | 'polar' | 'temperate' | 'tropical';
 export type RecoveryType = 'short' | 'long' | 'manual';
 export interface AbilityViewModel {
@@ -47,6 +43,7 @@ export interface CharacterViewModel {
   spellSaveDc: number;
   spellAttackBonus: number;
   abilities: Record<AbilityName, AbilityViewModel>;
+  skills: Record<SkillName, number>;
   spellSlots: SpellSlotViewModel[];
   resources: ResourceViewModel[];
 }
