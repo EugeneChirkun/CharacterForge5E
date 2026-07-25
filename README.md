@@ -57,3 +57,25 @@ route load from the static `index.html` without server rewrite rules.
 Included: responsive character list and sheet; pure explained generic calculations; immutable build/session models; summary, actions, spells, features, and inventory views; accessible rest confirmation dialogs; one-step rest undo; spell-slot controls; versioned local storage; and a creation placeholder.
 
 Not included: class/species/subclass/feat feature rules, rest rules, spell effects, prepared-spell validation, full character creation, leveling, authentication, backend/cloud sync, Android packaging, PDF export, multiplayer, complete book content, or dark mode. State is browser-local and deliberately uses a single version-1 fixture character. The placeholder names and descriptions are original/minimal UI copy rather than reproduced rulebook descriptions.
+
+## Iteration 2B: verified Druid vertical slice
+
+Iteration 2B adds a read-only, typed rule registry and pure interpreters for Druid levels 1–8, Circle of the Land (Arid, Polar, Temperate, and Tropical), Tiefling with Chthonic Legacy, Farmer, and Tough. These are the **only** class, subclass, species/legacy, background, feat, and levels currently supported. Character creation, multiclassing, and level-up flows remain out of scope.
+
+Every definition carries `5e-2024` source metadata and a verification flag. Private-reference text is never bundled: the application stores only names, structured mechanics, short original summaries, and section/page metadata. Spell descriptions from the PHB are not included.
+
+### Architecture
+
+- The immutable `RuleRegistry` contains class progression, typed feature effects, spells, independent spell grants, and resources. It is injected into character and rest computation.
+- Rule resolution derives active class, subclass, species, background, and feat features. Unknown or incompatible IDs produce typed diagnostics.
+- Resource session values consistently mean **remaining uses**. Maximums and recovery come from definitions rather than persisted or React-owned formulas.
+- Prepared Druid spells are validated for count, duplicates, list membership, spell level, cantrips, missing definitions, and accidental inclusion of granted spells.
+- Class, subclass, and species grant paths remain separate. Presentation merges cards by spell ID while retaining all source badges.
+- Rest previews and immutable transitions share one rules path. Short Rests restore only explicitly eligible resources; Long Rests restore HP, spell slots, resources, and free uses and can change the active Circle land.
+- Storage schema v2 persists the current presentation state. A v1 reference payload is conservatively merged with fresh derived Iteration 2B data; malformed state resets only to the reference default.
+
+### Known limitations
+
+Wild Shape creature forms, spell effects, attacks, concentration, conditions, equipment mechanics, individual Hit Dice spending/recovery, Natural Recovery choices, character creation, and level-up UI are deferred. The compatibility view-model rest adapter remains for the existing UI while authoritative new transitions are available in `src/domain/rest`.
+
+See [the compact verification matrix](docs/rules-verification/druid-tiefling-levels-1-8.md) for rule provenance and exact limitations.

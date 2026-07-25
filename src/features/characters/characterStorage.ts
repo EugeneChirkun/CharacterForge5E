@@ -3,9 +3,9 @@ import type {
   StoredApplicationState,
 } from './character.types';
 import { freshReferenceCharacter } from './referenceCharacter';
-export const STORAGE_KEY = 'character-forge-state-v1';
+export const STORAGE_KEY = 'character-forge-state-v2';
 const defaults = (): StoredApplicationState => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   characters: { reference: freshReferenceCharacter() },
 });
 export function loadState(): StoredApplicationState {
@@ -13,17 +13,45 @@ export function loadState(): StoredApplicationState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaults();
     const value: unknown = JSON.parse(raw);
-    if (!isState(value)) return defaults();
-    return value;
+    if (isState(value)) return value;
+    if (isLegacyState(value)) {
+      const fresh = defaults();
+      const legacy = value.characters.reference;
+      return {
+        ...fresh,
+        characters: {
+          reference: {
+            ...fresh.characters.reference,
+            ...legacy,
+            features: fresh.characters.reference.features,
+            spells: fresh.characters.reference.spells,
+            diagnostics: fresh.characters.reference.diagnostics,
+          },
+        },
+      };
+    }
+    return defaults();
   } catch {
     return defaults();
   }
+}
+function isLegacyState(
+  v: unknown,
+): v is { schemaVersion: 1; characters: { reference: CharacterViewModel } } {
+  if (!v || typeof v !== 'object') return false;
+  const x = v as Record<string, unknown>;
+  return (
+    x.schemaVersion === 1 &&
+    !!x.characters &&
+    typeof x.characters === 'object' &&
+    !!(x.characters as Record<string, unknown>).reference
+  );
 }
 function isState(v: unknown): v is StoredApplicationState {
   if (!v || typeof v !== 'object') return false;
   const x = v as Record<string, unknown>;
   if (
-    x.schemaVersion !== 1 ||
+    x.schemaVersion !== 2 ||
     !x.characters ||
     typeof x.characters !== 'object'
   )

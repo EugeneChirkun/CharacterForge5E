@@ -46,9 +46,23 @@ export interface CharacterViewModel {
   skills: Record<SkillName, number>;
   spellSlots: SpellSlotViewModel[];
   resources: ResourceViewModel[];
+  features: readonly {
+    id: string;
+    name: string;
+    sourceType: 'class' | 'subclass' | 'species' | 'background' | 'feat';
+    summary: string;
+  }[];
+  spells: readonly {
+    id: string;
+    name: string;
+    level: number;
+    sources: readonly ('class' | 'subclass' | 'species')[];
+    alwaysPrepared: boolean;
+  }[];
+  diagnostics: readonly string[];
 }
 export interface StoredApplicationState {
-  schemaVersion: 1;
+  schemaVersion: 2;
   characters: Record<string, CharacterViewModel>;
   lastCharacterId?: string;
   lastSection?: string;

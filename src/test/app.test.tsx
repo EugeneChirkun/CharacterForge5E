@@ -44,7 +44,7 @@ test('short rest opens preview and supports undo', async () => {
 test('short rest restores only short resources', () => {
   const c = freshReferenceCharacter();
   const n = performRest('short', c);
-  expect(n.resources.find((r) => r.id === 'wild-shape')?.current).toBe(2);
+  expect(n.resources.find((r) => r.id === 'wild-shape')?.current).toBe(3);
   expect(n.resources.find((r) => r.id === 'nature-aid')?.current).toBe(0);
   expect(n.currentHp).toBe(46);
 });
