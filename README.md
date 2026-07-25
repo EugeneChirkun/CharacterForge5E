@@ -6,10 +6,11 @@ A mobile-first, static React character manager scaffold for a Dungeons & Dragons
 
 ## Local setup
 
-Requires Node.js 20 or newer.
+Requires Node.js 22 and npm. The committed `package-lock.json` is the source of
+truth for dependency versions.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -30,9 +31,12 @@ Preview a production build with `npm run dev -- --host` or `npx vite preview` af
 1. Push the repository to GitHub and make `main` the deployment branch (or edit the workflow trigger).
 2. In **Settings → Pages**, select **GitHub Actions** as the source.
 3. Push to `main` or run **Test and deploy Pages** manually under Actions.
-4. The workflow installs dependencies, lints, tests, builds with `VITE_BASE_PATH=/<repository-name>/`, and deploys `dist`.
+4. The workflow installs the locked dependencies with `npm ci`, lints, tests,
+   builds, uploads `dist`, and deploys it to Pages.
 
-For a custom host/base, set `VITE_BASE_PATH` while building, for example `VITE_BASE_PATH=/my-project/ npm run build`.
+Vite emits relative asset URLs, so the same build works at a repository path or
+on a custom domain. Client-side navigation uses hash routes, which lets every
+route load from the static `index.html` without server rewrite rules.
 
 ## Iteration 1 scope and limitations
 
