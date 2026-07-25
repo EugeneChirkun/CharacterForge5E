@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useCharacter } from '../app/CharacterContext';
 import type {
   CharacterViewModel,
@@ -19,7 +19,11 @@ import {
   Summary,
 } from '../components/Sections';
 export function CharacterSheetPage() {
-  const { character, update, state, setMeta } = useCharacter();
+  const { id = 'reference' } = useParams();
+  const context = useCharacter();
+  const { update, state, setMeta } = context;
+  const missing = !state.characters[id];
+  const character = state.characters[id] ?? state.characters.reference;
   const initial = sections.includes(state.lastSection as Section)
     ? (state.lastSection as Section)
     : 'summary';
@@ -28,6 +32,13 @@ export function CharacterSheetPage() {
   const [restLand, setRestLand] = useState<LandType>(character.landType);
   const [undo, setUndo] = useState<CharacterViewModel | null>(null);
   const [toast, setToast] = useState('');
+  if (missing)
+    return (
+      <main className="center-page">
+        <h1>Character not found</h1>
+        <Link to="/characters">Return to characters</Link>
+      </main>
+    );
   const changeSection = (s: Section) => {
     setSection(s);
     setMeta({ lastSection: s });
@@ -66,6 +77,14 @@ export function CharacterSheetPage() {
             ← All characters
           </Link>
           <RestControls onRest={startRest} />
+          {id !== 'reference' && character.level < 8 && (
+            <Link className="button" to={`/character/${id}/level-up`}>
+              Level Up
+            </Link>
+          )}
+          {id !== 'reference' && character.level >= 8 && (
+            <span>Maximum level reached</span>
+          )}
         </div>
         <CharacterHeader character={character} onLandChange={changeLand} />
         <div className="content">

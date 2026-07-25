@@ -79,3 +79,13 @@ Every definition carries `5e-2024` source metadata and a verification flag. Priv
 Wild Shape creature forms, spell effects, attacks, concentration, conditions, equipment mechanics, individual Hit Dice spending/recovery, Natural Recovery choices, character creation, and level-up UI are deferred. The compatibility view-model rest adapter remains for the existing UI while authoritative new transitions are available in `src/domain/rest`.
 
 See [the compact verification matrix](docs/rules-verification/druid-tiefling-levels-1-8.md) for rule provenance and exact limitations.
+
+## Iteration 2C: creation and level-up
+
+The guided creation workflow supports **only Druid levels 1–8, Tiefling with Chthonic Legacy, Farmer, Tough, and Circle of the Land** (Arid, Polar, Temperate, or Tropical). Its responsive steps cover basics/class, fixed origin, Standard Array/27-point Point Buy/strict Manual scores, Farmer adjustments, Druid skills, one verified MVP equipment preset, class cantrips and prepared spells, the level-3 subclass choice, and a computed review. Spell descriptions from the PHB are not bundled.
+
+Creation choices live in a serializable schema-v1 `CharacterDraft`, separate from completed characters. The browser saves it under `character-forge-creation-draft-v1`, restores it after refresh, and removes it after confirmation or confirmed cancellation. Completed schema-v1 build/session records use `character-forge-records-v1`; computed characters and rule definitions are never stored. Remove those two local-storage keys plus `character-forge-state-v2` in browser developer tools to reset all browser data.
+
+Hash routes are `#/characters`, `#/characters/new`, `#/characters/new/:step`, `#/character/reference`, `#/character/:id`, and `#/character/:id/level-up`. The seeded reference remains read-only and cannot be deleted or leveled. User characters advance exactly one level through level 8. Level-up preserves current and temporary HP and spent resources/slots rather than performing a Long Rest; level 3 requires Circle and land selection. Cantrip replacement and other uncertain replacement rules are deliberately deferred.
+
+See [the Iteration 2C architecture notes](docs/iteration-2c-character-creation.md). Run verification with `npm ci`, `npm run lint`, `npm run test`, and `npm run build`.
