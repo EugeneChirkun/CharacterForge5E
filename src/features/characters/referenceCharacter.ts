@@ -171,6 +171,8 @@ export const referenceCharacter: CharacterViewModel = {
     ...computed.ruleDiagnostics.map((d) => d.type),
     ...computed.spellDiagnostics.map((d) => d.type),
   ],
+  conditions: referenceSession.conditions,
+  preparedSpellIds: referenceBuild.preparedSpellIds,
   inventory: referenceSession.inventory!,
   carriedWeight: computed.equipment.carriedWeight,
   ownedWeight: computed.equipment.ownedWeight,

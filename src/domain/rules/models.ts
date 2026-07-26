@@ -134,6 +134,22 @@ export type SpellSchool =
   | 'illusion'
   | 'necromancy'
   | 'transmutation';
+export type SpellTag =
+  | 'healing'
+  | 'attack'
+  | 'control'
+  | 'utility'
+  | 'summoning'
+  | 'movement'
+  | 'detection'
+  | 'protection';
+export interface SpellComponents {
+  readonly verbal: boolean;
+  readonly somatic: boolean;
+  readonly material: boolean;
+  /** A non-copyrighted indicator only; material prose is deliberately not stored. */
+  readonly materialRequirement?: string;
+}
 export interface SpellDefinition {
   readonly id: string;
   readonly name: string;
@@ -142,6 +158,13 @@ export interface SpellDefinition {
   readonly classIds: readonly string[];
   readonly ritual: boolean;
   readonly concentration: boolean;
+  readonly castingTime: string;
+  readonly range: string;
+  readonly duration: string;
+  readonly components: SpellComponents;
+  readonly tags: readonly SpellTag[];
+  /** Reserved for user-imported, appropriately licensed content. */
+  readonly description?: string;
   readonly source: RuleSource;
 }
 export type SpellGrantSourceType = 'class' | 'subclass' | 'species';

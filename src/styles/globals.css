@@ -915,3 +915,202 @@ dialog li {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* Iteration 3.3: presentation for the application-owned Spellbook view model. */
+.spellbook-page {
+  max-width: 88rem;
+  margin: auto;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+.spellbook-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+}
+.spellbook-heading h1 {
+  margin-bottom: 0.5rem;
+}
+.spell-search {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1.25rem 0 0.75rem;
+  font-weight: 700;
+}
+.spell-search input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem;
+  font: inherit;
+}
+.spell-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.spell-filters label,
+.spell-filters select {
+  min-height: 2.75rem;
+}
+.spell-filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+}
+.spell-filters select {
+  max-width: 100%;
+  padding: 0.45rem;
+}
+.slot-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.75rem;
+}
+.slot-summary > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.slot-summary button {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+}
+.preparation-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+}
+.preparation-summary h2 {
+  width: 100%;
+  margin-bottom: 0;
+}
+.preparation-summary div {
+  display: grid;
+  gap: 0.25rem;
+}
+.spellbook-layout {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+.spell-level {
+  margin-bottom: 2rem;
+}
+.spell-card-list {
+  display: grid;
+  gap: 0.75rem;
+}
+.spellbook-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.spellbook-card.unavailable {
+  opacity: 0.58;
+  filter: grayscale(0.35);
+}
+.spell-select {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  text-align: left;
+  gap: 0.45rem 1rem;
+  color: var(--text);
+  background: transparent;
+  border-radius: 0;
+}
+.spell-select:hover {
+  background: #f4ede3;
+}
+.spell-select > small,
+.spell-select > .badges {
+  grid-column: 1 / -1;
+}
+.spell-select strong,
+.spell-select small {
+  display: block;
+}
+.spell-status {
+  font-weight: 800;
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.badge,
+.tag {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #eee5d7;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.tag {
+  border: 1px solid var(--border);
+  background: white;
+  text-transform: capitalize;
+}
+.prepare-toggle {
+  align-self: center;
+  margin-right: 0.65rem;
+}
+.spell-detail dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.6rem 1rem;
+}
+.spell-detail dt {
+  font-weight: 800;
+}
+.spell-detail dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.spellbook-error {
+  padding: 0.75rem;
+  border-left: 0.3rem solid #8b1e1e;
+  background: #fff0f0;
+}
+@media (min-width: 900px) {
+  .spellbook-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+  }
+  .spell-detail {
+    position: sticky;
+    top: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  .spellbook-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+  .spellbook-card {
+    grid-template-columns: 1fr;
+  }
+  .prepare-toggle {
+    margin: 0 0.65rem 0.65rem;
+  }
+  .spell-select {
+    grid-template-columns: 1fr;
+  }
+  .spell-status {
+    grid-column: 1;
+  }
+  .spell-detail dl {
+    grid-template-columns: 1fr;
+  }
+}

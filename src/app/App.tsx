@@ -4,6 +4,7 @@ import { CharacterListPage } from '../pages/CharacterListPage';
 import { CharacterSheetPage } from '../pages/CharacterSheetPage';
 import { NewCharacterPage } from '../pages/NewCharacterPage';
 import { LevelUpPage } from '../pages/LevelUpPage';
+import { SpellbookPage } from '../features/spellbook/SpellbookPage';
 export function App() {
   return (
     <CharacterProvider>
@@ -16,6 +17,7 @@ export function App() {
           <Route path="/character/new" element={<NewCharacterPage />} />
           <Route path="/character/:id" element={<CharacterSheetPage />} />
           <Route path="/character/:id/level-up" element={<LevelUpPage />} />
+          <Route path="/character/:id/spellbook" element={<SpellbookPage />} />
           <Route path="*" element={<CharacterListPage />} />
         </Routes>
       </HashRouter>
