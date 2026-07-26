@@ -22,10 +22,10 @@ export function CharacterHeader({
   ];
   return (
     <header className="sheet-header character-header">
-      <div className="character-identity character-header__identity">
+      <section className="character-identity character-header__identity">
         <p className="eyebrow">Character name</p>
         <h1 className="character-header__name">{character.name}</h1>
-      </div>
+      </section>
       <dl className="character-details character-header__metadata">
         {details.map(([label, value]) => (
           <div key={label}>
@@ -34,7 +34,7 @@ export function CharacterHeader({
           </div>
         ))}
       </dl>
-      <label className="land-select">
+      <section className="character-header__options"><label className="land-select">
         <span>Circle land</span>
         <select
           value={character.landType}
@@ -46,7 +46,7 @@ export function CharacterHeader({
             </option>
           ))}
         </select>
-      </label>
+      </label></section>
     </header>
   );
 }

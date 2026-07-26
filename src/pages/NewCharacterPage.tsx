@@ -20,6 +20,7 @@ import {
 import { useCharacter } from '../app/CharacterContext';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
 import { equipmentRegistry } from '../domain/equipment';
+import { createCantripSelectionView } from '../application/characters/cantrip-selection-view';
 const steps = [
   'Basics',
   'Origin',
@@ -77,6 +78,7 @@ export function NewCharacterPage() {
   const magicianCantripId = resolvedCantrips.find(
     (choice) => choice.source === 'primal-order-magician',
   )?.spellId;
+  const cantripView = createCantripSelectionView(cantrips, draft.selectedCantripIds, progression.cantripsKnown, magicianCantripId);
   const leveled = getAvailableClassSpells(spellSelectorInput).filter(
     (spell) => spell.level > 0,
   );
@@ -367,31 +369,30 @@ export function NewCharacterPage() {
             <>
               <fieldset>
                 <legend>
-                  Druid selections ({draft.selectedCantripIds.length}/
-                  {progression.cantripsKnown})
+                  Druid cantrips ({cantripView.summary.normalSelected}/{cantripView.summary.normalLimit} selected)
                 </legend>
-                {cantrips.map((s) => (
-                  <label key={s.id}>
+                {cantripView.options.map((option) => (
+                  <label key={option.spellId} className={option.selectionSource === 'magician' ? 'granted-cantrip' : undefined}>
                     <input
                       type="checkbox"
-                      checked={draft.selectedCantripIds.includes(s.id) || magicianCantripId === s.id}
-                      disabled={magicianCantripId === s.id}
+                      checked={option.checked}
+                      disabled={option.disabled}
+                      aria-describedby={option.sourceLabel ? `cantrip-${option.spellId}-source` : undefined}
                       onChange={() =>
                         patch({
                           selectedCantripIds: toggle(
                             draft.selectedCantripIds,
-                            s.id,
+                            option.spellId,
                           ),
                         })
                       }
                     />
-                    {s.name}
-                    {magicianCantripId === s.id ? ' — Granted by Primal Order: Magician' : ''}
-                    {s.concentration ? ' · Concentration' : ''}
+                    <span>{option.name}</span>
+                    {option.sourceLabel && <small id={`cantrip-${option.spellId}-source`}>{option.sourceLabel}</small>}
                   </label>
                 ))}
                 {magicianCantripId && (
-                  <p>Granted cantrips: 1 · Total known cantrips: {resolvedCantrips.length}</p>
+                  <div className="cantrip-selection-summary"><p>Additional from Magician: {cantripView.options.find((option) => option.spellId === magicianCantripId)?.name}</p><p>Granted selections: {cantripView.summary.grantedCount}</p><p>Total known cantrips: {cantripView.summary.totalKnown}</p></div>
                 )}
               </fieldset>
               <fieldset>
@@ -476,8 +477,10 @@ export function NewCharacterPage() {
                   <dd>
                     {preview.spellSaveDc} / +{preview.spellAttackBonus}
                   </dd>
-                  <dt>Spells</dt>
-                  <dd>{preview.spells.map((s) => `${s.name}${s.sources.includes('primal-order') ? ' (Primal Order: Magician)' : ''}`).join(', ')}</dd>
+                  <dt>Druid cantrips</dt><dd>{cantripView.options.filter((option) => option.selectionSource === 'normal').map((option) => option.name).join(', ') || 'None'}</dd>
+                  <dt>Magician cantrip</dt><dd>{cantripView.options.find((option) => option.selectionSource === 'magician')?.name ?? 'None'}</dd>
+                  <dt>Total known cantrips</dt><dd>{cantripView.summary.totalKnown}</dd>
+                  <dt>Prepared and granted spells</dt><dd>{preview.spells.filter((spell) => !cantripView.options.some((option) => option.spellId === spell.id)).map((spell) => spell.name).join(', ') || 'None'}</dd>
                   <dt>Starting equipment</dt>
                   <dd>
                     {preview.inventory.items
