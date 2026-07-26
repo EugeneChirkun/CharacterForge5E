@@ -9,6 +9,17 @@ Only compact mechanics are recorded. `phb-2024-private` refers to the privately 
 | `druid`              | Druid 1–8    | d8 Hit Die; Wisdom spellcasting; saves, training, level table | phb-2024-private / Druid          | 80–86 | Verified | `src/domain/rules/registry.ts`         | `src/test/iteration2b.test.ts` | Single-class only      |
 | `druid-spellcasting` | Spellcasting | Cantrips, prepared counts, and full-caster slots              | phb-2024-private / Druid Features | 80–81 | Verified | `src/domain/spells/prepared-spells.ts` | `src/test/iteration2b.test.ts` | Spell effects excluded |
 
+### Verified Druid cantrip registry audit
+
+The supported rules subset was audited without expanding it with unverified or 2014 rules. Thorn Whip was the missing verified entry; grant-only subclass and species cantrips remain outside the Druid class list.
+
+| Internal ID     | Spell level | Class access | Source ID        | Status   | Implementation                 | Tests                              |
+| --------------- | ----------: | ------------ | ---------------- | -------- | ------------------------------ | ---------------------------------- |
+| `druidcraft`    |           0 | Druid        | phb-2024-private | Verified | `src/domain/rules/registry.ts` | `src/test/spell-selection.test.ts` |
+| `guidance`      |           0 | Druid        | phb-2024-private | Verified | `src/domain/rules/registry.ts` | `src/test/spell-selection.test.ts` |
+| `produce-flame` |           0 | Druid        | phb-2024-private | Verified | `src/domain/rules/registry.ts` | `src/test/spell-selection.test.ts` |
+| `thorn-whip`    |           0 | Druid        | phb-2024-private | Verified | `src/domain/rules/registry.ts` | `src/test/spell-selection.test.ts` |
+
 ## Druid features
 
 | Rule IDs                                                    | Mechanic                                     | Source                   | Status   | Implementation                 | Tests                          |

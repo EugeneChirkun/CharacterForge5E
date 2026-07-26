@@ -9,6 +9,10 @@ import {
 } from '../domain/creation';
 import { defaultRuleRegistry } from '../domain/rules';
 import {
+  getAvailableClassCantrips,
+  getAvailableClassSpells,
+} from '../domain/spells';
+import {
   LocalCharacterDraftRepository,
   LocalCharacterRepository,
 } from '../infrastructure/persistence/local-character-repository';
@@ -56,15 +60,14 @@ export function NewCharacterPage() {
   const patch = (value: Partial<CharacterDraft>) =>
     setDraft((d) => ({ ...d, ...value }));
   const scores = finalAbilityScores(draft);
-  const spells = Object.values(defaultRuleRegistry.spells);
-  const cantrips = spells.filter(
-    (s) => s.level === 0 && s.classIds.includes('druid'),
-  );
-  const leveled = spells.filter(
-    (s) =>
-      s.level > 0 &&
-      s.level <= Math.max(...Object.keys(progression.spellSlots).map(Number)) &&
-      s.classIds.includes('druid'),
+  const spellSelectorInput = {
+    classId: classRule.id,
+    characterLevel: draft.targetLevel,
+    registry: defaultRuleRegistry,
+  };
+  const cantrips = getAvailableClassCantrips(spellSelectorInput);
+  const leveled = getAvailableClassSpells(spellSelectorInput).filter(
+    (spell) => spell.level > 0,
   );
   const preview = useMemo(() => {
     const result = createCharacterFromDraft(draft, defaultRuleRegistry);
