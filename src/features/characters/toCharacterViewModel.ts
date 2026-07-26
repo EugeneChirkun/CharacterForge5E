@@ -7,6 +7,7 @@ import {
 import type { RuleRegistry } from '../../domain/rules';
 import { skillNames } from '../../domain/skills';
 import type { CharacterViewModel } from './character.types';
+import { emptyInventory } from '../../domain/equipment';
 export function toCharacterViewModel(
   build: CharacterBuild,
   session: CharacterSession,
@@ -80,9 +81,14 @@ export function toCharacterViewModel(
     diagnostics: [
       ...c.ruleDiagnostics.map((d) => d.type),
       ...c.spellDiagnostics.map((d) => d.type),
+      ...c.equipment.diagnostics.map((d) => d.type),
     ],
     conditions: session.conditions,
     concentrationSpellId: session.concentrationSpellId,
     preparedSpellIds: session.preparedSpellIds ?? build.preparedSpellIds ?? [],
+    inventory: session.inventory ?? emptyInventory(),
+    carriedWeight: c.equipment.carriedWeight,
+    ownedWeight: c.equipment.ownedWeight,
+    armorClassExplanation: c.equipment.armorClassSteps,
   };
 }

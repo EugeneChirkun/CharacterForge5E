@@ -1,5 +1,6 @@
 import type { AbilityName } from '../../domain/abilities';
 import type { SkillName } from '../../domain/skills';
+import type { CharacterInventory } from '../../domain/equipment';
 export type { AbilityName } from '../../domain/abilities';
 export type LandType = 'arid' | 'polar' | 'temperate' | 'tropical';
 export type RecoveryType = 'short' | 'long' | 'manual';
@@ -70,6 +71,10 @@ export interface CharacterViewModel {
   conditions?: readonly string[];
   concentrationSpellId?: string;
   preparedSpellIds?: readonly string[];
+  inventory: CharacterInventory;
+  carriedWeight: number;
+  ownedWeight: number;
+  armorClassExplanation: readonly string[];
 }
 export interface StoredApplicationState {
   schemaVersion: 2;

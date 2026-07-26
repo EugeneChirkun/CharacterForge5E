@@ -18,6 +18,7 @@ import {
 } from '../infrastructure/persistence/local-character-repository';
 import { useCharacter } from '../app/CharacterContext';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
+import { equipmentRegistry } from '../domain/equipment';
 const steps = [
   'Basics',
   'Origin',
@@ -90,7 +91,7 @@ export function NewCharacterPage() {
       return setErrors(result.diagnostics.map((d) => d.message));
     const now = new Date().toISOString();
     await characterRepo.save({
-      schemaVersion: 1,
+      schemaVersion: 2,
       build: result.build,
       session: result.session,
       createdAt: now,
@@ -436,6 +437,15 @@ export function NewCharacterPage() {
                   </dd>
                   <dt>Spells</dt>
                   <dd>{preview.spells.map((s) => s.name).join(', ')}</dd>
+                  <dt>Starting equipment</dt>
+                  <dd>
+                    {preview.inventory.items
+                      .map(
+                        (item) =>
+                          `${equipmentRegistry[item.definitionId]?.name ?? item.definitionId}${item.quantity > 1 ? ` ×${item.quantity}` : ''}`,
+                      )
+                      .join(', ')}
+                  </dd>
                 </dl>
               ) : (
                 <p>Complete all choices to generate the computed review.</p>

@@ -150,25 +150,3 @@ export function Features({ c }: { c: CharacterViewModel }) {
     </section>
   );
 }
-export function Inventory() {
-  return (
-    <section>
-      <h2>Inventory</h2>
-      <div className="info-grid">
-        {[
-          ['Equipped armor', 'Travel-worn hide'],
-          ['Equipped weapon', 'Wooden staff'],
-          ['Druidic focus', 'Carved branch'],
-          ['Backpack items', 'Bedroll, twine, field journal'],
-          ['Currency', '42 gp · 8 sp'],
-          ['Carrying capacity', '68 / 150 lb (fixture)'],
-        ].map(([h, p]) => (
-          <article className="panel" key={h}>
-            <h3>{h}</h3>
-            <p>{p}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}

@@ -11,6 +11,7 @@ import {
   validateCharacterDraft,
   type CreationDiagnostic,
 } from './draft-validation';
+import { startingInventory } from '../equipment';
 export type CreateCharacterResult =
   | {
       readonly success: true;
@@ -55,10 +56,7 @@ export function createCharacterFromDraft(
       ...draft.selectedSkillProficiencies,
     ],
     expertiseSkills: [],
-    armorClassSources: [
-      { type: 'armor', base: 12, dexterityCap: 2, label: 'MVP starting armor' },
-      { type: 'shield', amount: 2, label: 'Shield' },
-    ],
+    armorClassSources: [],
     spellcasting: { ability: 'wisdom', slotProgression },
     feats: ['Tough'],
     class: {
@@ -92,6 +90,7 @@ export function createCharacterFromDraft(
     spentSpellSlots: {},
     resources: resourceState,
     conditions: [],
+    inventory: startingInventory(),
     ...(draft.landType
       ? { selections: { circleOfTheLand: { landType: draft.landType } } }
       : {}),

@@ -11,17 +11,12 @@ import { CharacterHeader } from '../components/CharacterHeader';
 import { Navigation, type Section, sections } from '../components/Navigation';
 import { RestControls } from '../components/RestControls';
 import { RestDialog } from '../components/RestDialog';
-import {
-  Actions,
-  Features,
-  Inventory,
-  Spells,
-  Summary,
-} from '../components/Sections';
+import { Actions, Features, Spells, Summary } from '../components/Sections';
 import {
   SessionControls,
   type SessionActions,
 } from '../components/SessionControls';
+import { EquipmentPage } from '../features/equipment/EquipmentPage';
 import type { ConditionId } from '../application/session';
 export function CharacterSheetPage() {
   const { id = 'reference' } = useParams();
@@ -244,7 +239,9 @@ export function CharacterSheetPage() {
             />
           )}{' '}
           {section === 'features' && <Features c={character} />}{' '}
-          {section === 'inventory' && <Inventory />}
+          {section === 'inventory' && (
+            <EquipmentPage character={character} onChange={update} />
+          )}
         </div>
       </main>
       <div className="mobile-bars">
