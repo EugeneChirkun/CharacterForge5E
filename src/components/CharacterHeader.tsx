@@ -21,12 +21,12 @@ export function CharacterHeader({
     ['Background', character.background],
   ];
   return (
-    <header className="sheet-header">
-      <div className="character-identity">
+    <header className="sheet-header character-header">
+      <div className="character-identity character-header__identity">
         <p className="eyebrow">Character name</p>
-        <h1>{character.name}</h1>
+        <h1 className="character-header__name">{character.name}</h1>
       </div>
-      <dl className="character-details">
+      <dl className="character-details character-header__metadata">
         {details.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>

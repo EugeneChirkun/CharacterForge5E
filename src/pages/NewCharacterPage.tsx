@@ -8,6 +8,7 @@ import {
   type CharacterDraft,
 } from '../domain/creation';
 import { defaultRuleRegistry } from '../domain/rules';
+import { getResolvedCantripSelections } from '../domain/rules';
 import {
   getAvailableClassCantrips,
   getAvailableClassSpells,
@@ -68,6 +69,14 @@ export function NewCharacterPage() {
     registry: defaultRuleRegistry,
   };
   const cantrips = getAvailableClassCantrips(spellSelectorInput);
+  const cantripBuild = {
+    cantripIds: draft.selectedCantripIds,
+    class: { classId: 'druid', level: draft.targetLevel, primalOrder: draft.primalOrder },
+  };
+  const resolvedCantrips = getResolvedCantripSelections(cantripBuild);
+  const magicianCantripId = resolvedCantrips.find(
+    (choice) => choice.source === 'primal-order-magician',
+  )?.spellId;
   const leveled = getAvailableClassSpells(spellSelectorInput).filter(
     (spell) => spell.level > 0,
   );
@@ -347,7 +356,7 @@ export function NewCharacterPage() {
                 <label>Additional Druid cantrip
                   <select value={draft.primalOrder.magicianChoices?.additionalCantripId ?? ''} onChange={(e) => patch({ primalOrder: { orderId: 'magician', magicianChoices: { additionalCantripId: e.target.value, skillBonusTarget: draft.primalOrder?.orderId === 'magician' ? draft.primalOrder.magicianChoices?.skillBonusTarget ?? 'arcana' : 'arcana' } } })}>
                     <option value="">Choose a cantrip</option>
-                    {cantrips.filter((s) => !draft.selectedCantripIds.includes(s.id)).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    {cantrips.map((s) => <option key={s.id} value={s.id} disabled={draft.selectedCantripIds.includes(s.id)}>{s.name}{draft.selectedCantripIds.includes(s.id) ? ' — already selected as a Druid cantrip' : ''}</option>)}
                   </select>
                 </label>
                 <fieldset><legend>Skill bonus</legend>{(['arcana', 'nature'] as const).map((skill) => <label key={skill}><input type="radio" checked={draft.primalOrder?.orderId === 'magician' && draft.primalOrder.magicianChoices?.skillBonusTarget === skill} onChange={() => patch({ primalOrder: { orderId: 'magician', magicianChoices: { additionalCantripId: draft.primalOrder?.orderId === 'magician' ? draft.primalOrder.magicianChoices?.additionalCantripId ?? '' : '', skillBonusTarget: skill } } })} />{label(skill)}</label>)}</fieldset>
@@ -358,14 +367,15 @@ export function NewCharacterPage() {
             <>
               <fieldset>
                 <legend>
-                  Druid cantrips ({draft.selectedCantripIds.length}/
+                  Druid selections ({draft.selectedCantripIds.length}/
                   {progression.cantripsKnown})
                 </legend>
                 {cantrips.map((s) => (
                   <label key={s.id}>
                     <input
                       type="checkbox"
-                      checked={draft.selectedCantripIds.includes(s.id)}
+                      checked={draft.selectedCantripIds.includes(s.id) || magicianCantripId === s.id}
+                      disabled={magicianCantripId === s.id}
                       onChange={() =>
                         patch({
                           selectedCantripIds: toggle(
@@ -376,9 +386,13 @@ export function NewCharacterPage() {
                       }
                     />
                     {s.name}
+                    {magicianCantripId === s.id ? ' — Granted by Primal Order: Magician' : ''}
                     {s.concentration ? ' · Concentration' : ''}
                   </label>
                 ))}
+                {magicianCantripId && (
+                  <p>Granted cantrips: 1 · Total known cantrips: {resolvedCantrips.length}</p>
+                )}
               </fieldset>
               <fieldset>
                 <legend>
@@ -463,7 +477,7 @@ export function NewCharacterPage() {
                     {preview.spellSaveDc} / +{preview.spellAttackBonus}
                   </dd>
                   <dt>Spells</dt>
-                  <dd>{preview.spells.map((s) => s.name).join(', ')}</dd>
+                  <dd>{preview.spells.map((s) => `${s.name}${s.sources.includes('primal-order') ? ' (Primal Order: Magician)' : ''}`).join(', ')}</dd>
                   <dt>Starting equipment</dt>
                   <dd>
                     {preview.inventory.items

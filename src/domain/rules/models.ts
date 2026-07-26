@@ -183,7 +183,7 @@ export interface SpellDefinition {
   readonly description?: string;
   readonly source: RuleSource;
 }
-export type SpellGrantSourceType = 'class' | 'subclass' | 'species';
+export type SpellGrantSourceType = 'class' | 'subclass' | 'species' | 'primal-order';
 export interface SpellGrant {
   readonly id: string;
   readonly spellId: string;
@@ -235,7 +235,8 @@ export type RuleDiagnostic =
         | 'unsupported-character-level'
         | 'missing-primal-order' | 'invalid-primal-order'
         | 'missing-magician-cantrip' | 'invalid-magician-cantrip'
-        | 'missing-magician-skill-choice' | 'stale-primal-order-choice';
+        | 'missing-magician-skill-choice' | 'stale-primal-order-choice'
+        | 'duplicate-cantrip-selection';
       readonly value?: string | number;
     }
   | {

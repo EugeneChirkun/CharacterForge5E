@@ -33,6 +33,7 @@ import {
   defaultRuleRegistry,
   applyMagicianSkillBonus,
   resolvePrimalOrder,
+  getResolvedCantripSelections,
   type RuleDiagnostic,
   type RuleRegistry,
 } from '../rules';
@@ -282,20 +283,17 @@ export function computeCharacter(
         diagnostics: [],
       };
   const accesses = new Map<string, ComputedCharacter['spells'][number]>();
-  for (const id of [
-    ...(build.cantripIds ?? []),
-    ...(primalOrder.selection?.orderId === 'magician'
-      ? [primalOrder.selection.magicianChoices!.additionalCantripId]
-      : []),
-    ...preparation.validPreparedSpellIds,
-  ]) {
+  const cantripSelections = getResolvedCantripSelections(build);
+  for (const id of [...cantripSelections.map((choice) => choice.spellId), ...preparation.validPreparedSpellIds]) {
     const s = registry.spells[id];
     if (s)
       accesses.set(id, {
         spellId: id,
         name: s.name,
         level: s.level,
-        sourceTypes: ['class'],
+        sourceTypes: cantripSelections.find((choice) => choice.spellId === id)?.source === 'primal-order-magician'
+          ? ['primal-order']
+          : ['class'],
         prepared: true,
         alwaysPrepared: false,
         available: true,

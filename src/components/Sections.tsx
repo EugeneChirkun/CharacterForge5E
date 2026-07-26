@@ -111,7 +111,7 @@ export function Spells({
               <p>
                 {s.sources.map((x) => (
                   <span className="badge" key={x}>
-                    {x[0].toUpperCase() + x.slice(1)}{' '}
+                    {x === 'primal-order' ? 'Primal Order: Magician' : x[0].toUpperCase() + x.slice(1)}{' '}
                   </span>
                 ))}
               </p>

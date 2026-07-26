@@ -33,6 +33,7 @@ export type CreationDiagnosticType =
   | 'invalid-cantrip'
   | 'missing-primal-order' | 'invalid-primal-order' | 'missing-magician-cantrip'
   | 'invalid-magician-cantrip' | 'missing-magician-skill-choice' | 'stale-primal-order-choice'
+  | 'duplicate-cantrip-selection'
   | 'invalid-prepared-spell'
   | 'too-many-prepared-spells'
   | 'missing-subclass'
@@ -138,7 +139,9 @@ export function validateCharacterDraft(
     );
   const cls = registry.classes.druid;
   out.push(...validateDruidPrimalOrder(draft.primalOrder, draft.selectedCantripIds, registry).map((type) =>
-    diagnostic(type, type === 'missing-primal-order' ? 'Choose a Druid Primal Order.' : 'Complete a valid Primal Order selection.')));
+    diagnostic(type, type === 'missing-primal-order' ? 'Choose a Druid Primal Order.'
+      : type === 'duplicate-cantrip-selection' ? 'That spell is already selected as a normal Druid cantrip. Choose a different Magician cantrip.'
+      : 'Complete a valid Primal Order selection.')));
   const uniqueSkills = new Set(draft.selectedSkillProficiencies);
   if (uniqueSkills.size !== draft.selectedSkillProficiencies.length)
     out.push(

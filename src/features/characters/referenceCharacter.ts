@@ -174,6 +174,11 @@ export const referenceCharacter: CharacterViewModel = {
     ...computed.ruleDiagnostics.map((d) => d.type),
     ...computed.spellDiagnostics.map((d) => d.type),
   ],
+  diagnosticGroups: {
+    build: computed.ruleDiagnostics.map((d) => d.type),
+    spellPreparation: computed.spellDiagnostics.map((d) => d.type),
+    session: [],
+  },
   conditions: referenceSession.conditions,
   preparedSpellIds: referenceBuild.preparedSpellIds,
   inventory: referenceSession.inventory!,
