@@ -390,6 +390,9 @@ h1 {
   gap: 0.35rem;
   font-weight: 700;
 }
+.granted-cantrip { color: #59636e; background: #eef1f3; border-left: 0.25rem solid #66727e; padding: 0.5rem; }
+.granted-cantrip small { display: block; color: #4e5964; font-weight: 700; }
+.cantrip-selection-summary p { margin-block: 0.35rem; }
 .land-select select,
 .filters select,
 .filters input {
@@ -615,11 +618,6 @@ dialog li {
   .filters {
     grid-template-columns: 2fr 1fr 1fr;
   }
-  .sheet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
   .toast {
     left: auto;
     min-width: 360px;
@@ -713,6 +711,8 @@ dialog li {
 }
 .sheet-header {
   display: grid;
+  grid-template-areas: "identity" "metadata" "options";
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
   max-width: 1100px;
   margin-inline: auto;
@@ -723,7 +723,10 @@ dialog li {
   overflow-wrap: anywhere;
   line-height: 1.05;
 }
-.character-identity { min-width: 0; }
+.character-identity { grid-area: identity; min-width: 0; }
+.character-header__metadata { grid-area: metadata; min-width: 0; }
+.character-header__options { grid-area: options; min-width: 0; }
+.character-header__name { max-width: 100%; word-break: normal; }
 .character-details {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -908,10 +911,10 @@ dialog li {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .sheet-header {
-    grid-template-columns: minmax(0, 2fr) minmax(22rem, 3fr);
+    grid-template-areas: "identity options" "metadata metadata";
+    grid-template-columns: minmax(0, 2fr) minmax(8rem, 1fr);
     align-items: start;
   }
-  .land-select { grid-column: 2; }
   .sheet-secondary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -920,6 +923,10 @@ dialog li {
   }
 }
 @media (min-width: 1050px) {
+  .sheet-header {
+    grid-template-areas: "identity metadata options";
+    grid-template-columns: minmax(14rem, 1.6fr) minmax(22rem, 2.4fr) minmax(8rem, auto);
+  }
   .sheet-primary {
     grid-template-columns: minmax(25rem, 1.2fr) minmax(22rem, 1fr);
     align-items: start;
