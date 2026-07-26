@@ -44,6 +44,13 @@ export interface CharacterViewModel {
   spellAttackBonus: number;
   abilities: Record<AbilityName, AbilityViewModel>;
   skills: Record<SkillName, number>;
+  skillProficiencies: readonly SkillName[];
+  proficiencies: readonly {
+    category: string;
+    items: readonly string[];
+  }[];
+  languages: readonly string[];
+  senses: readonly string[];
   spellSlots: SpellSlotViewModel[];
   resources: ResourceViewModel[];
   features: readonly {

@@ -50,6 +50,13 @@ export function toCharacterViewModel(
     skills: Object.fromEntries(
       skillNames.map((s) => [s, c.skills[s].value]),
     ) as CharacterViewModel['skills'],
+    skillProficiencies: build.skillProficiencies,
+    proficiencies: [
+      { category: 'Armor', items: ['Light Armor'] },
+      { category: 'Tools', items: ['Herbalism Kit'] },
+    ],
+    languages: ['Common', 'Infernal', 'Druidic'],
+    senses: ['Darkvision'],
     spellSlots: Object.values(c.spellcasting?.slots ?? {}).map((s) => ({
       level: s.level,
       current: s.remaining,

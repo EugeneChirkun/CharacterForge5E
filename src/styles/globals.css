@@ -572,3 +572,233 @@ dialog li {
     animation: none !important;
   }
 }
+
+/* Digital character sheet summary */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.sheet-header {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin-inline: auto;
+  border-top: 5px solid var(--accent);
+}
+.character-identity h1 {
+  margin-bottom: 0;
+}
+.character-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem 1rem;
+  margin: 0;
+}
+.character-details div {
+  min-width: 0;
+}
+.character-details dt,
+.combat-grid dt {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.character-details dd {
+  margin: 0.15rem 0 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.character-summary {
+  display: grid;
+  gap: 1rem;
+}
+.sheet-primary {
+  display: grid;
+  gap: 1rem;
+}
+.abilities-section,
+.sheet-panel {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+}
+.abilities-section > h2,
+.sheet-panel > h2 {
+  margin-bottom: 1rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px solid var(--accent);
+  font-size: 1.25rem;
+}
+.ability-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+.ability-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-dark);
+  border-radius: 0.45rem;
+  overflow: hidden;
+}
+.ability-panel header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f4ede3;
+}
+.ability-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ability-score {
+  grid-row: span 2;
+  font:
+    700 2.25rem/1 Georgia,
+    serif;
+  color: var(--accent-dark);
+}
+.ability-modifier {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.proficiency-row {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  gap: 0.4rem;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.88rem;
+}
+.proficiency-mark {
+  color: var(--accent-dark);
+  font-size: 1rem;
+}
+.saving-throw {
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+.skill-list,
+.plain-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.skill-list .proficiency-row {
+  border-top: 1px dotted var(--border);
+}
+.combat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0;
+}
+.combat-grid div {
+  min-width: 0;
+  padding: 0.75rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  text-align: center;
+}
+.combat-grid dd {
+  margin: 0.25rem 0 0;
+  font:
+    700 1.5rem Georgia,
+    serif;
+}
+.sheet-secondary {
+  display: grid;
+  gap: 1rem;
+}
+.plain-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px dotted var(--border);
+}
+.plain-list li:last-child {
+  border-bottom: 0;
+}
+.list-group + .list-group {
+  margin-top: 1rem;
+}
+.list-group h3,
+.feature-group h3 {
+  margin: 0.75rem 0 0.25rem;
+  color: var(--accent-dark);
+  font-size: 1rem;
+}
+.feature-group > div {
+  padding: 0.6rem 0;
+  border-bottom: 1px dotted var(--border);
+}
+.feature-group p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.resource-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+.resource-grid article {
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+}
+.resource-grid h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.resource-grid strong {
+  display: block;
+  margin: 0.4rem 0;
+  font-size: 1.4rem;
+}
+.resource-grid small {
+  color: var(--muted);
+}
+
+@media (min-width: 700px) {
+  .character-details {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .sheet-header {
+    grid-template-columns: minmax(12rem, 1.2fr) 2fr auto;
+    align-items: center;
+  }
+  .sheet-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1050px) {
+  .sheet-primary {
+    grid-template-columns: minmax(25rem, 1.2fr) minmax(22rem, 1fr);
+    align-items: start;
+  }
+  .combat-panel {
+    position: sticky;
+    top: 1rem;
+  }
+  .combat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .sheet-secondary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
