@@ -1,0 +1,11 @@
+@media print {
+  @page { margin: 12mm; }
+  html, body { background: #fff !important; color: #000 !important; font: 10.5pt/1.35 Georgia, serif; }
+  .sidebar, .mobile-bars, .desktop-top, button, .button, .dialog-backdrop, .toast, .update-banner, .print-hidden, nav { display: none !important; }
+  .sheet-shell, .sheet-main, .content, section, article { display: block !important; width: 100% !important; max-width: none !important; overflow: visible !important; }
+  .sheet-main { margin: 0 !important; padding: 0 !important; }
+  h1, h2, h3 { break-after: avoid; }
+  section, article, table, .stat-card, .inventory-list li { break-inside: avoid; }
+  .content > * + * { break-before: auto; }
+  a { color: #000; text-decoration: none; }
+}

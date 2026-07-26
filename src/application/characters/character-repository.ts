@@ -12,6 +12,7 @@ export interface CharacterRepository {
   get(id: string): Promise<CharacterRecord | null>;
   save(record: CharacterRecord): Promise<void>;
   delete(id: string): Promise<void>;
+  replaceAll?(records: readonly CharacterRecord[]): Promise<void>;
 }
 export interface CharacterDraftRepository {
   loadDraft(): Promise<CharacterDraft | null>;

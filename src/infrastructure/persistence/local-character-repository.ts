@@ -5,13 +5,15 @@ import type {
 } from '../../application/characters/character-repository';
 import type { CharacterDraft } from '../../domain/creation';
 import { startingInventory, validateInventory } from '../../domain/equipment';
+import { migratePersistedCharacter } from './migrations/migrate-persisted-character';
 export interface KeyValueStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
 }
-const RECORDS_KEY = 'character-forge-records-v1';
-const DRAFT_KEY = 'character-forge-creation-draft-v1';
+export const RECORDS_KEY = 'character-forge-records-v1';
+export const DRAFT_KEY = 'character-forge-creation-draft-v1';
+export const OWNED_STORAGE_KEYS = [RECORDS_KEY, DRAFT_KEY, 'character-forge-state-v2'] as const;
 const object = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === 'object';
 function isLegacyOrCurrentRecord(
@@ -34,7 +36,9 @@ export function isCharacterRecord(v: unknown): v is CharacterRecord {
   return (
     isLegacyOrCurrentRecord(v) &&
     v.schemaVersion === 2 &&
-    !!v.session.inventory &&
+    object(v.session.inventory) &&
+    Array.isArray(v.session.inventory.items) &&
+    object(v.session.inventory.currency) &&
     validateInventory(v.session.inventory).every((d) => d.severity !== 'error')
   );
 }
@@ -63,6 +67,19 @@ export function loadLocalCharacterRecords(
     return [];
   }
 }
+export function inspectLocalCharacterRecords(storage: KeyValueStorage) {
+  let raw: unknown;
+  try { raw = JSON.parse(storage.getItem(RECORDS_KEY) ?? '[]'); } catch { return { valid: [] as CharacterRecord[], corrupt: [{ raw: storage.getItem(RECORDS_KEY), diagnostics: ['invalid-json'] }] }; }
+  if (!Array.isArray(raw)) return { valid: [] as CharacterRecord[], corrupt: [{ raw, diagnostics: ['invalid-records-container'] }] };
+  const valid: CharacterRecord[] = [];
+  const corrupt: { raw: unknown; diagnostics: readonly string[] }[] = [];
+  raw.forEach((entry) => {
+    const result = migratePersistedCharacter(entry);
+    if (result.success) valid.push(result.record);
+    else corrupt.push({ raw: result.raw, diagnostics: result.diagnostics.map((d) => d.code) });
+  });
+  return { valid, corrupt };
+}
 export class LocalCharacterRepository implements CharacterRepository {
   constructor(private readonly storage: KeyValueStorage) {}
   private read(): readonly CharacterRecord[] {
@@ -85,6 +102,10 @@ export class LocalCharacterRepository implements CharacterRepository {
       RECORDS_KEY,
       JSON.stringify(this.read().filter((r) => r.build.id !== id)),
     );
+  }
+  async replaceAll(records: readonly CharacterRecord[]) {
+    if (!records.every(isCharacterRecord)) throw new Error('corrupt-character-record');
+    this.storage.setItem(RECORDS_KEY, JSON.stringify(records));
   }
 }
 export class LocalCharacterDraftRepository implements CharacterDraftRepository {

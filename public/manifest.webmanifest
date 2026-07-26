@@ -1,0 +1,12 @@
+{
+  "name": "CharacterForge5E",
+  "short_name": "Character Forge",
+  "description": "An offline-first character manager for the CharacterForge5E MVP.",
+  "id": "./",
+  "start_url": "./#/characters",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5efe4",
+  "theme_color": "#5b3427",
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
