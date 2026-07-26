@@ -29,10 +29,12 @@ export function Actions() {
 }
 export function Spells({
   c,
-  onSlots,
+  onSlots, onSpendSlot, onRestoreSlot,
 }: {
   c: CharacterViewModel;
   onSlots: (c: CharacterViewModel) => void;
+  onSpendSlot?: (level: number) => void;
+  onRestoreSlot?: (level: number) => void;
 }) {
   const [search, setSearch] = useState('');
   return (
@@ -72,6 +74,7 @@ export function Spells({
               <small>
                 {s.current} / {s.maximum} available
               </small>
+              {onSpendSlot && <div><button disabled={s.current === 0} onClick={() => onSpendSlot(s.level)}>Spend</button><button disabled={s.current === s.maximum} onClick={() => onRestoreSlot?.(s.level)}>Restore</button></div>}
             </div>
           ))}
         </div>

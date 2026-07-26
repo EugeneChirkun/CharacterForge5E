@@ -67,6 +67,9 @@ export interface CharacterViewModel {
     alwaysPrepared: boolean;
   }[];
   diagnostics: readonly string[];
+  conditions?: readonly string[];
+  concentrationSpellId?: string;
+  preparedSpellIds?: readonly string[];
 }
 export interface StoredApplicationState {
   schemaVersion: 2;

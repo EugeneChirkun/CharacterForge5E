@@ -12,6 +12,9 @@ export function updateCharacterSession(
       : session.spentSpellSlots,
     resources: patch.resources ? { ...patch.resources } : session.resources,
     conditions: patch.conditions ? [...patch.conditions] : session.conditions,
+    preparedSpellIds: patch.preparedSpellIds
+      ? [...patch.preparedSpellIds]
+      : session.preparedSpellIds,
   };
 }
 export function validateCharacterSession(

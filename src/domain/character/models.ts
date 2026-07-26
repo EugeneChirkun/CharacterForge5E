@@ -42,6 +42,9 @@ export interface CharacterSession {
   readonly spentSpellSlots: Readonly<Record<number, number>>;
   readonly resources: Readonly<Record<string, number>>;
   readonly conditions: readonly string[];
+  /** A live-play override; permanent spell choices remain on CharacterBuild. */
+  readonly preparedSpellIds?: readonly string[];
+  readonly concentrationSpellId?: string;
   readonly selections?: {
     readonly circleOfTheLand?: { readonly landType: LandType };
   };
