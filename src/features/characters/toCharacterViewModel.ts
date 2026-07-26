@@ -86,6 +86,11 @@ export function toCharacterViewModel(
       sources: s.sourceTypes,
       alwaysPrepared: s.alwaysPrepared,
     })),
+    diagnosticGroups: {
+      build: c.ruleDiagnostics.map((d) => d.type),
+      spellPreparation: c.spellDiagnostics.map((d) => d.type),
+      session: c.equipment.diagnostics.map((d) => d.type),
+    },
     diagnostics: [
       ...c.ruleDiagnostics.map((d) => d.type),
       ...c.spellDiagnostics.map((d) => d.type),

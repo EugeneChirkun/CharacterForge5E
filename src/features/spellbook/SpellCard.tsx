@@ -42,6 +42,8 @@ export function SpellCard({
             <span className="badge" key={source}>
               {source === 'magic-item'
                 ? 'Magic Item'
+                : source === 'primal-order'
+                  ? 'Primal Order: Magician'
                 : source[0].toUpperCase() + source.slice(1)}
             </span>
           ))}

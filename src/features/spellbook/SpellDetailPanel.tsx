@@ -41,7 +41,7 @@ export function SpellDetailPanel({
                 : 'Not Prepared'}
         </dd>
         <dt>Sources</dt>
-        <dd>{spell.sources.join(', ') || 'No character source'}</dd>
+        <dd>{spell.sources.map((source) => source === 'primal-order' ? 'Primal Order: Magician' : source).join(', ') || 'No character source'}</dd>
         <dt>Mechanical tags</dt>
         <dd>
           {[

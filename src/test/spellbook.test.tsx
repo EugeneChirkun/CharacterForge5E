@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import {
   filterSpells,
@@ -16,6 +16,7 @@ import {
 import { referenceCharacter } from '../features/characters/referenceCharacter';
 import { CharacterProvider } from '../app/CharacterContext';
 import { SpellbookPage } from '../features/spellbook/SpellbookPage';
+import { SpellPreparationPanel } from '../features/spellbook/SpellPreparationPanel';
 
 describe('spellbook domain and application', () => {
   const cards = selectSpellCards(referenceCharacter);
@@ -83,5 +84,23 @@ describe('SpellbookPage', () => {
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Spend' })[0]);
     expect(screen.getByText('1 / 4')).toBeInTheDocument();
+  });
+});
+
+describe('categorized preparation diagnostics', () => {
+  test('excludes build codes and renders genuine preparation messages', () => {
+    const view = selectSpellbook({
+      ...referenceCharacter,
+      diagnostics: ['missing-primal-order', 'too-many-prepared-spells'],
+      diagnosticGroups: {
+        build: ['missing-primal-order'],
+        spellPreparation: ['too-many-prepared-spells'],
+        session: [],
+      },
+    }, { search: '', filters: emptySpellbookFilters, sort: 'level' });
+    render(<SpellPreparationPanel view={view} />);
+    expect(screen.getByText('Validation messages (1)')).toBeInTheDocument();
+    expect(screen.getByText('Too many Druid spells are prepared.')).toBeInTheDocument();
+    expect(screen.queryByText('missing-primal-order')).not.toBeInTheDocument();
   });
 });

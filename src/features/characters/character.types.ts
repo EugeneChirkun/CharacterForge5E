@@ -71,10 +71,15 @@ export interface CharacterViewModel {
     id: string;
     name: string;
     level: number;
-    sources: readonly ('class' | 'subclass' | 'species')[];
+    sources: readonly ('class' | 'subclass' | 'species' | 'primal-order')[];
     alwaysPrepared: boolean;
   }[];
   diagnostics: readonly string[];
+  diagnosticGroups?: {
+    readonly build: readonly string[];
+    readonly spellPreparation: readonly string[];
+    readonly session: readonly string[];
+  };
   conditions?: readonly string[];
   concentrationSpellId?: string;
   preparedSpellIds?: readonly string[];

@@ -100,7 +100,22 @@ export function selectSpellbook(
     preparedLimit: progression?.preparedSpells ?? 0,
     alwaysPreparedCount: all.filter((spell) => spell.alwaysPrepared).length,
     grantedCount: all.filter((spell) => spell.granted).length,
-    diagnostics: character.diagnostics,
+    diagnostics: (character.diagnosticGroups?.spellPreparation ?? []).map(
+      (code) => spellPreparationDiagnosticMessage(code),
+    ),
     selected: all.find((spell) => spell.id === selectedId),
   };
+}
+
+function spellPreparationDiagnosticMessage(code: string): string {
+  const messages: Readonly<Record<string, string>> = {
+    'too-many-prepared-spells': 'Too many Druid spells are prepared.',
+    'inaccessible-spell-level': 'A prepared spell is above the maximum spell level.',
+    'not-on-class-list': 'A prepared spell is not on the Druid spell list.',
+    'duplicate-spell-selection': 'A prepared spell was selected more than once.',
+    'missing-spell-definition': 'A prepared spell is no longer available in these rules.',
+    'cantrip-in-prepared-spells': 'Cantrips do not use prepared spell selections.',
+    'granted-spell-counted-as-class': 'A granted spell does not count against the preparation limit.',
+  };
+  return messages[code] ?? 'A spell preparation choice needs attention.';
 }

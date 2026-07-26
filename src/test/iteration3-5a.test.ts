@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { computeCharacter } from '../domain/character';
-import { defaultRuleRegistry, validateDruidPrimalOrder } from '../domain/rules';
+import { defaultRuleRegistry, getResolvedCantripSelections, validateDruidPrimalOrder } from '../domain/rules';
 import { performLongRest, performShortRest, previewLongRest, previewShortRest } from '../domain/rest';
 import { referenceBuild, referenceSession } from '../features/characters/referenceCharacter';
 
@@ -12,7 +12,7 @@ describe('Druid Primal Order', () => {
     expect(defaultRuleRegistry.druidPrimalOrders.warden.source.verified).toBe(true);
   });
   test('Magician validates duplicates and contributes minimum +1', () => {
-    expect(validateDruidPrimalOrder({ orderId: 'magician', magicianChoices: { additionalCantripId: 'guidance', skillBonusTarget: 'arcana' } }, ['guidance'], defaultRuleRegistry)).toContain('invalid-magician-cantrip');
+    expect(validateDruidPrimalOrder({ orderId: 'magician', magicianChoices: { additionalCantripId: 'guidance', skillBonusTarget: 'arcana' } }, ['guidance'], defaultRuleRegistry)).toContain('duplicate-cantrip-selection');
     const build = { ...referenceBuild, abilityScores: { ...referenceBuild.abilityScores, wisdom: 8 }, cantripIds: ['druidcraft'], class: { ...referenceBuild.class!, primalOrder: { orderId: 'magician' as const, magicianChoices: { additionalCantripId: 'guidance', skillBonusTarget: 'arcana' as const } } } };
     const c = computeCharacter(build, referenceSession);
     expect(c.skills.arcana.steps.at(-1)).toMatchObject({ label: 'Magician Primal Order bonus', value: 1 });
@@ -22,6 +22,20 @@ describe('Druid Primal Order', () => {
     const c = computeCharacter(referenceBuild, referenceSession);
     expect(c.proficiencies.armor).toContain('Medium armor');
     expect(c.proficiencies.weapons).toContain('Martial weapons');
+  });
+  test('resolves normal and Magician cantrips with retained, deduplicated sources', () => {
+    const magician = { ...referenceBuild, cantripIds: ['druidcraft', 'guidance'], class: { ...referenceBuild.class!, primalOrder: { orderId: 'magician' as const, magicianChoices: { additionalCantripId: 'produce-flame', skillBonusTarget: 'nature' as const } } } };
+    expect(getResolvedCantripSelections(magician)).toEqual([
+      { spellId: 'druidcraft', source: 'druid-base' },
+      { spellId: 'guidance', source: 'druid-base' },
+      { spellId: 'produce-flame', source: 'primal-order-magician' },
+    ]);
+    const computed = computeCharacter(magician, referenceSession);
+    expect(computed.spells.find((spell) => spell.spellId === 'produce-flame')?.sourceTypes).toEqual(['primal-order']);
+    expect(new Set(computed.spells.map((spell) => spell.spellId)).size).toBe(computed.spells.length);
+    const warden = { ...magician, class: { ...magician.class, primalOrder: { orderId: 'warden' as const } } };
+    expect(getResolvedCantripSelections(warden).map((choice) => choice.spellId)).not.toContain('produce-flame');
+    expect(getResolvedCantripSelections(warden).map((choice) => choice.spellId)).toEqual(['druidcraft', 'guidance']);
   });
 });
 
