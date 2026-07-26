@@ -38,6 +38,7 @@ import {
   activeSpellGrants,
   maximumSpellLevel,
   validatePreparedSpells,
+  sortSpells,
 } from '../spells';
 
 export function computeCharacter(
@@ -320,7 +321,12 @@ export function computeCharacter(
       : undefined,
     activeFeatures,
     activeResources: resolvedResources.resources,
-    spells: [...accesses.values()],
+    spells: sortSpells(
+      [...accesses.values()].map((spell) => ({
+        ...spell,
+        id: spell.spellId,
+      })),
+    ),
     spellDiagnostics: preparation.diagnostics,
     ruleDiagnostics,
     activeLandType: landType,

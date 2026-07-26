@@ -221,6 +221,7 @@ const spellRows: Array<
   ['druidcraft', 'Druidcraft', 0, 'transmutation', false, false, ['druid']],
   ['guidance', 'Guidance', 0, 'divination', false, true, ['druid']],
   ['produce-flame', 'Produce Flame', 0, 'conjuration', false, false, ['druid']],
+  ['thorn-whip', 'Thorn Whip', 0, 'transmutation', false, false, ['druid']],
   ['fire-bolt', 'Fire Bolt', 0, 'evocation', false, false, []],
   ['ray-of-frost', 'Ray of Frost', 0, 'evocation', false, false, []],
   ['shocking-grasp', 'Shocking Grasp', 0, 'evocation', false, false, []],

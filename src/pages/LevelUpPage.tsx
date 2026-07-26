@@ -8,6 +8,10 @@ import {
   type LevelUpDraft,
 } from '../domain/leveling';
 import { defaultRuleRegistry } from '../domain/rules';
+import {
+  getAvailableClassCantrips,
+  getAvailableClassSpells,
+} from '../domain/spells';
 import { LocalCharacterRepository } from '../infrastructure/persistence/local-character-repository';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
 const repo = new LocalCharacterRepository(localStorage);
@@ -49,13 +53,13 @@ export function LevelUpPage() {
     (p) => p.level === toLevel,
   )!;
   const prepared = [...(record.build.preparedSpellIds ?? [])];
-  const candidates = Object.values(defaultRuleRegistry.spells)
-    .filter(
-      (s) =>
-        s.level > 0 &&
-        s.classIds.includes('druid') &&
-        s.level <= Math.max(...Object.keys(progression.spellSlots).map(Number)),
-    )
+  const spellSelectorInput = {
+    classId: 'druid',
+    characterLevel: toLevel,
+    registry: defaultRuleRegistry,
+  };
+  const candidates = getAvailableClassSpells(spellSelectorInput)
+    .filter((spell) => spell.level > 0)
     .map((s) => s.id);
   while (prepared.length < progression.preparedSpells) {
     const next = candidates.find((x) => !prepared.includes(x));
@@ -63,9 +67,9 @@ export function LevelUpPage() {
     prepared.push(next);
   }
   const selectedCantripIds = [...(record.build.cantripIds ?? [])];
-  const cantripCandidates = Object.values(defaultRuleRegistry.spells)
-    .filter((spell) => spell.level === 0 && spell.classIds.includes('druid'))
-    .map((spell) => spell.id);
+  const cantripCandidates = getAvailableClassCantrips(spellSelectorInput).map(
+    (spell) => spell.id,
+  );
   while (selectedCantripIds.length < progression.cantripsKnown) {
     const next = cantripCandidates.find(
       (candidate) => !selectedCantripIds.includes(candidate),
