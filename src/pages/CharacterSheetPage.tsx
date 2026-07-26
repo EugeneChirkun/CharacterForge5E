@@ -207,6 +207,7 @@ export function CharacterSheetPage() {
             ← All characters
           </Link>
           <RestControls onRest={startRest} />
+          <button type="button" className="secondary print-hidden" onClick={() => window.print()}>Print Character</button>
           <Link className="button" to={`/character/${id}/spellbook`}>
             Open Spellbook
           </Link>

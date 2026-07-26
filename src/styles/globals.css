@@ -186,6 +186,19 @@ body {
   margin: 0;
   min-width: 320px;
 }
+.settings-page { max-width: 58rem; margin: auto; padding: 2rem 1rem 5rem; }
+.settings-page section { background: var(--surface, white); border: 1px solid var(--border); border-radius: .75rem; margin: 1rem 0; padding: 1.25rem; }
+.settings-page dl { display: grid; grid-template-columns: minmax(10rem, 1fr) 2fr; gap: .5rem 1rem; }
+.settings-page dt { font-weight: 700; }
+.settings-page dd { margin: 0; }
+.settings-page label { display: grid; gap: .35rem; margin-block: .75rem; max-width: 28rem; }
+.file-label input { padding: .65rem; border: 1px solid var(--border); }
+.danger-zone { border-color: #8b1e1e !important; }
+.update-banner { position: fixed; inset: auto 1rem 1rem; z-index: 40; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding: 1rem; border: 2px solid var(--accent); border-radius: .75rem; background: white; box-shadow: 0 5px 30px rgb(0 0 0 / .25); }
+.update-banner span { flex: 1 1 20rem; }
+.page-actions { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+button:disabled { cursor: not-allowed; opacity: .55; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 button,
 .button {
   border: 0;

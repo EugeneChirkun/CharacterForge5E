@@ -1,5 +1,15 @@
 # Character Forge 5E
 
+## Release quality (Iteration 3.4)
+
+CharacterForge5E is now an offline-capable, browser-local MVP. Build and serve `dist/` over HTTPS (or localhost), then use the browser's install action where available. After one successful production load, the generated service worker caches the bundled app shell and rules: hash routes, existing characters, session editing, inventory, Spellbook, and creation work offline. Install UX differs across current Chromium, Firefox, and Safari; external and never-bundled content remains unavailable offline.
+
+Open `#/settings` to export all characters, validate/preview JSON, select Replace/Keep both/Skip conflicts, inspect storage health, export isolated corrupt records, or perform a `DELETE`-confirmed reset. Character cards support individual export, duplication, and confirmed deletion. Keep external backups because browser/site data can be cleared and private modes or quotas can reject writes. **Print Character** opens the browser print dialog with dedicated control-free styles.
+
+Updates are not forced: a waiting service worker offers **Update now** or **Later**. Paths and scope remain relative for GitHub Pages project hosting. Character data stays local unless explicitly exported; there are no accounts, backend, cloud sync, analytics, or telemetry. Imports are untrusted, validated, and size/count limited. See [the release-quality architecture and recovery guide](docs/iteration-3d-release-quality.md).
+
+Deferred work includes cloud synchronization, accounts, collaboration, remote databases, D&D Beyond import, PDF form filling, combat automation, additional rules, and remote analytics. Stage 4 should first design compatibility/versioning for optional encrypted synchronization and broader licensed rules while preserving fully local use.
+
 ## Spellbook (Iteration 3.3)
 
 `#/character/{id}/spellbook` is the dedicated spell-management experience. Domain functions own name search, composable filters, canonical sorting, and level grouping. Application selectors build an immutable `SpellbookView`; React renders its cards, detail, preparation totals, and slot summaries. Preparation reuses rules validation, and slot controls share Session Mode persistence.
