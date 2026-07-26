@@ -207,6 +207,9 @@ export function CharacterSheetPage() {
             ← All characters
           </Link>
           <RestControls onRest={startRest} />
+          <Link className="button" to={`/character/${id}/spellbook`}>
+            Open Spellbook
+          </Link>
           {id !== 'reference' && character.level < 8 && (
             <Link className="button" to={`/character/${id}/level-up`}>
               Level Up
@@ -220,6 +223,11 @@ export function CharacterSheetPage() {
         <div className="content">
           {section === 'summary' && (
             <>
+              <p>
+                <Link className="button" to={`/character/${id}/spellbook`}>
+                  Open Spellbook
+                </Link>
+              </p>
               <Summary c={character} />
               <SessionControls
                 c={character}

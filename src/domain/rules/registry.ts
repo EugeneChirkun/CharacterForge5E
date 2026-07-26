@@ -341,6 +341,22 @@ const spells = Object.fromEntries(
         ritual,
         concentration,
         classIds,
+        castingTime: 'Action',
+        range: 'See imported rules content',
+        duration: concentration
+          ? 'Concentration'
+          : 'See imported rules content',
+        components: {
+          verbal: true,
+          somatic: true,
+          material: false,
+        },
+        tags: [
+          ...(name.toLowerCase().includes('heal') || name.includes('Cure')
+            ? (['healing'] as const)
+            : []),
+          ...(concentration ? (['control'] as const) : (['utility'] as const)),
+        ],
         source: phb2024,
       },
     ],

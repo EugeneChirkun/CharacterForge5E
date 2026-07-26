@@ -1,5 +1,11 @@
 # Character Forge 5E
 
+## Spellbook (Iteration 3.3)
+
+`#/character/{id}/spellbook` is the dedicated spell-management experience. Domain functions own name search, composable filters, canonical sorting, and level grouping. Application selectors build an immutable `SpellbookView`; React renders its cards, detail, preparation totals, and slot summaries. Preparation reuses rules validation, and slot controls share Session Mode persistence.
+
+Spell metadata is structured and contains no copyrighted descriptions. An optional description field permits future user-imported or appropriately licensed content without redesigning the pipeline. See [the Iteration 3.3 architecture](docs/iteration-3c-spellbook.md).
+
 A mobile-first, static React character manager scaffold for a Dungeons & Dragons 5e (2024) play aid. Iteration 2A provides a reference character, five responsive sheet sections, generic character calculations, spell/resource tracking, rest previews and undo, and local browser persistence.
 
 > **Fixture notice:** Generic character statistics are calculated from typed fixture inputs. Class, species, subclass, background, feature, equipment-description, spell-list, resource, and recovery behavior remain fixture UI data until later iterations. No Player’s Handbook prose or copyrighted artwork is bundled.
