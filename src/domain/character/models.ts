@@ -4,7 +4,7 @@ import type { CalculationResult } from '../calculation';
 import type { HitPointProgression } from '../hit-points';
 import type { SkillName } from '../skills';
 import type { ComputedSpellcasting, SpellcastingBuild } from '../spellcasting';
-import type { LandType, RuleDiagnostic, SpellGrantSourceType } from '../rules';
+import type { DruidPrimalOrderSelection, LandType, RuleDiagnostic, SpellGrantSourceType } from '../rules';
 import type { ComputedResource } from '../resources';
 import type { SpellDiagnostic } from '../spells';
 import type {
@@ -13,6 +13,10 @@ import type {
   InventoryDiagnostic,
 } from '../equipment';
 export interface CharacterBuild {
+  readonly requiredBuildChoices?: readonly {
+    readonly code: 'missing-required-build-choice';
+    readonly choiceId: 'druid.primal-order';
+  }[];
   readonly id: string;
   readonly name: string;
   readonly ruleset: '5e-2024';
@@ -29,6 +33,7 @@ export interface CharacterBuild {
     readonly classId: string;
     readonly level: number;
     readonly subclassId?: string;
+    readonly primalOrder?: DruidPrimalOrderSelection;
   };
   readonly species?: {
     readonly speciesId: string;
@@ -76,6 +81,19 @@ export interface ComputedSpellAccess {
   readonly castingAbility: AbilityName;
 }
 export interface ComputedCharacter {
+  readonly proficiencies: {
+    readonly armor: readonly string[];
+    readonly weapons: readonly string[];
+  };
+  readonly druid?: {
+    readonly primalOrder?: {
+      readonly id: 'magician' | 'warden';
+      readonly name: string;
+      readonly additionalCantripId?: string;
+      readonly skillBonusTarget?: 'arcana' | 'nature';
+      readonly grantedProficiencies: readonly string[];
+    };
+  };
   readonly abilityModifiers: Readonly<
     Record<AbilityName, CalculationResult<number>>
   >;

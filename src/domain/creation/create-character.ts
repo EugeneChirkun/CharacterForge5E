@@ -62,6 +62,7 @@ export function createCharacterFromDraft(
     class: {
       classId: 'druid',
       level: draft.targetLevel,
+      primalOrder: draft.primalOrder,
       ...(draft.subclassId ? { subclassId: draft.subclassId } : {}),
     },
     species: {

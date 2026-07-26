@@ -21,8 +21,15 @@ export interface ResourceViewModel {
   current: number;
   maximum: number;
   recovery: RecoveryType;
+  recoveryOn?: readonly ('short' | 'long')[];
 }
 export interface CharacterViewModel {
+  primalOrder?: {
+    name: string;
+    additionalCantrip?: string;
+    skillBonusTarget?: 'arcana' | 'nature';
+    grantedProficiencies: readonly string[];
+  };
   id: string;
   name: string;
   level: number;

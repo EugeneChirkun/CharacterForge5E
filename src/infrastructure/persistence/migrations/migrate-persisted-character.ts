@@ -19,5 +19,11 @@ export function migratePersistedCharacter(input: unknown): MigrationResult {
   const inventory = inventoryShape(candidate) && validateInventory(candidate as never).every((d) => d.severity !== 'error') ? candidate : startingInventory();
   if (candidate !== inventory) diagnostics.push({ code: 'field-defaulted', message: 'Invalid or missing inventory was replaced with starting inventory.', severity: 'warning', characterId: input.build.id });
   if (input.schemaVersion === 1) diagnostics.push({ code: 'migration-applied', message: 'Character migrated from schema version 1.', severity: 'warning', characterId: input.build.id });
-  return { success: true, record: { ...input, schemaVersion: 2, session: { ...input.session, inventory } } as unknown as CharacterRecord, diagnostics };
+  const build = input.build as Record<string, unknown>;
+  const cls = object(build.class) ? build.class : undefined;
+  const migratedBuild = cls?.classId === 'druid' && !cls.primalOrder
+    ? { ...build, requiredBuildChoices: [{ code: 'missing-required-build-choice', choiceId: 'druid.primal-order' }] }
+    : build;
+  if (migratedBuild !== build) diagnostics.push({ code: 'missing-required-build-choice', message: 'Choose a Druid Primal Order before continuing.', severity: 'warning', characterId: input.build.id as string });
+  return { success: true, record: { ...input, build: migratedBuild, schemaVersion: 2, session: { ...input.session, inventory } } as unknown as CharacterRecord, diagnostics };
 }

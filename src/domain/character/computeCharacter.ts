@@ -31,6 +31,8 @@ import { validateCharacterSession } from './session';
 import { emptyInventory, selectEquipment } from '../equipment';
 import {
   defaultRuleRegistry,
+  applyMagicianSkillBonus,
+  resolvePrimalOrder,
   type RuleDiagnostic,
   type RuleRegistry,
 } from '../rules';
@@ -128,7 +130,7 @@ export function computeCharacter(
       }),
     ]),
   ) as ComputedCharacter['savingThrows'];
-  const skills = Object.fromEntries(
+  let skills = Object.fromEntries(
     skillNames.map((skill) => [
       skill,
       calculateSkillModifier({
@@ -140,6 +142,12 @@ export function computeCharacter(
       }),
     ]),
   ) as Record<SkillName, ReturnType<typeof calculateSkillModifier>>;
+  const primalOrder = classId === 'druid' ? resolvePrimalOrder(build, registry) : { selection: undefined, diagnostics: [] };
+  for (const type of primalOrder.diagnostics) ruleDiagnostics.push({ type, value: undefined });
+  if (primalOrder.selection?.orderId === 'magician') {
+    const target = primalOrder.selection.magicianChoices!.skillBonusTarget;
+    skills = { ...skills, [target]: applyMagicianSkillBonus(skills[target], abilityModifiers.wisdom.value) };
+  }
   const initiative = calculateInitiative({
     dexterityModifier: abilityModifiers.dexterity.value,
   });
@@ -276,6 +284,9 @@ export function computeCharacter(
   const accesses = new Map<string, ComputedCharacter['spells'][number]>();
   for (const id of [
     ...(build.cantripIds ?? []),
+    ...(primalOrder.selection?.orderId === 'magician'
+      ? [primalOrder.selection.magicianChoices!.additionalCantripId]
+      : []),
     ...preparation.validPreparedSpellIds,
   ]) {
     const s = registry.spells[id];
@@ -313,6 +324,21 @@ export function computeCharacter(
     });
   }
   return {
+    proficiencies: {
+      armor: [...(classDefinition?.armorTraining ?? []), ...(primalOrder.selection?.orderId === 'warden' ? ['Medium armor'] : [])],
+      weapons: [...(classDefinition?.weaponTraining ?? []), ...(primalOrder.selection?.orderId === 'warden' ? ['Martial weapons'] : [])],
+    },
+    druid: classId === 'druid' ? {
+      primalOrder: primalOrder.selection ? {
+        id: primalOrder.selection.orderId,
+        name: registry.druidPrimalOrders[primalOrder.selection.orderId].name,
+        ...(primalOrder.selection.orderId === 'magician' ? {
+          additionalCantripId: primalOrder.selection.magicianChoices!.additionalCantripId,
+          skillBonusTarget: primalOrder.selection.magicianChoices!.skillBonusTarget,
+          grantedProficiencies: [],
+        } : { grantedProficiencies: ['Medium armor', 'Martial weapons'] }),
+      } : undefined,
+    } : undefined,
     abilityModifiers,
     proficiencyBonus,
     savingThrows,
