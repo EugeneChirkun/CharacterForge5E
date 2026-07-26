@@ -235,23 +235,6 @@ export function CharacterSummary({ c }: { c: CharacterViewModel }) {
           })}
         </section>
       </div>
-      <section
-        className="sheet-panel resources-panel"
-        aria-labelledby="resources-heading"
-      >
-        <h2 id="resources-heading">Resources</h2>
-        <div className="resource-grid">
-          {c.resources.map((resource) => (
-            <article key={resource.id}>
-              <h3>{resource.name}</h3>
-              <strong>
-                {resource.current} / {resource.maximum}
-              </strong>
-              <small>Recovers on a {resource.recovery} rest</small>
-            </article>
-          ))}
-        </div>
-      </section>
     </section>
   );
 }

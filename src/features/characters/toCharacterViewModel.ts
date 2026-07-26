@@ -81,5 +81,8 @@ export function toCharacterViewModel(
       ...c.ruleDiagnostics.map((d) => d.type),
       ...c.spellDiagnostics.map((d) => d.type),
     ],
+    conditions: session.conditions,
+    concentrationSpellId: session.concentrationSpellId,
+    preparedSpellIds: session.preparedSpellIds ?? build.preparedSpellIds ?? [],
   };
 }

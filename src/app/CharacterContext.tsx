@@ -7,6 +7,7 @@ import { loadState, saveState } from '../features/characters/characterStorage';
 import { loadLocalCharacterRecords } from '../infrastructure/persistence/local-character-repository';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
 import { defaultRuleRegistry } from '../domain/rules';
+import { LocalCharacterRepository } from '../infrastructure/persistence/local-character-repository';
 type Ctx = {
   state: StoredApplicationState;
   character: CharacterViewModel;
@@ -33,6 +34,42 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
         characters: { ...s.characters, [character.id]: character },
       };
       saveState(n);
+      if (character.id !== 'reference') {
+        const record = loadLocalCharacterRecords(localStorage).find(
+          (r) => r.build.id === character.id,
+        );
+        if (record) {
+          const session = {
+            ...record.session,
+            currentHp: character.currentHp,
+            temporaryHp: character.temporaryHp,
+            spentSpellSlots: Object.fromEntries(
+              character.spellSlots.map((slot) => [
+                slot.level,
+                slot.maximum - slot.current,
+              ]),
+            ),
+            resources: Object.fromEntries(
+              character.resources.map((resource) => [
+                resource.id,
+                resource.current,
+              ]),
+            ),
+            conditions: character.conditions ?? [],
+            concentrationSpellId: character.concentrationSpellId,
+            preparedSpellIds: character.preparedSpellIds,
+            selections: {
+              ...record.session.selections,
+              circleOfTheLand: { landType: character.landType },
+            },
+          };
+          void new LocalCharacterRepository(localStorage).save({
+            ...record,
+            session,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
       return n;
     });
   const setMeta = (p: Partial<StoredApplicationState>) =>

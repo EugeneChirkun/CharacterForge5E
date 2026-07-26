@@ -18,6 +18,11 @@ import {
   Spells,
   Summary,
 } from '../components/Sections';
+import {
+  SessionControls,
+  type SessionActions,
+} from '../components/SessionControls';
+import type { ConditionId } from '../application/session';
 export function CharacterSheetPage() {
   const { id = 'reference' } = useParams();
   const context = useCharacter();
@@ -32,6 +37,11 @@ export function CharacterSheetPage() {
   const [restLand, setRestLand] = useState<LandType>(character.landType);
   const [undo, setUndo] = useState<CharacterViewModel | null>(null);
   const [toast, setToast] = useState('');
+  const [sessionUndo, setSessionUndo] = useState<CharacterViewModel | null>(
+    null,
+  );
+  const [history, setHistory] = useState<readonly string[]>([]);
+  const [error, setError] = useState('');
   if (missing)
     return (
       <main className="center-page">
@@ -62,6 +72,131 @@ export function CharacterSheetPage() {
       setToast('Rest undone');
     }
   };
+  const execute = (next: () => CharacterViewModel, message: string) => {
+    try {
+      const value = next();
+      setSessionUndo(character);
+      update(value);
+      setHistory((h) => [message, ...h]);
+      setError('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Session change failed.');
+    }
+  };
+  const requireWhole = (value: number, name: string) => {
+    if (!Number.isInteger(value) || value < 0)
+      throw new Error(`${name} must be a non-negative whole number.`);
+  };
+  const actions: SessionActions = {
+    damage: (amount) =>
+      execute(() => {
+        requireWhole(amount, 'Damage');
+        const absorbed = Math.min(character.temporaryHp, amount);
+        return {
+          ...character,
+          temporaryHp: character.temporaryHp - absorbed,
+          currentHp: Math.max(0, character.currentHp - amount + absorbed),
+        };
+      }, `Took ${amount} damage`),
+    heal: (amount) =>
+      execute(() => {
+        requireWhole(amount, 'Healing');
+        if (character.currentHp + amount > character.maximumHp)
+          throw new Error('Healing would exceed maximum HP.');
+        return { ...character, currentHp: character.currentHp + amount };
+      }, `Recovered ${amount} HP`),
+    setHp: (value) =>
+      execute(() => {
+        requireWhole(value, 'Current HP');
+        if (value > character.maximumHp)
+          throw new Error('Current HP cannot exceed maximum HP.');
+        return { ...character, currentHp: value };
+      }, `Set HP to ${value}`),
+    setTempHp: (value) =>
+      execute(() => {
+        requireWhole(value, 'Temporary HP');
+        return { ...character, temporaryHp: value };
+      }, `Set temporary HP to ${value}`),
+    clearTempHp: () =>
+      execute(() => ({ ...character, temporaryHp: 0 }), 'Cleared temporary HP'),
+    spendSlot: (level) =>
+      execute(
+        () => ({
+          ...character,
+          spellSlots: character.spellSlots.map((s) =>
+            s.level === level && s.current > 0
+              ? { ...s, current: s.current - 1 }
+              : s,
+          ),
+        }),
+        `Spent Level ${level} Slot`,
+      ),
+    restoreSlot: (level) =>
+      execute(
+        () => ({
+          ...character,
+          spellSlots: character.spellSlots.map((s) =>
+            s.level === level && s.current < s.maximum
+              ? { ...s, current: s.current + 1 }
+              : s,
+          ),
+        }),
+        `Restored Level ${level} Slot`,
+      ),
+    spendResource: (resourceId) =>
+      execute(
+        () => ({
+          ...character,
+          resources: character.resources.map((r) =>
+            r.id === resourceId && r.current > 0
+              ? { ...r, current: r.current - 1 }
+              : r,
+          ),
+        }),
+        `Used ${character.resources.find((r) => r.id === resourceId)?.name ?? resourceId}`,
+      ),
+    restoreResource: (resourceId) =>
+      execute(
+        () => ({
+          ...character,
+          resources: character.resources.map((r) =>
+            r.id === resourceId && r.current < r.maximum
+              ? { ...r, current: r.current + 1 }
+              : r,
+          ),
+        }),
+        `Restored ${character.resources.find((r) => r.id === resourceId)?.name ?? resourceId}`,
+      ),
+    setCondition: (condition: ConditionId, active) =>
+      execute(
+        () => ({
+          ...character,
+          conditions: active
+            ? [...new Set([...(character.conditions ?? []), condition])]
+            : (character.conditions ?? []).filter((x) => x !== condition),
+        }),
+        `${active ? 'Applied' : 'Removed'} ${condition}`,
+      ),
+    startConcentration: (spellId) =>
+      execute(
+        () => ({ ...character, concentrationSpellId: spellId }),
+        'Started Concentration',
+      ),
+    endConcentration: () =>
+      execute(
+        () => ({ ...character, concentrationSpellId: undefined }),
+        'Ended Concentration',
+      ),
+    undo: () => {
+      if (!sessionUndo) {
+        setError('There is no session change to undo.');
+        return;
+      }
+      update(sessionUndo);
+      setSessionUndo(null);
+      setHistory((h) => ['Undid last session change', ...h]);
+    },
+  };
   return (
     <div className="sheet-shell">
       <aside className="sidebar">
@@ -88,9 +223,26 @@ export function CharacterSheetPage() {
         </div>
         <CharacterHeader character={character} onLandChange={changeLand} />
         <div className="content">
-          {section === 'summary' && <Summary c={character} />}{' '}
+          {section === 'summary' && (
+            <>
+              <Summary c={character} />
+              <SessionControls
+                c={character}
+                actions={actions}
+                error={error}
+                history={history}
+              />
+            </>
+          )}{' '}
           {section === 'actions' && <Actions />}{' '}
-          {section === 'spells' && <Spells c={character} onSlots={update} />}{' '}
+          {section === 'spells' && (
+            <Spells
+              c={character}
+              onSlots={update}
+              onSpendSlot={actions.spendSlot}
+              onRestoreSlot={actions.restoreSlot}
+            />
+          )}{' '}
           {section === 'features' && <Features c={character} />}{' '}
           {section === 'inventory' && <Inventory />}
         </div>

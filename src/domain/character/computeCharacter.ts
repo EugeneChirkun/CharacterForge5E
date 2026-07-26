@@ -247,7 +247,8 @@ export function computeCharacter(
   );
   const preparation = classLevel
     ? validatePreparedSpells({
-        preparedSpellIds: build.preparedSpellIds ?? [],
+        preparedSpellIds:
+          session.preparedSpellIds ?? build.preparedSpellIds ?? [],
         classId: classId ?? '',
         maximum: classLevel.preparedSpells,
         maximumSpellLevel: maximumSpellLevel(classLevel.spellSlots),
