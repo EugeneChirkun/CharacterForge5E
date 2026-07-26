@@ -13,7 +13,24 @@ export function loadState(): StoredApplicationState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaults();
     const value: unknown = JSON.parse(raw);
-    if (isState(value)) return value;
+    if (isState(value)) {
+      const fallback = freshReferenceCharacter();
+      return {
+        ...value,
+        characters: Object.fromEntries(
+          Object.entries(value.characters).map(([id, character]) => [
+            id,
+            {
+              ...character,
+              skillProficiencies: character.skillProficiencies ?? [],
+              proficiencies: character.proficiencies ?? fallback.proficiencies,
+              languages: character.languages ?? fallback.languages,
+              senses: character.senses ?? fallback.senses,
+            },
+          ]),
+        ),
+      };
+    }
     if (isLegacyState(value)) {
       const fresh = defaults();
       const legacy = value.characters.reference;

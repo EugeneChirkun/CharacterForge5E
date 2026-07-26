@@ -130,6 +130,13 @@ export const referenceCharacter: CharacterViewModel = {
   skills: Object.fromEntries(
     skillNames.map((name) => [name, computed.skills[name].value]),
   ) as CharacterViewModel['skills'],
+  skillProficiencies: referenceBuild.skillProficiencies,
+  proficiencies: [
+    { category: 'Armor', items: ['Light Armor'] },
+    { category: 'Tools', items: ['Herbalism Kit'] },
+  ],
+  languages: ['Common', 'Infernal', 'Druidic'],
+  senses: ['Darkvision'],
   spellSlots: Object.values(computed.spellcasting?.slots ?? {}).map((slot) => ({
     level: slot.level,
     current: slot.remaining,

@@ -28,6 +28,61 @@ test('mobile navigation switches sections', async () => {
   await userEvent.click(screen.getAllByRole('button', { name: /spells/i })[0]);
   expect(screen.getByRole('heading', { name: 'Spells' })).toBeInTheDocument();
 });
+test('summary renders a grouped, complete character sheet', () => {
+  start('#/character/reference');
+  expect(
+    screen.getAllByRole('article', {
+      name: /^(strength|dexterity|constitution|intelligence|wisdom|charisma)$/i,
+    }),
+  ).toHaveLength(6);
+  const expectedSkills = [
+    'Acrobatics',
+    'Animal Handling',
+    'Arcana',
+    'Athletics',
+    'Deception',
+    'History',
+    'Insight',
+    'Intimidation',
+    'Investigation',
+    'Medicine',
+    'Nature',
+    'Perception',
+    'Performance',
+    'Persuasion',
+    'Religion',
+    'Sleight of Hand',
+    'Stealth',
+    'Survival',
+  ];
+  expectedSkills.forEach((skill) =>
+    expect(screen.getAllByText(skill)).toHaveLength(1),
+  );
+  expect(
+    screen.getByRole('list', { name: 'Strength skills' }),
+  ).toHaveTextContent('Athletics');
+  expect(screen.getByRole('list', { name: 'Wisdom skills' })).toHaveTextContent(
+    'Perception',
+  );
+  expect(screen.getAllByLabelText(/proficient|not proficient/i)).toHaveLength(
+    24,
+  );
+  [
+    'Armor Class',
+    'Initiative',
+    'Speed',
+    'Current HP',
+    'Passive Perception',
+    'Spell Save DC',
+  ].forEach((stat) => expect(screen.getByText(stat)).toBeInTheDocument());
+  ['Common', 'Infernal', 'Druidic', 'Light Armor', 'Herbalism Kit'].forEach(
+    (item) => expect(screen.getByText(item)).toBeInTheDocument(),
+  );
+  expect(
+    screen.getByRole('heading', { name: 'Resources' }),
+  ).toBeInTheDocument();
+  expect(screen.getByText('Wild Shape')).toBeInTheDocument();
+});
 test('short rest opens preview and supports undo', async () => {
   start('#/character/reference');
   await userEvent.click(
