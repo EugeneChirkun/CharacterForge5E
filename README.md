@@ -89,3 +89,13 @@ Creation choices live in a serializable schema-v1 `CharacterDraft`, separate fro
 Hash routes are `#/characters`, `#/characters/new`, `#/characters/new/:step`, `#/character/reference`, `#/character/:id`, and `#/character/:id/level-up`. The seeded reference remains read-only and cannot be deleted or leveled. User characters advance exactly one level through level 8. Level-up preserves current and temporary HP and spent resources/slots rather than performing a Long Rest; level 3 requires Circle and land selection. Cantrip replacement and other uncertain replacement rules are deliberately deferred.
 
 See [the Iteration 2C architecture notes](docs/iteration-2c-character-creation.md). Run verification with `npm ci`, `npm run lint`, `npm run test`, and `npm run build`.
+
+## Iteration 3B: equipment and inventory
+
+Characters now own a persistent, typed inventory rather than display-only equipment strings. Immutable domain definitions cover armor, shields, weapons, tools, adventuring gear, containers, and spellcasting focuses for the supported Druid/Farmer path. Instances independently track quantity, carried/equipped state, an optional container, notes, and attunement. The starting-equipment choice creates stable inventory instances during character creation, and level-up preserves them.
+
+Equipped armor and shield mechanics feed the existing generic Armor Class calculator. The sheet displays grouped inventory, carried/owned weight, searchable verified additions, confirmed removal, quantity and equipment controls, container assignment, and an integer CP/SP/EP/GP/PP wallet. Container commands prevent missing, self, and circular references. Generic attunement state and its three-item limit are implemented even though no supported production item requires attunement.
+
+Character-record schema v2 migrates schema-v1 records to the structured fallback preset. Equipment definitions and derived AC/weight are never persisted. See [the Iteration 3B architecture and limitations](docs/iteration-3b-equipment-inventory.md).
+
+This iteration deliberately does **not** include automated attacks, automated damage, purchasing workflows, encumbrance penalties, a complete equipment compendium, or magic-item effects. Starting currency remains zero where a non-zero value was not verified; container capacity and complete training warnings are deferred.

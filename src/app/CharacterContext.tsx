@@ -58,6 +58,7 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
             conditions: character.conditions ?? [],
             concentrationSpellId: character.concentrationSpellId,
             preparedSpellIds: character.preparedSpellIds,
+            inventory: character.inventory,
             selections: {
               ...record.session.selections,
               circleOfTheLand: { landType: character.landType },

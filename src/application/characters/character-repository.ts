@@ -1,7 +1,7 @@
 import type { CharacterBuild, CharacterSession } from '../../domain/character';
 import type { CharacterDraft } from '../../domain/creation';
 export interface CharacterRecord {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly build: CharacterBuild;
   readonly session: CharacterSession;
   readonly createdAt: string;

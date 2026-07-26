@@ -140,7 +140,7 @@ describe('creation, persistence, and leveling', () => {
     if (!created.success) throw new Error('fixture');
     const now = new Date().toISOString();
     await repo.save({
-      schemaVersion: 1,
+      schemaVersion: 2,
       build: created.build,
       session: created.session,
       createdAt: now,

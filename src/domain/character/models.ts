@@ -7,6 +7,11 @@ import type { ComputedSpellcasting, SpellcastingBuild } from '../spellcasting';
 import type { LandType, RuleDiagnostic, SpellGrantSourceType } from '../rules';
 import type { ComputedResource } from '../resources';
 import type { SpellDiagnostic } from '../spells';
+import type {
+  CharacterInventory,
+  EquipmentDefinition,
+  InventoryDiagnostic,
+} from '../equipment';
 export interface CharacterBuild {
   readonly id: string;
   readonly name: string;
@@ -45,6 +50,8 @@ export interface CharacterSession {
   /** A live-play override; permanent spell choices remain on CharacterBuild. */
   readonly preparedSpellIds?: readonly string[];
   readonly concentrationSpellId?: string;
+  /** Mutable ownership and equipment state; definitions and derived totals are never persisted. */
+  readonly inventory?: CharacterInventory;
   readonly selections?: {
     readonly circleOfTheLand?: { readonly landType: LandType };
   };
@@ -80,6 +87,16 @@ export interface ComputedCharacter {
   readonly initiative: CalculationResult<number>;
   readonly passivePerception: CalculationResult<number>;
   readonly armorClass: CalculationResult<number>;
+  readonly equipment: {
+    readonly equippedArmor?: EquipmentDefinition;
+    readonly equippedShield?: EquipmentDefinition;
+    readonly equippedWeapons: readonly EquipmentDefinition[];
+    readonly equippedFocus?: EquipmentDefinition;
+    readonly carriedWeight: number;
+    readonly ownedWeight: number;
+    readonly diagnostics: readonly InventoryDiagnostic[];
+    readonly armorClassSteps: readonly string[];
+  };
   readonly maximumHp: CalculationResult<number>;
   readonly currentHp: number;
   readonly temporaryHp: number;

@@ -7,6 +7,7 @@ import {
 import { skillNames } from '../../domain/skills';
 import type { CharacterViewModel } from './character.types';
 import { defaultRuleRegistry } from '../../domain/rules';
+import { startingInventory } from '../../domain/equipment';
 
 const toughPerLevel = defaultRuleRegistry.features['tough-durability'].effects
   .filter((effect) => effect.type === 'modify-hit-points-per-level')
@@ -37,10 +38,7 @@ export const referenceBuild: CharacterBuild = {
   savingThrowProficiencies: ['intelligence', 'wisdom'],
   skillProficiencies: ['animalHandling', 'nature', 'perception'],
   expertiseSkills: [],
-  armorClassSources: [
-    { type: 'armor', base: 12, dexterityCap: 2, label: 'Equipped armor' },
-    { type: 'shield', amount: 2, label: 'Shield' },
-  ],
+  armorClassSources: [],
   spellcasting: {
     ability: 'wisdom',
     slotProgression: {
@@ -90,6 +88,7 @@ export const referenceSession: CharacterSession = {
     'chthonic-ray-of-enfeeblement-use': 0,
   },
   conditions: [],
+  inventory: startingInventory(),
   selections: { circleOfTheLand: { landType: 'temperate' } },
 };
 
@@ -172,6 +171,10 @@ export const referenceCharacter: CharacterViewModel = {
     ...computed.ruleDiagnostics.map((d) => d.type),
     ...computed.spellDiagnostics.map((d) => d.type),
   ],
+  inventory: referenceSession.inventory!,
+  carriedWeight: computed.equipment.carriedWeight,
+  ownedWeight: computed.equipment.ownedWeight,
+  armorClassExplanation: computed.equipment.armorClassSteps,
 };
 export const freshReferenceCharacter = () =>
   structuredClone(referenceCharacter);

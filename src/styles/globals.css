@@ -2,6 +2,119 @@
   box-sizing: border-box;
 }
 
+.equipment-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.currency-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(4.5rem, 1fr));
+  gap: 0.75rem;
+}
+.currency-grid label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 700;
+}
+.currency-grid input {
+  width: 100%;
+}
+.inventory-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.inventory-list,
+.add-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.inventory-list li {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) auto auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  border-top: 1px solid var(--color-border, #d7d9dd);
+  padding-top: 0.75rem;
+}
+.inventory-list li > div {
+  display: grid;
+}
+.inventory-list label {
+  font-size: 0.8rem;
+}
+.inventory-list input[type='number'] {
+  width: 4.5rem;
+}
+.inventory-list select,
+.inventory-list input[placeholder='Notes'] {
+  grid-column: span 2;
+  min-width: 0;
+}
+.equipment-warning {
+  border-left: 0.3rem solid #9b4a15;
+  padding: 0.5rem 1rem;
+  background: #fff3e8;
+}
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(10 20 30 / 0.65);
+}
+.dialog {
+  width: min(36rem, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  background: white;
+  display: grid;
+  gap: 1rem;
+}
+.dialog label {
+  display: grid;
+  gap: 0.35rem;
+}
+.add-items li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+button.danger {
+  color: #8b1e1e;
+}
+@media (max-width: 760px) {
+  .inventory-groups {
+    grid-template-columns: 1fr;
+  }
+  .currency-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .inventory-list li {
+    grid-template-columns: 1fr auto;
+  }
+  .inventory-list select,
+  .inventory-list input[placeholder='Notes'] {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .equipment-heading {
+    align-items: flex-start;
+  }
+}
+
 .wizard-page {
   max-width: 54rem;
   margin: 0 auto;

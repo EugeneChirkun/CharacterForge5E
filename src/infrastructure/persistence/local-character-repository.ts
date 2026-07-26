@@ -4,6 +4,7 @@ import type {
   CharacterRepository,
 } from '../../application/characters/character-repository';
 import type { CharacterDraft } from '../../domain/creation';
+import { startingInventory, validateInventory } from '../../domain/equipment';
 export interface KeyValueStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
@@ -13,10 +14,14 @@ const RECORDS_KEY = 'character-forge-records-v1';
 const DRAFT_KEY = 'character-forge-creation-draft-v1';
 const object = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === 'object';
-export function isCharacterRecord(v: unknown): v is CharacterRecord {
+function isLegacyOrCurrentRecord(
+  v: unknown,
+): v is Omit<CharacterRecord, 'schemaVersion'> & {
+  readonly schemaVersion: 1 | 2;
+} {
   return (
     object(v) &&
-    v.schemaVersion === 1 &&
+    (v.schemaVersion === 1 || v.schemaVersion === 2) &&
     object(v.build) &&
     typeof v.build.id === 'string' &&
     v.build.id !== 'reference' &&
@@ -25,8 +30,29 @@ export function isCharacterRecord(v: unknown): v is CharacterRecord {
     typeof v.updatedAt === 'string'
   );
 }
+export function isCharacterRecord(v: unknown): v is CharacterRecord {
+  return (
+    isLegacyOrCurrentRecord(v) &&
+    v.schemaVersion === 2 &&
+    !!v.session.inventory &&
+    validateInventory(v.session.inventory).every((d) => d.severity !== 'error')
+  );
+}
 export function migrateRecords(value: unknown): readonly CharacterRecord[] {
-  return Array.isArray(value) ? value.filter(isCharacterRecord) : [];
+  if (!Array.isArray(value)) return [];
+  return value.filter(isLegacyOrCurrentRecord).map((record) => {
+    const candidate = record.session.inventory;
+    const inventory =
+      candidate &&
+      validateInventory(candidate).every((d) => d.severity !== 'error')
+        ? candidate
+        : startingInventory();
+    return {
+      ...record,
+      schemaVersion: 2 as const,
+      session: { ...record.session, inventory },
+    };
+  });
 }
 export function loadLocalCharacterRecords(
   storage: KeyValueStorage,

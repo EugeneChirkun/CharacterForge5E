@@ -28,6 +28,7 @@ import type {
   ComputedCharacter,
 } from './models';
 import { validateCharacterSession } from './session';
+import { emptyInventory, selectEquipment } from '../equipment';
 import {
   defaultRuleRegistry,
   type RuleDiagnostic,
@@ -143,8 +144,19 @@ export function computeCharacter(
     dexterityModifier: abilityModifiers.dexterity.value,
   });
   const passivePerception = calculatePassivePerception(skills.perception);
+  const equipment = selectEquipment(session.inventory ?? emptyInventory());
   const armorClass = calculateArmorClass({
-    sources: build.armorClassSources,
+    sources: session.inventory
+      ? [
+          {
+            type: 'unarmored' as const,
+            base: 10,
+            abilityModifiers: ['dexterity' as const],
+            label: 'Unarmored',
+          },
+          ...equipment.armorClassSources,
+        ]
+      : build.armorClassSources,
     abilityModifiers: Object.fromEntries(
       abilityNames.map((name) => [name, abilityModifiers[name].value]),
     ) as Record<AbilityName, number>,
@@ -308,6 +320,19 @@ export function computeCharacter(
     initiative,
     passivePerception,
     armorClass,
+    equipment: {
+      equippedArmor: equipment.equippedArmor,
+      equippedShield: equipment.equippedShield,
+      equippedWeapons: equipment.equippedWeapons,
+      equippedFocus: equipment.equippedFocus,
+      carriedWeight: equipment.carriedWeight,
+      ownedWeight: equipment.ownedWeight,
+      diagnostics: equipment.diagnostics,
+      armorClassSteps: [
+        ...equipment.armorClassSteps,
+        ...armorClass.steps.map((step) => step.label),
+      ],
+    },
     maximumHp,
     currentHp: session.currentHp,
     temporaryHp: session.temporaryHp,
