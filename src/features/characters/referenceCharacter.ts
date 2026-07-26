@@ -53,7 +53,7 @@ export const referenceBuild: CharacterBuild = {
     },
   },
   feats: ['Tough'],
-  class: { classId: 'druid', level: 8, subclassId: 'circle-of-the-land' },
+  class: { classId: 'druid', level: 8, subclassId: 'circle-of-the-land', primalOrder: { orderId: 'warden' } },
   species: {
     speciesId: 'tiefling',
     optionId: 'chthonic',
@@ -97,6 +97,7 @@ export const referenceCharacter: CharacterViewModel = {
   id: referenceBuild.id,
   name: referenceBuild.name,
   level: referenceBuild.totalLevel,
+  primalOrder: { name: 'Warden', grantedProficiencies: ['Medium armor', 'Martial weapons'] },
   species: 'Tiefling',
   legacy: 'Chthonic',
   characterClass: 'Druid',
@@ -131,7 +132,8 @@ export const referenceCharacter: CharacterViewModel = {
   ) as CharacterViewModel['skills'],
   skillProficiencies: referenceBuild.skillProficiencies,
   proficiencies: [
-    { category: 'Armor', items: ['Light Armor'] },
+    { category: 'Armor', items: ['Light Armor', 'Medium Armor'] },
+    { category: 'Weapons', items: computed.proficiencies.weapons },
     { category: 'Tools', items: ['Herbalism Kit'] },
   ],
   languages: ['Common', 'Infernal', 'Druidic'],
@@ -150,6 +152,7 @@ export const referenceCharacter: CharacterViewModel = {
       recovery: r.recovery.includes('short')
         ? ('short' as const)
         : ('long' as const),
+      recoveryOn: r.recovery,
     })),
     {
       id: 'nature-aid',

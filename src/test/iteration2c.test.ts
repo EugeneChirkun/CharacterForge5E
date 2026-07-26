@@ -30,6 +30,7 @@ const completeDraft = (level = 1) => ({
   ...newCharacterDraft('stable-id'),
   name: 'Myrddin',
   targetLevel: level,
+  primalOrder: { orderId: 'warden' as const },
   selectedSkillProficiencies: ['perception', 'survival'] as const,
   selectedCantripIds:
     level >= 4

@@ -437,6 +437,17 @@ const grants: SpellGrant[] = Object.entries(landData)
     ),
   ]);
 export const defaultRuleRegistry: RuleRegistry = {
+  druidPrimalOrders: {
+    magician: {
+      id: 'magician', name: 'Magician',
+      grants: ['additional-druid-cantrip', 'wisdom-skill-bonus'],
+      choices: ['additional-cantrip', 'skill-bonus-target'], source: phb2024,
+    },
+    warden: {
+      id: 'warden', name: 'Warden',
+      grants: ['medium-armor', 'martial-weapons'], choices: [], source: phb2024,
+    },
+  },
   classes: {
     druid: {
       id: 'druid',

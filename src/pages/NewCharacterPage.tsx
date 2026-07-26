@@ -24,6 +24,7 @@ const steps = [
   'Origin',
   'Abilities',
   'Skills',
+  'Primal Order',
   'Equipment',
   'Spells',
   'Subclass',
@@ -329,6 +330,30 @@ export function NewCharacterPage() {
               </label>
             </fieldset>
           )}
+          {current === 'Primal Order' && (
+            <>
+              <p>Choose the permanent role learned by your Druid at level 1.</p>
+              <fieldset>
+                <legend>Primal Order (required)</legend>
+                {Object.values(defaultRuleRegistry.druidPrimalOrders).map((order) => (
+                  <label key={order.id}>
+                    <input type="radio" checked={draft.primalOrder?.orderId === order.id}
+                      onChange={() => patch({ primalOrder: order.id === 'warden' ? { orderId: 'warden' } : { orderId: 'magician' } })} />
+                    {order.name} — {order.id === 'magician' ? 'an additional cantrip and Wisdom-based skill bonus' : 'medium armor and martial weapons'}
+                  </label>
+                ))}
+              </fieldset>
+              {draft.primalOrder?.orderId === 'magician' && <>
+                <label>Additional Druid cantrip
+                  <select value={draft.primalOrder.magicianChoices?.additionalCantripId ?? ''} onChange={(e) => patch({ primalOrder: { orderId: 'magician', magicianChoices: { additionalCantripId: e.target.value, skillBonusTarget: draft.primalOrder?.orderId === 'magician' ? draft.primalOrder.magicianChoices?.skillBonusTarget ?? 'arcana' : 'arcana' } } })}>
+                    <option value="">Choose a cantrip</option>
+                    {cantrips.filter((s) => !draft.selectedCantripIds.includes(s.id)).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </label>
+                <fieldset><legend>Skill bonus</legend>{(['arcana', 'nature'] as const).map((skill) => <label key={skill}><input type="radio" checked={draft.primalOrder?.orderId === 'magician' && draft.primalOrder.magicianChoices?.skillBonusTarget === skill} onChange={() => patch({ primalOrder: { orderId: 'magician', magicianChoices: { additionalCantripId: draft.primalOrder?.orderId === 'magician' ? draft.primalOrder.magicianChoices?.additionalCantripId ?? '' : '', skillBonusTarget: skill } } })} />{label(skill)}</label>)}</fieldset>
+              </>}
+            </>
+          )}
           {current === 'Spells' && (
             <>
               <fieldset>
@@ -429,6 +454,8 @@ export function NewCharacterPage() {
                   </dd>
                   <dt>Maximum HP</dt>
                   <dd>{preview.maximumHp}</dd>
+                  <dt>Primal Order</dt>
+                  <dd>{preview.primalOrder?.name ?? 'Incomplete'}</dd>
                   <dt>Armor Class</dt>
                   <dd>{preview.armorClass}</dd>
                   <dt>Spell save DC / attack</dt>

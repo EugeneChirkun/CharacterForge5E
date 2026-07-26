@@ -115,3 +115,9 @@ Equipped armor and shield mechanics feed the existing generic Armor Class calcul
 Character-record schema v2 migrates schema-v1 records to the structured fallback preset. Equipment definitions and derived AC/weight are never persisted. See [the Iteration 3B architecture and limitations](docs/iteration-3b-equipment-inventory.md).
 
 This iteration deliberately does **not** include automated attacks, automated damage, purchasing workflows, encumbrance penalties, a complete equipment compendium, or magic-item effects. Starting currency remains zero where a non-zero value was not verified; container capacity and complete training warnings are deferred.
+
+## Iteration 3.5A: Druid Primal Order and Wild Shape rests
+
+Druids now permanently choose **Magician** (one extra verified Druid cantrip and an Arcana or Nature check contribution equal to Wisdom, minimum +1) or **Warden** (Medium Armor and Martial Weapons training). Existing stored Druids are not guessed: migration marks `druid.primal-order` as a required build choice for explicit resolution. Wild Shape is sourced from the Druid progression/resource registry (unavailable at level 1, 2 uses at levels 2–5, and 3 at levels 6–8); a Short Rest restores one use and a Long Rest restores all uses through shared recovery transitions.
+
+Current Druid limitations remain: equipment purchasing, ASI/feat decisions, subclass-choice changes, transformations, and additional forms/subclasses are deferred.

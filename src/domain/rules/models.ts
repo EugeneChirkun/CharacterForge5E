@@ -9,6 +9,22 @@ export interface RuleSource {
   readonly page?: number;
   readonly verified: boolean;
 }
+export type DruidPrimalOrderId = 'magician' | 'warden';
+export type DruidPrimalOrderSkill = 'arcana' | 'nature';
+export interface DruidPrimalOrderSelection {
+  readonly orderId: DruidPrimalOrderId;
+  readonly magicianChoices?: {
+    readonly additionalCantripId: string;
+    readonly skillBonusTarget: DruidPrimalOrderSkill;
+  };
+}
+export interface DruidPrimalOrderDefinition {
+  readonly id: DruidPrimalOrderId;
+  readonly name: string;
+  readonly grants: readonly ('additional-druid-cantrip' | 'wisdom-skill-bonus' | 'medium-armor' | 'martial-weapons')[];
+  readonly choices: readonly ('additional-cantrip' | 'skill-bonus-target')[];
+  readonly source: RuleSource;
+}
 export type OwnerType =
   'class' | 'subclass' | 'species' | 'background' | 'feat';
 export type DamageType = 'fire' | 'necrotic' | 'poison';
@@ -184,6 +200,7 @@ export interface SpellGrant {
 }
 export type LandType = 'arid' | 'polar' | 'temperate' | 'tropical';
 export interface RuleRegistry {
+  readonly druidPrimalOrders: Readonly<Record<DruidPrimalOrderId, DruidPrimalOrderDefinition>>;
   readonly classes: Readonly<Record<string, ClassDefinition>>;
   readonly subclasses: Readonly<Record<string, SubclassDefinition>>;
   readonly species: Readonly<Record<string, SpeciesDefinition>>;
@@ -215,7 +232,10 @@ export type RuleDiagnostic =
       readonly type:
         | 'missing-required-land-selection'
         | 'invalid-land-selection'
-        | 'unsupported-character-level';
+        | 'unsupported-character-level'
+        | 'missing-primal-order' | 'invalid-primal-order'
+        | 'missing-magician-cantrip' | 'invalid-magician-cantrip'
+        | 'missing-magician-skill-choice' | 'stale-primal-order-choice';
       readonly value?: string | number;
     }
   | {

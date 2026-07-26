@@ -194,6 +194,12 @@ export function CharacterSummary({ c }: { c: CharacterViewModel }) {
         <CombatSummary c={c} />
       </div>
       <div className="sheet-secondary">
+        {c.primalOrder && <section className="sheet-panel" aria-labelledby="primal-order-heading">
+          <h2 id="primal-order-heading">Primal Order</h2><strong>{c.primalOrder.name}</strong>
+          {c.primalOrder.additionalCantrip && <p>Additional Cantrip: {c.primalOrder.additionalCantrip}</p>}
+          {c.primalOrder.skillBonusTarget && <p>Skill Bonus: {skillLabels[c.primalOrder.skillBonusTarget]}</p>}
+          {!!c.primalOrder.grantedProficiencies.length && <p>Granted Proficiencies: {c.primalOrder.grantedProficiencies.join(', ')}</p>}
+        </section>}
         <section
           className="sheet-panel"
           aria-labelledby="proficiencies-heading"

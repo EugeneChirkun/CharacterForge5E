@@ -18,6 +18,12 @@ export function toCharacterViewModel(
     id: build.id,
     name: build.name,
     level: build.totalLevel,
+    primalOrder: c.druid?.primalOrder ? {
+      name: c.druid.primalOrder.name,
+      additionalCantrip: c.druid.primalOrder.additionalCantripId ? registry.spells[c.druid.primalOrder.additionalCantripId]?.name : undefined,
+      skillBonusTarget: c.druid.primalOrder.skillBonusTarget,
+      grantedProficiencies: c.druid.primalOrder.grantedProficiencies,
+    } : undefined,
     species: 'Tiefling',
     legacy: 'Chthonic',
     characterClass: 'Druid',
@@ -53,7 +59,8 @@ export function toCharacterViewModel(
     ) as CharacterViewModel['skills'],
     skillProficiencies: build.skillProficiencies,
     proficiencies: [
-      { category: 'Armor', items: ['Light Armor'] },
+      { category: 'Armor', items: c.proficiencies.armor },
+      { category: 'Weapons', items: c.proficiencies.weapons },
       { category: 'Tools', items: ['Herbalism Kit'] },
     ],
     languages: ['Common', 'Infernal', 'Druidic'],
@@ -69,6 +76,7 @@ export function toCharacterViewModel(
       current: r.remaining,
       maximum: r.maximum,
       recovery: r.recovery.includes('short') ? 'short' : 'long',
+      recoveryOn: r.recovery,
     })),
     features: c.activeFeatures,
     spells: c.spells.map((s) => ({

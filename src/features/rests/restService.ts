@@ -5,8 +5,11 @@ export function previewRest(
   c: CharacterViewModel,
 ): RestPreview {
   const resources = c.resources
-    .filter((r) => r.recovery === type && r.current < r.maximum)
-    .map((r) => `${r.name}: ${r.current} → ${r.maximum}`);
+    .filter((r) => (r.recoveryOn?.includes(type) ?? r.recovery === type) && r.current < r.maximum)
+    .map((r) => {
+      const after = type === 'short' && r.id === 'wild-shape' ? Math.min(r.maximum, r.current + 1) : r.maximum;
+      return `${r.name}: ${r.current} / ${r.maximum} → ${after} / ${r.maximum}`;
+    });
   return {
     title: type === 'short' ? 'Short Rest preview' : 'Long Rest preview',
     items:
@@ -36,7 +39,7 @@ export function performRest(
         }
       : {}),
     resources: c.resources.map((r) =>
-      r.recovery === type ? { ...r, current: r.maximum } : r,
+      (r.recoveryOn?.includes(type) ?? r.recovery === type) ? { ...r, current: type === 'short' && r.id === 'wild-shape' ? Math.min(r.maximum, r.current + 1) : r.maximum } : r,
     ),
   };
 }

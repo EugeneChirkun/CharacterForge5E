@@ -1,6 +1,6 @@
 import type { AbilityName } from '../abilities';
 import type { SkillName } from '../skills';
-import type { LandType } from '../rules';
+import type { DruidPrimalOrderSelection, LandType } from '../rules';
 import type {
   AbilityAssignment,
   AbilityGenerationMethod,
@@ -33,6 +33,7 @@ export interface CharacterDraft {
   readonly equipmentChoiceIds: readonly string[];
   readonly selectedCantripIds: readonly string[];
   readonly selectedPreparedSpellIds: readonly string[];
+  readonly primalOrder?: DruidPrimalOrderSelection;
   readonly subclassId?: 'circle-of-the-land';
   readonly landType?: LandType;
   readonly hitPointChoices: Readonly<Record<number, HitPointLevelChoice>>;

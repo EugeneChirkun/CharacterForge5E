@@ -3,7 +3,7 @@ import {
   type AbilityName,
   type AbilityScores,
 } from '../abilities';
-import type { RuleRegistry } from '../rules';
+import { validateDruidPrimalOrder, type RuleRegistry } from '../rules';
 import { maximumSpellLevel, validatePreparedSpells } from '../spells';
 import { validateEquipment } from '../equipment';
 import {
@@ -31,6 +31,8 @@ export type CreationDiagnosticType =
   | 'invalid-equipment-choice'
   | 'missing-equipment-choice'
   | 'invalid-cantrip'
+  | 'missing-primal-order' | 'invalid-primal-order' | 'missing-magician-cantrip'
+  | 'invalid-magician-cantrip' | 'missing-magician-skill-choice' | 'stale-primal-order-choice'
   | 'invalid-prepared-spell'
   | 'too-many-prepared-spells'
   | 'missing-subclass'
@@ -135,6 +137,8 @@ export function validateCharacterDraft(
       ),
     );
   const cls = registry.classes.druid;
+  out.push(...validateDruidPrimalOrder(draft.primalOrder, draft.selectedCantripIds, registry).map((type) =>
+    diagnostic(type, type === 'missing-primal-order' ? 'Choose a Druid Primal Order.' : 'Complete a valid Primal Order selection.')));
   const uniqueSkills = new Set(draft.selectedSkillProficiencies);
   if (uniqueSkills.size !== draft.selectedSkillProficiencies.length)
     out.push(

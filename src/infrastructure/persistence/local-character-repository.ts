@@ -51,9 +51,13 @@ export function migrateRecords(value: unknown): readonly CharacterRecord[] {
       validateInventory(candidate).every((d) => d.severity !== 'error')
         ? candidate
         : startingInventory();
+    const build = record.build.class?.classId === 'druid' && !record.build.class.primalOrder
+      ? { ...record.build, requiredBuildChoices: [{ code: 'missing-required-build-choice' as const, choiceId: 'druid.primal-order' as const }] }
+      : record.build;
     return {
       ...record,
       schemaVersion: 2 as const,
+      build,
       session: { ...record.session, inventory },
     };
   });
