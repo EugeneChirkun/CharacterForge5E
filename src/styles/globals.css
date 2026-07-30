@@ -458,6 +458,21 @@ h1 {
   background: var(--surface);
   box-shadow: var(--shadow);
 }
+.conditions-grid,
+.condition-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+  gap: 0.5rem 1rem;
+}
+.condition-option,
+.condition-grid label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
+  cursor: pointer;
+}
 .implementation-status summary {
   display: flex;
   align-items: center;

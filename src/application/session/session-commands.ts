@@ -192,3 +192,81 @@ export function setCondition(
 export const clearConditions = (
   session: CharacterSession,
 ): CharacterSession => ({ ...session, conditions: [] });
+
+export interface MaximumHpAdjustmentResult {
+  readonly session: CharacterSession;
+  readonly diagnostics: readonly {
+    readonly type: 'current-hp-clamped';
+    readonly message: string;
+  }[];
+}
+export function effectiveMaximumHp(
+  session: CharacterSession,
+  calculatedMaximumHp: number,
+) {
+  return calculatedMaximumHp + (session.maximumHpAdjustment ?? 0);
+}
+export function setMaximumHpAdjustment(
+  session: CharacterSession,
+  adjustment: number,
+  calculatedMaximumHp: number,
+  reason?: string,
+): MaximumHpAdjustmentResult {
+  if (!Number.isInteger(adjustment))
+    throw new SessionCommandError(
+      'invalid-max-hp-adjustment',
+      'Maximum HP adjustment must be a whole number.',
+    );
+  const effective = calculatedMaximumHp + adjustment;
+  if (effective < 0)
+    throw new SessionCommandError(
+      'effective-max-below-zero',
+      'Effective Maximum HP cannot be below zero.',
+    );
+  const clamped = Math.min(session.currentHp, effective);
+  return {
+    session: {
+      ...session,
+      currentHp: clamped,
+      maximumHpAdjustment: adjustment,
+      maximumHpAdjustmentReason: reason?.trim() || undefined,
+    },
+    diagnostics:
+      clamped < session.currentHp
+        ? [
+            {
+              type: 'current-hp-clamped',
+              message: 'Current HP was reduced to the effective maximum.',
+            },
+          ]
+        : [],
+  };
+}
+export const increaseMaximumHpAdjustment = (
+  session: CharacterSession,
+  amount: number,
+  calculatedMaximumHp: number,
+  reason?: string,
+) =>
+  setMaximumHpAdjustment(
+    session,
+    (session.maximumHpAdjustment ?? 0) + amount,
+    calculatedMaximumHp,
+    reason,
+  );
+export const decreaseMaximumHpAdjustment = (
+  session: CharacterSession,
+  amount: number,
+  calculatedMaximumHp: number,
+  reason?: string,
+) =>
+  setMaximumHpAdjustment(
+    session,
+    (session.maximumHpAdjustment ?? 0) - amount,
+    calculatedMaximumHp,
+    reason,
+  );
+export const resetMaximumHpAdjustment = (
+  session: CharacterSession,
+  calculatedMaximumHp: number,
+) => setMaximumHpAdjustment(session, 0, calculatedMaximumHp);

@@ -19,6 +19,8 @@ import type {
 } from '../equipment';
 import type { StartingEquipmentSourceChoice } from '../equipment';
 export interface CharacterBuild {
+  /** Append-only record of choices made at advancement milestones. */
+  readonly advancementChoices?: readonly import('../leveling').CharacterAdvancementChoice[];
   readonly requiredBuildChoices?: readonly {
     readonly code: 'missing-required-build-choice';
     readonly choiceId: 'druid.primal-order';
@@ -59,6 +61,8 @@ export interface CharacterSession {
   readonly spentSpellSlots: Readonly<Record<number, number>>;
   readonly resources: Readonly<Record<string, number>>;
   readonly conditions: readonly string[];
+  readonly maximumHpAdjustment?: number;
+  readonly maximumHpAdjustmentReason?: string;
   /** A live-play override; permanent spell choices remain on CharacterBuild. */
   readonly preparedSpellIds?: readonly string[];
   readonly concentrationSpellId?: string;

@@ -7,6 +7,7 @@ export interface RestChange {
     | 'restore-resource'
     | 'restore-spell-slots'
     | 'clear-temporary-hit-points'
+    | 'clear-conditions'
     | 'change-selection';
   readonly label: string;
   readonly before?: number | string;
@@ -97,6 +98,13 @@ function transition(
         before: 'spent',
         after: 'all available',
       });
+    if (session.conditions.length)
+      changes.push({
+        type: 'clear-conditions',
+        label: 'Conditions cleared',
+        before: session.conditions.join(', '),
+        after: 'None',
+      });
     session = {
       ...session,
       currentHp: input.maximumHp,
@@ -104,6 +112,7 @@ function transition(
       spentSpellSlots: Object.fromEntries(
         Object.keys(input.spellSlotMaximums).map((k) => [Number(k), 0]),
       ),
+      conditions: [],
     };
     if (
       input.selectedLandType &&

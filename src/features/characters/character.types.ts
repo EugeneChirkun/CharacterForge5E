@@ -45,6 +45,9 @@ export interface CharacterViewModel {
   proficiencyBonus: number;
   currentHp: number;
   maximumHp: number;
+  baseMaximumHp?: number;
+  maximumHpAdjustment?: number;
+  maximumHpAdjustmentReason?: string;
   temporaryHp: number;
   hitDice: string;
   passivePerception: number;

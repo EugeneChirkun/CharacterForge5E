@@ -9,10 +9,10 @@ export interface ApplicationImplementationStatus {
 /** The single application-facing source for the currently implemented milestone. */
 export const applicationImplementationStatus = Object.freeze({
   stage: '3',
-  iteration: '3.5B',
-  title: 'Druid Starting Equipment, Gold Alternatives and Purchasing',
+  iteration: '3.5C',
+  title: 'Druid Level Advancement, ASI, General Feats and Session Corrections',
   summary:
-    'Druid and Farmer starting equipment packages, gold alternatives, structured purchasing during character creation, inventory materialization, Armor Class integration, and migration support.',
+    'Ability Score Improvements, General Feat selection, advancement preview, Conditions redesign, condition recovery, session Maximum HP adjustments, and improved Session Mode.',
   implementedFeatures: Object.freeze([
     'Generic rules engine',
     'Character creation',
@@ -26,8 +26,11 @@ export const applicationImplementationStatus = Object.freeze({
     'Equipment & Inventory',
     'Spellbook',
     'Session Mode',
-    'Starting equipment packages',
-    'Starting gold alternatives',
+    'Starting equipment',
     'Character creation purchasing',
+    'Ability Score Improvement',
+    'General Feats',
+    'Conditions redesign',
+    'Maximum HP adjustment',
   ]),
 } as const satisfies ApplicationImplementationStatus);
