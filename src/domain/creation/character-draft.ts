@@ -2,6 +2,10 @@ import type { AbilityName } from '../abilities';
 import type { SkillName } from '../skills';
 import type { DruidPrimalOrderSelection, LandType } from '../rules';
 import type {
+  StartingEquipmentSourceChoice,
+  StartingPurchaseCartItem,
+} from '../equipment';
+import type {
   AbilityAssignment,
   AbilityGenerationMethod,
 } from './ability-generation';
@@ -31,6 +35,9 @@ export interface CharacterDraft {
   >;
   readonly selectedSkillProficiencies: readonly SkillName[];
   readonly equipmentChoiceIds: readonly string[];
+  readonly startingEquipmentChoices: readonly StartingEquipmentSourceChoice[];
+  /** Builder-only state. Materialized inventory, rather than this cart, is persisted on creation. */
+  readonly startingPurchaseCart: readonly StartingPurchaseCartItem[];
   readonly selectedCantripIds: readonly string[];
   readonly selectedPreparedSpellIds: readonly string[];
   readonly primalOrder?: DruidPrimalOrderSelection;
@@ -38,7 +45,9 @@ export interface CharacterDraft {
   readonly landType?: LandType;
   readonly hitPointChoices: Readonly<Record<number, HitPointLevelChoice>>;
 }
-export function newCharacterDraft(id: string = crypto.randomUUID()): CharacterDraft {
+export function newCharacterDraft(
+  id: string = crypto.randomUUID(),
+): CharacterDraft {
   const scores = {
     strength: 15,
     dexterity: 14,
@@ -73,6 +82,14 @@ export function newCharacterDraft(id: string = crypto.randomUUID()): CharacterDr
     backgroundAbilityAdjustments: { constitution: 2, wisdom: 1 },
     selectedSkillProficiencies: [],
     equipmentChoiceIds: ['druid-farmer-preset'],
+    startingEquipmentChoices: [
+      { sourceId: 'druid.class.starting-equipment', choiceType: 'package' },
+      {
+        sourceId: 'farmer.background.starting-equipment',
+        choiceType: 'package',
+      },
+    ],
+    startingPurchaseCart: [],
     selectedCantripIds: [],
     selectedPreparedSpellIds: [],
     hitPointChoices: { 1: { type: 'fixed', baseHitPoints: 8 } },

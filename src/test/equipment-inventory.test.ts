@@ -175,7 +175,7 @@ describe('character integration and migration', () => {
         updatedAt: '2026-01-01',
       },
     ]);
-    expect(migrated[0].schemaVersion).toBe(2);
+    expect(migrated[0].schemaVersion).toBe(3);
     expect(migrated[0].session.inventory?.items.length).toBeGreaterThan(0);
     expect(migrated[0].session.inventory).not.toHaveProperty('ownedWeight');
     expect(migrated[0].session.inventory).not.toHaveProperty('armorClass');

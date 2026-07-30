@@ -11,7 +11,7 @@ import {
   validateCharacterDraft,
   type CreationDiagnostic,
 } from './draft-validation';
-import { startingInventory } from '../equipment';
+import { finalizeStartingEquipment } from '../equipment';
 export type CreateCharacterResult =
   | {
       readonly success: true;
@@ -29,6 +29,21 @@ export function createCharacterFromDraft(
   const diagnostics = validateCharacterDraft(draft, registry);
   const scores = finalAbilityScores(draft);
   if (diagnostics.length || !scores) return { success: false, diagnostics };
+  const startingEquipment = finalizeStartingEquipment(
+    draft.startingEquipmentChoices,
+    draft.startingPurchaseCart,
+  );
+  if (!startingEquipment.success)
+    return {
+      success: false,
+      diagnostics: startingEquipment.diagnostics.map((entry) => ({
+        type:
+          entry.code === 'insufficient-starting-funds'
+            ? 'invalid-equipment-choice'
+            : 'missing-equipment-choice',
+        message: entry.message,
+      })),
+    };
   const cls = registry.classes.druid;
   const slotProgression = Object.fromEntries(
     cls.progression.map((p) => [p.level, p.spellSlots]),
@@ -74,6 +89,7 @@ export function createCharacterFromDraft(
     featIds: ['tough'],
     cantripIds: [...draft.selectedCantripIds],
     preparedSpellIds: [...draft.selectedPreparedSpellIds],
+    startingEquipmentChoices: [...draft.startingEquipmentChoices],
   };
   const resourceState = Object.fromEntries(
     resolveResources(registry, draft.targetLevel, {}, [
@@ -91,7 +107,7 @@ export function createCharacterFromDraft(
     spentSpellSlots: {},
     resources: resourceState,
     conditions: [],
-    inventory: startingInventory(),
+    inventory: startingEquipment.inventory,
     ...(draft.landType
       ? { selections: { circleOfTheLand: { landType: draft.landType } } }
       : {}),

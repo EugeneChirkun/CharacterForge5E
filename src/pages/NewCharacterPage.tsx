@@ -20,6 +20,18 @@ import {
 import { useCharacter } from '../app/CharacterContext';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
 import { equipmentRegistry } from '../domain/equipment';
+import {
+  addStartingPurchaseItem,
+  clearStartingPurchaseCart,
+  equipmentProficiencyWarning,
+  getPurchasableStartingEquipment,
+  removeStartingPurchaseItem,
+  resolveStartingChoices,
+  setStartingPurchaseQuantity,
+  summarizeStartingPurchase,
+  type StartingEquipmentSourceId,
+} from '../domain/equipment';
+import { computeCharacter } from '../domain/character';
 import { createCantripSelectionView } from '../application/characters/cantrip-selection-view';
 const steps = [
   'Basics',
@@ -36,6 +48,19 @@ const draftRepo = new LocalCharacterDraftRepository(localStorage);
 const characterRepo = new LocalCharacterRepository(localStorage);
 const label = (value: string) =>
   value.replace(/([A-Z])/g, ' $1').replace(/^./, (x) => x.toUpperCase());
+const formatWallet = (wallet: {
+  readonly cp: number;
+  readonly sp: number;
+  readonly ep: number;
+  readonly gp: number;
+  readonly pp: number;
+}) =>
+  (['pp', 'gp', 'ep', 'sp', 'cp'] as const)
+    .filter((denomination) => wallet[denomination] > 0)
+    .map(
+      (denomination) => `${wallet[denomination]} ${denomination.toUpperCase()}`,
+    )
+    .join(', ') || '0 GP';
 export function NewCharacterPage() {
   const navigate = useNavigate();
   const { update } = useCharacter();
@@ -43,6 +68,8 @@ export function NewCharacterPage() {
   const [loaded, setLoaded] = useState(false);
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<readonly string[]>([]);
+  const [equipmentSearch, setEquipmentSearch] = useState('');
+  const [equipmentCategory, setEquipmentCategory] = useState('all');
   useEffect(() => {
     void draftRepo.loadDraft().then((saved) => {
       if (saved) setDraft(saved);
@@ -72,13 +99,22 @@ export function NewCharacterPage() {
   const cantrips = getAvailableClassCantrips(spellSelectorInput);
   const cantripBuild = {
     cantripIds: draft.selectedCantripIds,
-    class: { classId: 'druid', level: draft.targetLevel, primalOrder: draft.primalOrder },
+    class: {
+      classId: 'druid',
+      level: draft.targetLevel,
+      primalOrder: draft.primalOrder,
+    },
   };
   const resolvedCantrips = getResolvedCantripSelections(cantripBuild);
   const magicianCantripId = resolvedCantrips.find(
     (choice) => choice.source === 'primal-order-magician',
   )?.spellId;
-  const cantripView = createCantripSelectionView(cantrips, draft.selectedCantripIds, progression.cantripsKnown, magicianCantripId);
+  const cantripView = createCantripSelectionView(
+    cantrips,
+    draft.selectedCantripIds,
+    progression.cantripsKnown,
+    magicianCantripId,
+  );
   const leveled = getAvailableClassSpells(spellSelectorInput).filter(
     (spell) => spell.level > 0,
   );
@@ -88,6 +124,41 @@ export function NewCharacterPage() {
       ? toCharacterViewModel(result.build, result.session, defaultRuleRegistry)
       : null;
   }, [draft]);
+  const equipmentModel = useMemo(() => {
+    const resolved = resolveStartingChoices(draft.startingEquipmentChoices);
+    const purchaseDraft = {
+      sourceWallet: resolved.availableWallet,
+      items: draft.startingPurchaseCart,
+    };
+    const created = createCharacterFromDraft(draft, defaultRuleRegistry);
+    const computed = created.success
+      ? computeCharacter(created.build, created.session, defaultRuleRegistry)
+      : undefined;
+    return {
+      resolved,
+      purchaseDraft,
+      summary: summarizeStartingPurchase(purchaseDraft),
+      computed,
+    };
+  }, [draft]);
+  const chooseEquipment = (
+    sourceId: StartingEquipmentSourceId,
+    choiceType: 'package' | 'gold',
+  ) =>
+    patch({
+      startingEquipmentChoices: [
+        ...draft.startingEquipmentChoices.filter(
+          (choice) => choice.sourceId !== sourceId,
+        ),
+        { sourceId, choiceType },
+      ],
+    });
+  const applyCartResult = (
+    result: ReturnType<typeof addStartingPurchaseItem>,
+  ) => {
+    if (result.success) patch({ startingPurchaseCart: result.draft.items });
+    else setErrors(result.diagnostics.map((entry) => entry.message));
+  };
   const next = () => {
     setErrors([]);
     if (
@@ -103,7 +174,7 @@ export function NewCharacterPage() {
       return setErrors(result.diagnostics.map((d) => d.message));
     const now = new Date().toISOString();
     await characterRepo.save({
-      schemaVersion: 2,
+      schemaVersion: 3,
       build: result.build,
       session: result.session,
       createdAt: now,
@@ -319,65 +390,387 @@ export function NewCharacterPage() {
             </>
           )}
           {current === 'Equipment' && (
-            <fieldset>
-              <legend>Supported starting equipment</legend>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={draft.equipmentChoiceIds.includes(
-                    'druid-farmer-preset',
-                  )}
-                  onChange={() =>
-                    patch({
-                      equipmentChoiceIds: toggle(
-                        draft.equipmentChoiceIds,
-                        'druid-farmer-preset',
-                      ),
-                    })
-                  }
-                />
-                Druid & Farmer MVP preset (starting armor, shield, and verified
-                essentials)
-              </label>
-            </fieldset>
+            <div className="starting-equipment-builder">
+              {(
+                [
+                  [
+                    'druid.class.starting-equipment',
+                    'Class Equipment',
+                    'Druid package (includes 9 GP)',
+                    'Take 50 GP',
+                  ],
+                  [
+                    'farmer.background.starting-equipment',
+                    'Background Equipment',
+                    'Farmer package (includes 30 GP)',
+                    'Take 50 GP',
+                  ],
+                ] as const
+              ).map(([sourceId, legend, packageLabel, goldLabel]) => (
+                <fieldset key={sourceId}>
+                  <legend>{legend}</legend>
+                  <label>
+                    <input
+                      type="radio"
+                      name={sourceId}
+                      checked={draft.startingEquipmentChoices.some(
+                        (choice) =>
+                          choice.sourceId === sourceId &&
+                          choice.choiceType === 'package',
+                      )}
+                      onChange={() => chooseEquipment(sourceId, 'package')}
+                    />
+                    {packageLabel}
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name={sourceId}
+                      checked={draft.startingEquipmentChoices.some(
+                        (choice) =>
+                          choice.sourceId === sourceId &&
+                          choice.choiceType === 'gold',
+                      )}
+                      onChange={() => chooseEquipment(sourceId, 'gold')}
+                    />
+                    {goldLabel}
+                  </label>
+                </fieldset>
+              ))}
+              <section aria-labelledby="starting-funds">
+                <h3 id="starting-funds">Starting Funds</h3>
+                <p>
+                  {formatWallet(equipmentModel.summary.availableWallet)}{' '}
+                  available ·{' '}
+                  {formatWallet(equipmentModel.summary.cartTotalWallet)} spent ·{' '}
+                  {formatWallet(equipmentModel.summary.remainingWallet)}{' '}
+                  remaining
+                </p>
+              </section>
+              {equipmentModel.summary.availableCopperValue > 0 && (
+                <div className="starting-shop">
+                  <section>
+                    <h3>Purchase Equipment</h3>
+                    <label htmlFor="equipment-search">Search equipment</label>
+                    <input
+                      id="equipment-search"
+                      type="search"
+                      value={equipmentSearch}
+                      onChange={(event) =>
+                        setEquipmentSearch(event.target.value)
+                      }
+                    />
+                    <label htmlFor="equipment-category">
+                      Equipment category
+                    </label>
+                    <select
+                      id="equipment-category"
+                      value={equipmentCategory}
+                      onChange={(event) =>
+                        setEquipmentCategory(event.target.value)
+                      }
+                    >
+                      <option value="all">All categories</option>
+                      {[
+                        'armor',
+                        'shield',
+                        'weapon',
+                        'tool',
+                        'adventuring-gear',
+                        'container',
+                        'spellcasting-focus',
+                      ].map((category) => (
+                        <option key={category} value={category}>
+                          {label(category)}
+                        </option>
+                      ))}
+                    </select>
+                    <ul className="shop-list">
+                      {getPurchasableStartingEquipment()
+                        .filter(
+                          (definition) =>
+                            definition.name
+                              .toLowerCase()
+                              .includes(equipmentSearch.trim().toLowerCase()) &&
+                            (equipmentCategory === 'all' ||
+                              definition.category === equipmentCategory),
+                        )
+                        .map((definition) => {
+                          const warning = equipmentModel.computed
+                            ? equipmentProficiencyWarning(
+                                definition,
+                                equipmentModel.computed.proficiencies,
+                              )
+                            : undefined;
+                          return (
+                            <li key={definition.id}>
+                              <span>
+                                <strong>{definition.name}</strong>
+                                <small>
+                                  {definition.category} ·{' '}
+                                  {(definition.priceCopper ?? 0) / 100} GP ·{' '}
+                                  {definition.weight ?? '—'} lb
+                                </small>
+                                {warning && (
+                                  <span className="equipment-warning">
+                                    Warning: {warning}
+                                  </span>
+                                )}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  applyCartResult(
+                                    addStartingPurchaseItem(
+                                      equipmentModel.purchaseDraft,
+                                      definition.id,
+                                    ),
+                                  )
+                                }
+                              >
+                                Add {definition.name}
+                              </button>
+                            </li>
+                          );
+                        })}
+                    </ul>
+                  </section>
+                  <section>
+                    <h3>Cart</h3>
+                    {draft.startingPurchaseCart.length ? (
+                      <ul className="cart-list">
+                        {draft.startingPurchaseCart.map((row) => (
+                          <li key={row.equipmentDefinitionId}>
+                            <span>
+                              {
+                                equipmentRegistry[row.equipmentDefinitionId]
+                                  ?.name
+                              }
+                            </span>
+                            <label>
+                              Quantity{' '}
+                              <input
+                                aria-label={`Quantity for ${equipmentRegistry[row.equipmentDefinitionId]?.name}`}
+                                type="number"
+                                min="1"
+                                value={row.quantity}
+                                onChange={(event) =>
+                                  applyCartResult(
+                                    setStartingPurchaseQuantity(
+                                      equipmentModel.purchaseDraft,
+                                      row.equipmentDefinitionId,
+                                      Number(event.target.value),
+                                    ),
+                                  )
+                                }
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              aria-label={`Remove ${equipmentRegistry[row.equipmentDefinitionId]?.name} from cart`}
+                              onClick={() =>
+                                applyCartResult(
+                                  removeStartingPurchaseItem(
+                                    equipmentModel.purchaseDraft,
+                                    row.equipmentDefinitionId,
+                                  ),
+                                )
+                              }
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No purchases selected. Unspent funds are preserved.</p>
+                    )}
+                    <button
+                      type="button"
+                      disabled={!draft.startingPurchaseCart.length}
+                      onClick={() =>
+                        applyCartResult(
+                          clearStartingPurchaseCart(
+                            equipmentModel.purchaseDraft,
+                          ),
+                        )
+                      }
+                    >
+                      Clear cart
+                    </button>
+                    {!equipmentModel.summary.affordable && (
+                      <p role="alert" className="equipment-warning">
+                        The selected equipment costs more than the available
+                        starting funds.
+                      </p>
+                    )}
+                  </section>
+                </div>
+              )}
+              <section>
+                <h3>Equipment Review</h3>
+                {equipmentModel.resolved.grants.length ? (
+                  <ul>
+                    {equipmentModel.resolved.grants.map(
+                      ({ grant, sourceId }) =>
+                        grant.type === 'item' && (
+                          <li
+                            key={`${sourceId}-${grant.equipmentDefinitionId}`}
+                          >
+                            {
+                              equipmentRegistry[grant.equipmentDefinitionId]
+                                ?.name
+                            }{' '}
+                            ·{' '}
+                            {sourceId.startsWith('druid')
+                              ? 'Druid package'
+                              : 'Farmer package'}{' '}
+                            ·{' '}
+                            {grant.equipPolicy === 'equipped'
+                              ? 'Equipped'
+                              : 'Carried'}
+                          </li>
+                        ),
+                    )}
+                  </ul>
+                ) : (
+                  <p>No package items selected.</p>
+                )}
+                <p>
+                  <strong>Armor Class preview:</strong>{' '}
+                  {preview?.armorClass ?? 'Complete required choices'}
+                </p>
+              </section>
+            </div>
           )}
           {current === 'Primal Order' && (
             <>
               <p>Choose the permanent role learned by your Druid at level 1.</p>
               <fieldset>
                 <legend>Primal Order (required)</legend>
-                {Object.values(defaultRuleRegistry.druidPrimalOrders).map((order) => (
-                  <label key={order.id}>
-                    <input type="radio" checked={draft.primalOrder?.orderId === order.id}
-                      onChange={() => patch({ primalOrder: order.id === 'warden' ? { orderId: 'warden' } : { orderId: 'magician' } })} />
-                    {order.name} — {order.id === 'magician' ? 'an additional cantrip and Wisdom-based skill bonus' : 'medium armor and martial weapons'}
-                  </label>
-                ))}
+                {Object.values(defaultRuleRegistry.druidPrimalOrders).map(
+                  (order) => (
+                    <label key={order.id}>
+                      <input
+                        type="radio"
+                        checked={draft.primalOrder?.orderId === order.id}
+                        onChange={() =>
+                          patch({
+                            primalOrder:
+                              order.id === 'warden'
+                                ? { orderId: 'warden' }
+                                : { orderId: 'magician' },
+                          })
+                        }
+                      />
+                      {order.name} —{' '}
+                      {order.id === 'magician'
+                        ? 'an additional cantrip and Wisdom-based skill bonus'
+                        : 'medium armor and martial weapons'}
+                    </label>
+                  ),
+                )}
               </fieldset>
-              {draft.primalOrder?.orderId === 'magician' && <>
-                <label>Additional Druid cantrip
-                  <select value={draft.primalOrder.magicianChoices?.additionalCantripId ?? ''} onChange={(e) => patch({ primalOrder: { orderId: 'magician', magicianChoices: { additionalCantripId: e.target.value, skillBonusTarget: draft.primalOrder?.orderId === 'magician' ? draft.primalOrder.magicianChoices?.skillBonusTarget ?? 'arcana' : 'arcana' } } })}>
-                    <option value="">Choose a cantrip</option>
-                    {cantrips.map((s) => <option key={s.id} value={s.id} disabled={draft.selectedCantripIds.includes(s.id)}>{s.name}{draft.selectedCantripIds.includes(s.id) ? ' — already selected as a Druid cantrip' : ''}</option>)}
-                  </select>
-                </label>
-                <fieldset><legend>Skill bonus</legend>{(['arcana', 'nature'] as const).map((skill) => <label key={skill}><input type="radio" checked={draft.primalOrder?.orderId === 'magician' && draft.primalOrder.magicianChoices?.skillBonusTarget === skill} onChange={() => patch({ primalOrder: { orderId: 'magician', magicianChoices: { additionalCantripId: draft.primalOrder?.orderId === 'magician' ? draft.primalOrder.magicianChoices?.additionalCantripId ?? '' : '', skillBonusTarget: skill } } })} />{label(skill)}</label>)}</fieldset>
-              </>}
+              {draft.primalOrder?.orderId === 'magician' && (
+                <>
+                  <label>
+                    Additional Druid cantrip
+                    <select
+                      value={
+                        draft.primalOrder.magicianChoices
+                          ?.additionalCantripId ?? ''
+                      }
+                      onChange={(e) =>
+                        patch({
+                          primalOrder: {
+                            orderId: 'magician',
+                            magicianChoices: {
+                              additionalCantripId: e.target.value,
+                              skillBonusTarget:
+                                draft.primalOrder?.orderId === 'magician'
+                                  ? (draft.primalOrder.magicianChoices
+                                      ?.skillBonusTarget ?? 'arcana')
+                                  : 'arcana',
+                            },
+                          },
+                        })
+                      }
+                    >
+                      <option value="">Choose a cantrip</option>
+                      {cantrips.map((s) => (
+                        <option
+                          key={s.id}
+                          value={s.id}
+                          disabled={draft.selectedCantripIds.includes(s.id)}
+                        >
+                          {s.name}
+                          {draft.selectedCantripIds.includes(s.id)
+                            ? ' — already selected as a Druid cantrip'
+                            : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <fieldset>
+                    <legend>Skill bonus</legend>
+                    {(['arcana', 'nature'] as const).map((skill) => (
+                      <label key={skill}>
+                        <input
+                          type="radio"
+                          checked={
+                            draft.primalOrder?.orderId === 'magician' &&
+                            draft.primalOrder.magicianChoices
+                              ?.skillBonusTarget === skill
+                          }
+                          onChange={() =>
+                            patch({
+                              primalOrder: {
+                                orderId: 'magician',
+                                magicianChoices: {
+                                  additionalCantripId:
+                                    draft.primalOrder?.orderId === 'magician'
+                                      ? (draft.primalOrder.magicianChoices
+                                          ?.additionalCantripId ?? '')
+                                      : '',
+                                  skillBonusTarget: skill,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        {label(skill)}
+                      </label>
+                    ))}
+                  </fieldset>
+                </>
+              )}
             </>
           )}
           {current === 'Spells' && (
             <>
               <fieldset>
                 <legend>
-                  Druid cantrips ({cantripView.summary.normalSelected}/{cantripView.summary.normalLimit} selected)
+                  Druid cantrips ({cantripView.summary.normalSelected}/
+                  {cantripView.summary.normalLimit} selected)
                 </legend>
                 {cantripView.options.map((option) => (
-                  <label key={option.spellId} className={option.selectionSource === 'magician' ? 'granted-cantrip' : undefined}>
+                  <label
+                    key={option.spellId}
+                    className={
+                      option.selectionSource === 'magician'
+                        ? 'granted-cantrip'
+                        : undefined
+                    }
+                  >
                     <input
                       type="checkbox"
                       checked={option.checked}
                       disabled={option.disabled}
-                      aria-describedby={option.sourceLabel ? `cantrip-${option.spellId}-source` : undefined}
+                      aria-describedby={
+                        option.sourceLabel
+                          ? `cantrip-${option.spellId}-source`
+                          : undefined
+                      }
                       onChange={() =>
                         patch({
                           selectedCantripIds: toggle(
@@ -388,11 +781,30 @@ export function NewCharacterPage() {
                       }
                     />
                     <span>{option.name}</span>
-                    {option.sourceLabel && <small id={`cantrip-${option.spellId}-source`}>{option.sourceLabel}</small>}
+                    {option.sourceLabel && (
+                      <small id={`cantrip-${option.spellId}-source`}>
+                        {option.sourceLabel}
+                      </small>
+                    )}
                   </label>
                 ))}
                 {magicianCantripId && (
-                  <div className="cantrip-selection-summary"><p>Additional from Magician: {cantripView.options.find((option) => option.spellId === magicianCantripId)?.name}</p><p>Granted selections: {cantripView.summary.grantedCount}</p><p>Total known cantrips: {cantripView.summary.totalKnown}</p></div>
+                  <div className="cantrip-selection-summary">
+                    <p>
+                      Additional from Magician:{' '}
+                      {
+                        cantripView.options.find(
+                          (option) => option.spellId === magicianCantripId,
+                        )?.name
+                      }
+                    </p>
+                    <p>
+                      Granted selections: {cantripView.summary.grantedCount}
+                    </p>
+                    <p>
+                      Total known cantrips: {cantripView.summary.totalKnown}
+                    </p>
+                  </div>
                 )}
               </fieldset>
               <fieldset>
@@ -477,18 +889,77 @@ export function NewCharacterPage() {
                   <dd>
                     {preview.spellSaveDc} / +{preview.spellAttackBonus}
                   </dd>
-                  <dt>Druid cantrips</dt><dd>{cantripView.options.filter((option) => option.selectionSource === 'normal').map((option) => option.name).join(', ') || 'None'}</dd>
-                  <dt>Magician cantrip</dt><dd>{cantripView.options.find((option) => option.selectionSource === 'magician')?.name ?? 'None'}</dd>
-                  <dt>Total known cantrips</dt><dd>{cantripView.summary.totalKnown}</dd>
-                  <dt>Prepared and granted spells</dt><dd>{preview.spells.filter((spell) => !cantripView.options.some((option) => option.spellId === spell.id)).map((spell) => spell.name).join(', ') || 'None'}</dd>
+                  <dt>Druid cantrips</dt>
+                  <dd>
+                    {cantripView.options
+                      .filter((option) => option.selectionSource === 'normal')
+                      .map((option) => option.name)
+                      .join(', ') || 'None'}
+                  </dd>
+                  <dt>Magician cantrip</dt>
+                  <dd>
+                    {cantripView.options.find(
+                      (option) => option.selectionSource === 'magician',
+                    )?.name ?? 'None'}
+                  </dd>
+                  <dt>Total known cantrips</dt>
+                  <dd>{cantripView.summary.totalKnown}</dd>
+                  <dt>Prepared and granted spells</dt>
+                  <dd>
+                    {preview.spells
+                      .filter(
+                        (spell) =>
+                          !cantripView.options.some(
+                            (option) => option.spellId === spell.id,
+                          ),
+                      )
+                      .map((spell) => spell.name)
+                      .join(', ') || 'None'}
+                  </dd>
+                  <dt>Druid starting choice</dt>
+                  <dd>
+                    {
+                      draft.startingEquipmentChoices.find((choice) =>
+                        choice.sourceId.startsWith('druid'),
+                      )?.choiceType
+                    }
+                  </dd>
+                  <dt>Farmer starting choice</dt>
+                  <dd>
+                    {
+                      draft.startingEquipmentChoices.find((choice) =>
+                        choice.sourceId.startsWith('farmer'),
+                      )?.choiceType
+                    }
+                  </dd>
+                  <dt>Starting funds / spent / remaining</dt>
+                  <dd>
+                    {formatWallet(equipmentModel.summary.availableWallet)} /{' '}
+                    {formatWallet(equipmentModel.summary.cartTotalWallet)} /{' '}
+                    {formatWallet(equipmentModel.summary.remainingWallet)}
+                  </dd>
                   <dt>Starting equipment</dt>
                   <dd>
-                    {preview.inventory.items
-                      .map(
-                        (item) =>
-                          `${equipmentRegistry[item.definitionId]?.name ?? item.definitionId}${item.quantity > 1 ? ` ×${item.quantity}` : ''}`,
-                      )
-                      .join(', ')}
+                    <ul>
+                      {preview.inventory.items.map((item) => (
+                        <li key={item.instanceId}>
+                          {equipmentRegistry[item.definitionId]?.name ??
+                            item.definitionId}
+                          {item.quantity > 1 ? ` ×${item.quantity}` : ''} ·{' '}
+                          {item.equipped ? 'Equipped' : 'Carried'} ·{' '}
+                          {item.acquisitionSource?.type === 'starting-purchase'
+                            ? 'Purchased'
+                            : item.acquisitionSource?.type ===
+                                'starting-package'
+                              ? item.acquisitionSource.sourceId.startsWith(
+                                  'druid',
+                                )
+                                ? 'Druid package'
+                                : 'Farmer package'
+                              : 'Legacy'}
+                        </li>
+                      ))}
+                    </ul>
                   </dd>
                 </dl>
               ) : (

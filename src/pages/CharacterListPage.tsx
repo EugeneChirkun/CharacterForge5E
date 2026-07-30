@@ -2,8 +2,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCharacter } from '../app/CharacterContext';
 import { LocalCharacterRepository } from '../infrastructure/persistence/local-character-repository';
 import { duplicateCharacter } from '../application/characters/character-management';
-import { createBackup, backupFilename, serializeBackup } from '../application/backup/backup-controller';
+import {
+  createBackup,
+  backupFilename,
+  serializeBackup,
+} from '../application/backup/backup-controller';
 import { downloadJson } from '../infrastructure/persistence/backup-file-adapter';
+import { applicationImplementationStatus } from '../application/implementation-status/implementation-status';
 const repository = new LocalCharacterRepository(localStorage);
 export function CharacterListPage() {
   const { state, setMeta, remove } = useCharacter();
@@ -31,7 +36,11 @@ export function CharacterListPage() {
           <h1>Character Forge</h1>
         </div>
       </header>
-      <nav className="page-actions" aria-label="Application"><Link className="button secondary" to="/settings">Settings</Link></nav>
+      <nav className="page-actions" aria-label="Application">
+        <Link className="button secondary" to="/settings">
+          Settings
+        </Link>
+      </nav>
       <section aria-labelledby="characters">
         <div className="section-heading">
           <div>
@@ -66,7 +75,45 @@ export function CharacterListPage() {
                 Open character →
               </button>
               {character.id !== 'reference' && (
-                <><button type="button" className="secondary" onClick={() => void repository.get(character.id).then((record) => record && duplicateCharacter(record, repository)).then(() => location.reload())}>Duplicate character</button><button type="button" className="secondary" onClick={() => void repository.get(character.id).then((record) => { if (record) downloadJson(serializeBackup(createBackup([record])), backupFilename(character.name)); })}>Export character</button><button type="button" className="danger" onClick={() => void discard(character.id, character.name)}>Delete character</button></>
+                <>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() =>
+                      void repository
+                        .get(character.id)
+                        .then(
+                          (record) =>
+                            record && duplicateCharacter(record, repository),
+                        )
+                        .then(() => location.reload())
+                    }
+                  >
+                    Duplicate character
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() =>
+                      void repository.get(character.id).then((record) => {
+                        if (record)
+                          downloadJson(
+                            serializeBackup(createBackup([record])),
+                            backupFilename(character.name),
+                          );
+                      })
+                    }
+                  >
+                    Export character
+                  </button>
+                  <button
+                    type="button"
+                    className="danger"
+                    onClick={() => void discard(character.id, character.name)}
+                  >
+                    Delete character
+                  </button>
+                </>
               )}
             </div>
           </article>
@@ -79,6 +126,37 @@ export function CharacterListPage() {
           </span>
         </Link>
       </section>
+      <details className="implementation-status" open>
+        <summary>
+          <span>Implementation Status</span>
+          <small>
+            Stage {applicationImplementationStatus.stage} · Iteration{' '}
+            {applicationImplementationStatus.iteration}
+          </small>
+        </summary>
+        <div className="implementation-status-content">
+          <dl>
+            <div>
+              <dt>Stage</dt>
+              <dd>{applicationImplementationStatus.stage}</dd>
+            </div>
+            <div>
+              <dt>Iteration</dt>
+              <dd>{applicationImplementationStatus.iteration}</dd>
+            </div>
+          </dl>
+          <h2>{applicationImplementationStatus.title}</h2>
+          <p>{applicationImplementationStatus.summary}</p>
+          <h3>Implemented features</h3>
+          <ul>
+            {applicationImplementationStatus.implementedFeatures.map(
+              (feature) => (
+                <li key={feature}>{feature}</li>
+              ),
+            )}
+          </ul>
+        </div>
+      </details>
     </main>
   );
 }

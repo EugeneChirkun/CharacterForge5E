@@ -4,7 +4,12 @@ import type { CalculationResult } from '../calculation';
 import type { HitPointProgression } from '../hit-points';
 import type { SkillName } from '../skills';
 import type { ComputedSpellcasting, SpellcastingBuild } from '../spellcasting';
-import type { DruidPrimalOrderSelection, LandType, RuleDiagnostic, SpellGrantSourceType } from '../rules';
+import type {
+  DruidPrimalOrderSelection,
+  LandType,
+  RuleDiagnostic,
+  SpellGrantSourceType,
+} from '../rules';
 import type { ComputedResource } from '../resources';
 import type { SpellDiagnostic } from '../spells';
 import type {
@@ -12,6 +17,7 @@ import type {
   EquipmentDefinition,
   InventoryDiagnostic,
 } from '../equipment';
+import type { StartingEquipmentSourceChoice } from '../equipment';
 export interface CharacterBuild {
   readonly requiredBuildChoices?: readonly {
     readonly code: 'missing-required-build-choice';
@@ -44,6 +50,7 @@ export interface CharacterBuild {
   readonly featIds?: readonly string[];
   readonly preparedSpellIds?: readonly string[];
   readonly cantripIds?: readonly string[];
+  readonly startingEquipmentChoices?: readonly StartingEquipmentSourceChoice[];
 }
 export interface CharacterSession {
   readonly currentHp: number;
