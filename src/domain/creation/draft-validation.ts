@@ -5,7 +5,7 @@ import {
 } from '../abilities';
 import { validateDruidPrimalOrder, type RuleRegistry } from '../rules';
 import { maximumSpellLevel, validatePreparedSpells } from '../spells';
-import { validateEquipment } from '../equipment';
+import { finalizeStartingEquipment } from '../equipment';
 import {
   calculatePointBuy,
   isCompleteScores,
@@ -31,8 +31,12 @@ export type CreationDiagnosticType =
   | 'invalid-equipment-choice'
   | 'missing-equipment-choice'
   | 'invalid-cantrip'
-  | 'missing-primal-order' | 'invalid-primal-order' | 'missing-magician-cantrip'
-  | 'invalid-magician-cantrip' | 'missing-magician-skill-choice' | 'stale-primal-order-choice'
+  | 'missing-primal-order'
+  | 'invalid-primal-order'
+  | 'missing-magician-cantrip'
+  | 'invalid-magician-cantrip'
+  | 'missing-magician-skill-choice'
+  | 'stale-primal-order-choice'
   | 'duplicate-cantrip-selection'
   | 'invalid-prepared-spell'
   | 'too-many-prepared-spells'
@@ -138,10 +142,22 @@ export function validateCharacterDraft(
       ),
     );
   const cls = registry.classes.druid;
-  out.push(...validateDruidPrimalOrder(draft.primalOrder, draft.selectedCantripIds, registry).map((type) =>
-    diagnostic(type, type === 'missing-primal-order' ? 'Choose a Druid Primal Order.'
-      : type === 'duplicate-cantrip-selection' ? 'That spell is already selected as a normal Druid cantrip. Choose a different Magician cantrip.'
-      : 'Complete a valid Primal Order selection.')));
+  out.push(
+    ...validateDruidPrimalOrder(
+      draft.primalOrder,
+      draft.selectedCantripIds,
+      registry,
+    ).map((type) =>
+      diagnostic(
+        type,
+        type === 'missing-primal-order'
+          ? 'Choose a Druid Primal Order.'
+          : type === 'duplicate-cantrip-selection'
+            ? 'That spell is already selected as a normal Druid cantrip. Choose a different Magician cantrip.'
+            : 'Complete a valid Primal Order selection.',
+      ),
+    ),
+  );
   const uniqueSkills = new Set(draft.selectedSkillProficiencies);
   if (uniqueSkills.size !== draft.selectedSkillProficiencies.length)
     out.push(
@@ -172,11 +188,21 @@ export function validateCharacterDraft(
         'Choose eligible Druid skills not already granted by Farmer.',
       ),
     );
-  out.push(
-    ...validateEquipment(draft.equipmentChoiceIds).map((d) =>
-      diagnostic(d.type, 'Select the supported MVP equipment preset.'),
-    ),
+  const equipment = finalizeStartingEquipment(
+    draft.startingEquipmentChoices,
+    draft.startingPurchaseCart,
   );
+  if (!equipment.success)
+    out.push(
+      ...equipment.diagnostics.map((entry) =>
+        diagnostic(
+          entry.code === 'insufficient-starting-funds'
+            ? 'invalid-equipment-choice'
+            : 'missing-equipment-choice',
+          entry.message,
+        ),
+      ),
+    );
   const progression = cls.progression.find(
     (p) => p.level === draft.targetLevel,
   );

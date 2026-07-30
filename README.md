@@ -1,5 +1,7 @@
 # Character Forge 5E
 
+> **Implementation status:** The milestone banner on the character-list page is rendered from the single authoritative [`applicationImplementationStatus`](src/application/implementation-status/implementation-status.ts) definition. Future iterations update that module; React components contain no milestone strings.
+
 ## Release quality (Iteration 3.4)
 
 CharacterForge5E is now an offline-capable, browser-local MVP. Build and serve `dist/` over HTTPS (or localhost), then use the browser's install action where available. After one successful production load, the generated service worker caches the bundled app shell and rules: hash routes, existing characters, session editing, inventory, Spellbook, and creation work offline. Install UX differs across current Chromium, Firefox, and Safari; external and never-bundled content remains unavailable offline.
@@ -120,4 +122,12 @@ This iteration deliberately does **not** include automated attacks, automated da
 
 Druids now permanently choose **Magician** (one extra verified Druid cantrip and an Arcana or Nature check contribution equal to Wisdom, minimum +1) or **Warden** (Medium Armor and Martial Weapons training). Existing stored Druids are not guessed: migration marks `druid.primal-order` as a required build choice for explicit resolution. Wild Shape is sourced from the Druid progression/resource registry (unavailable at level 1, 2 uses at levels 2–5, and 3 at levels 6–8); a Short Rest restores one use and a Long Rest restores all uses through shared recovery transitions.
 
-Current Druid limitations remain: equipment purchasing, ASI/feat decisions, subclass-choice changes, transformations, and additional forms/subclasses are deferred.
+Current Druid limitations remain: ASI/feat decisions, subclass-choice changes, transformations, and additional forms/subclasses are deferred.
+
+## Iteration 3.5B: starting equipment and creation purchasing
+
+New Druids independently choose the verified Druid package or 50 GP and the verified Farmer package or 50 GP. Package currencies combine with gold alternatives, and the creation-only catalog uses verified registry prices and exact integer copper arithmetic. The editable draft cart can be left partly or wholly unspent; an over-budget cart blocks creation without losing selections.
+
+Finalization atomically materializes structured inventory and a remaining denomination wallet. Every instance records a stable package source ID or starting-purchase attribution. Druid package leather armor and shield begin equipped; purchased armor and shields begin carried so they never displace package defaults. The existing equipped-item Armor Class pipeline supplies both review and final AC. Generic Warden training suppresses medium-armor and martial-weapon warnings, while Magician ownership remains allowed with warnings.
+
+Persistence schema 3 adds starting-choice metadata conservatively. Existing structured inventory and wallets remain authoritative and are never retroactively granted equipment; unknown historical choices are marked `legacy-unknown`. Creation purchasing remains intentionally limited to creation: selling, refunds after creation, merchants, discounts, encumbrance effects, attacks, magic-item effects, ASI/feat selection, and subclass-selection changes are deferred. See [the Iteration 3.5B architecture notes](docs/iteration-3-5b-druid-starting-equipment-purchasing.md).

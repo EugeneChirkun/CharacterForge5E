@@ -26,6 +26,8 @@ interface EquipmentBase {
   readonly name: string;
   readonly category: EquipmentCategory;
   readonly weight?: number;
+  /** Verified list price, normalized to copper pieces for exact arithmetic. */
+  readonly priceCopper?: number;
   readonly stackable: boolean;
   readonly source: EquipmentSource;
   readonly attunement?: 'allowed' | 'required';
@@ -91,6 +93,7 @@ export const equipmentDefinitions = [
     baseArmorClass: 11,
     dexterityModifier: { type: 'full' },
     weight: 10,
+    priceCopper: 1000,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -102,6 +105,7 @@ export const equipmentDefinitions = [
     baseArmorClass: 12,
     dexterityModifier: { type: 'capped', maximum: 2 },
     weight: 12,
+    priceCopper: 1000,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -111,6 +115,7 @@ export const equipmentDefinitions = [
     category: 'shield',
     armorClassBonus: 2,
     weight: 6,
+    priceCopper: 1000,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -123,6 +128,7 @@ export const equipmentDefinitions = [
     damage: { diceCount: 1, dieSize: 4, damageType: 'slashing' },
     properties: ['light'],
     weight: 2,
+    priceCopper: 100,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -135,6 +141,7 @@ export const equipmentDefinitions = [
     damage: { diceCount: 1, dieSize: 6, damageType: 'bludgeoning' },
     properties: ['versatile'],
     weight: 4,
+    priceCopper: 20,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -148,6 +155,7 @@ export const equipmentDefinitions = [
     properties: ['thrown', 'versatile'],
     range: { normal: 20, long: 60 },
     weight: 3,
+    priceCopper: 100,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -160,6 +168,7 @@ export const equipmentDefinitions = [
     damage: { diceCount: 1, dieSize: 4, damageType: 'bludgeoning' },
     properties: ['ammunition'],
     range: { normal: 30, long: 120 },
+    priceCopper: 10,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -170,6 +179,16 @@ export const equipmentDefinitions = [
     focusTypes: ['druidic'],
     weight: 0,
     stackable: false,
+    source: verified('Legacy structured-inventory compatibility'),
+  },
+  {
+    id: 'druidic-focus-quarterstaff',
+    name: 'Druidic Focus (Quarterstaff)',
+    category: 'spellcasting-focus',
+    focusTypes: ['druidic'],
+    weight: 4,
+    priceCopper: 500,
+    stackable: false,
     source: verified('Free Rules 2024 class equipment'),
   },
   {
@@ -178,6 +197,7 @@ export const equipmentDefinitions = [
     category: 'tool',
     toolType: 'herbalism kit',
     weight: 3,
+    priceCopper: 500,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -186,6 +206,7 @@ export const equipmentDefinitions = [
     name: 'Backpack',
     category: 'container',
     weight: 5,
+    priceCopper: 200,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -194,6 +215,7 @@ export const equipmentDefinitions = [
     name: 'Bedroll',
     category: 'adventuring-gear',
     weight: 7,
+    priceCopper: 100,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -202,6 +224,7 @@ export const equipmentDefinitions = [
     name: 'Rations',
     category: 'adventuring-gear',
     weight: 2,
+    priceCopper: 50,
     stackable: true,
     source: verified('Free Rules 2024 equipment table'),
   },
@@ -210,8 +233,77 @@ export const equipmentDefinitions = [
     name: 'Rope, Hempen',
     category: 'adventuring-gear',
     weight: 10,
+    priceCopper: 100,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
+  },
+  {
+    id: 'explorers-pack',
+    name: "Explorer's Pack",
+    category: 'container',
+    weight: 59,
+    priceCopper: 1000,
+    stackable: false,
+    source: verified('PHB 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'carpenters-tools',
+    name: "Carpenter's Tools",
+    category: 'tool',
+    toolType: "carpenter's tools",
+    weight: 6,
+    priceCopper: 800,
+    stackable: false,
+    source: verified('PHB 2024 / Tools'),
+  },
+  {
+    id: 'healers-kit',
+    name: "Healer's Kit",
+    category: 'adventuring-gear',
+    weight: 3,
+    priceCopper: 500,
+    stackable: false,
+    source: verified('PHB 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'iron-pot',
+    name: 'Iron Pot',
+    category: 'adventuring-gear',
+    weight: 10,
+    priceCopper: 200,
+    stackable: false,
+    source: verified('PHB 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'shovel',
+    name: 'Shovel',
+    category: 'adventuring-gear',
+    weight: 5,
+    priceCopper: 200,
+    stackable: false,
+    source: verified('PHB 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'travelers-clothes',
+    name: "Traveler's Clothes",
+    category: 'adventuring-gear',
+    weight: 4,
+    priceCopper: 200,
+    stackable: false,
+    source: verified('PHB 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'scimitar',
+    name: 'Scimitar',
+    category: 'weapon',
+    weaponCategory: 'martial',
+    weaponType: 'melee',
+    damage: { diceCount: 1, dieSize: 6, damageType: 'slashing' },
+    properties: ['finesse', 'light'],
+    weight: 3,
+    priceCopper: 2500,
+    stackable: false,
+    source: verified('PHB 2024 / Weapons'),
   },
 ] as const satisfies readonly EquipmentDefinition[];
 export const equipmentRegistry: Readonly<Record<string, EquipmentDefinition>> =
@@ -226,7 +318,12 @@ export interface InventoryItem {
   readonly containerInstanceId?: string;
   readonly attuned: boolean;
   readonly notes?: string;
+  readonly acquisitionSource?: InventoryAcquisitionSource;
 }
+export type InventoryAcquisitionSource =
+  | { readonly type: 'starting-package'; readonly sourceId: string }
+  | { readonly type: 'starting-purchase' }
+  | { readonly type: 'manual' };
 export interface CharacterInventory {
   readonly items: readonly InventoryItem[];
   readonly currency: CurrencyWallet;
@@ -451,3 +548,5 @@ export function validateEquipment(
       ? []
       : [{ type: 'invalid-equipment-choice' }];
 }
+
+export * from './starting-equipment';
