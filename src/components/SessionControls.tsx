@@ -16,6 +16,8 @@ export interface SessionActions {
   startConcentration(spellId: string): void;
   endConcentration(): void;
   undo(): void;
+  adjustMaximumHp(delta: number, reason?: string): void;
+  resetMaximumHpAdjustment(): void;
 }
 const label = (id: string) => id[0].toUpperCase() + id.slice(1);
 export function SessionControls({
@@ -30,6 +32,9 @@ export function SessionControls({
   history: readonly string[];
 }) {
   const [amount, setAmount] = useState(1);
+  const [maximumReason, setMaximumReason] = useState(
+    c.maximumHpAdjustmentReason ?? '',
+  );
   return (
     <section className="session-controls" aria-labelledby="session-heading">
       <h2 id="session-heading">Session</h2>
@@ -76,6 +81,36 @@ export function SessionControls({
           <button onClick={() => actions.heal(amount)}>Heal</button>
           <button onClick={() => actions.setTempHp(amount)}>Temp HP</button>
           <button onClick={actions.clearTempHp}>Clear Temp HP</button>
+        </div>
+        <dl>
+          <div>
+            <dt>Effective Maximum HP</dt>
+            <dd>{c.maximumHp}</dd>
+          </div>
+          <div>
+            <dt>Base Maximum HP</dt>
+            <dd>{c.baseMaximumHp ?? c.maximumHp}</dd>
+          </div>
+          <div>
+            <dt>Adjustment</dt>
+            <dd>{c.maximumHpAdjustment ?? 0}</dd>
+          </div>
+        </dl>
+        <label>
+          Reason (optional){' '}
+          <input
+            value={maximumReason}
+            onChange={(event) => setMaximumReason(event.currentTarget.value)}
+          />
+        </label>
+        <div className="button-row">
+          <button onClick={() => actions.adjustMaximumHp(-1, maximumReason)}>
+            -1 Max
+          </button>
+          <button onClick={() => actions.adjustMaximumHp(1, maximumReason)}>
+            +1 Max
+          </button>
+          <button onClick={actions.resetMaximumHpAdjustment}>Reset</button>
         </div>
       </article>
       <article className="panel">
@@ -142,9 +177,9 @@ export function SessionControls({
       </article>
       <article className="panel">
         <h3>Conditions</h3>
-        <div className="condition-grid">
+        <div className="conditions-grid">
           {conditionIds.map((id) => (
-            <label key={id}>
+            <label className="condition-option" key={id}>
               <input
                 type="checkbox"
                 checked={(c.conditions ?? []).includes(id)}

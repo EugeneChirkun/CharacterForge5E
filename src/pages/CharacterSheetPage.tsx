@@ -191,6 +191,34 @@ export function CharacterSheetPage() {
       setSessionUndo(null);
       setHistory((h) => ['Undid last session change', ...h]);
     },
+    adjustMaximumHp: (delta, reason) =>
+      execute(
+        () => {
+          const adjustment = (character.maximumHpAdjustment ?? 0) + delta;
+          const effective =
+            (character.baseMaximumHp ?? character.maximumHp) + adjustment;
+          if (effective < 0)
+            throw new Error('Effective Maximum HP cannot be below zero.');
+          return {
+            ...character,
+            maximumHpAdjustment: adjustment,
+            maximumHpAdjustmentReason: reason?.trim() || undefined,
+            maximumHp: effective,
+            currentHp: Math.min(character.currentHp, effective),
+          };
+        },
+        `${delta < 0 ? 'Decreased' : 'Increased'} Maximum HP adjustment`,
+      ),
+    resetMaximumHpAdjustment: () =>
+      execute(
+        () => ({
+          ...character,
+          maximumHpAdjustment: 0,
+          maximumHpAdjustmentReason: undefined,
+          maximumHp: character.baseMaximumHp ?? character.maximumHp,
+        }),
+        'Reset Maximum HP adjustment',
+      ),
   };
   return (
     <div className="sheet-shell">
@@ -207,7 +235,13 @@ export function CharacterSheetPage() {
             ← All characters
           </Link>
           <RestControls onRest={startRest} />
-          <button type="button" className="secondary print-hidden" onClick={() => window.print()}>Print Character</button>
+          <button
+            type="button"
+            className="secondary print-hidden"
+            onClick={() => window.print()}
+          >
+            Print Character
+          </button>
           <Link className="button" to={`/character/${id}/spellbook`}>
             Open Spellbook
           </Link>

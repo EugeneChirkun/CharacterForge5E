@@ -5,6 +5,7 @@ import {
   type ComputedCharacter,
 } from '../character';
 import type { LandType, RuleRegistry } from '../rules';
+import { abilityNames, type AbilityName } from '../abilities';
 import { maximumSpellLevel, validatePreparedSpells } from '../spells';
 export interface LevelUpDraft {
   readonly characterId: string;
@@ -18,7 +19,40 @@ export interface LevelUpDraft {
   readonly selectedCantripIds: readonly string[];
   readonly subclassId?: 'circle-of-the-land';
   readonly landType?: LandType;
+  readonly advancementChoice?: AdvancementChoice;
 }
+export interface AbilityScoreImprovementChoice {
+  readonly type: 'ability-score-improvement';
+  readonly increases: readonly {
+    readonly ability: AbilityName;
+    readonly amount: 1 | 2;
+  }[];
+}
+export interface GeneralFeatChoice {
+  readonly type: 'general-feat';
+  readonly featId: string;
+  readonly selections?: Readonly<Record<string, string>>;
+}
+export type AdvancementChoice =
+  AbilityScoreImprovementChoice | GeneralFeatChoice;
+export interface CharacterAdvancementChoice {
+  readonly characterLevel: number;
+  readonly classId: string;
+  readonly choice: AdvancementChoice;
+}
+/** Data, rather than control flow, declares every supported choice milestone. */
+export const advancementDefinitions = Object.freeze([
+  {
+    classId: 'druid',
+    characterLevel: 4,
+    choices: ['ability-score-improvement', 'general-feat'],
+  },
+  {
+    classId: 'druid',
+    characterLevel: 8,
+    choices: ['ability-score-improvement', 'general-feat'],
+  },
+] as const);
 export type LevelUpDiagnosticType =
   | 'character-not-found'
   | 'unsupported-character'
@@ -29,7 +63,12 @@ export type LevelUpDiagnosticType =
   | 'missing-subclass-choice'
   | 'missing-land-type'
   | 'persistence-conflict'
-  | 'corrupt-character-record';
+  | 'corrupt-character-record'
+  | 'invalid-ability-improvement'
+  | 'ability-score-cap-exceeded'
+  | 'duplicate-asi-target'
+  | 'missing-advancement-choice'
+  | 'invalid-feat-choice';
 export interface LevelUpDiagnostic {
   readonly type: LevelUpDiagnosticType;
   readonly message: string;
@@ -121,12 +160,80 @@ export function applyLevelUp(
       type: 'missing-land-type',
       message: 'Choose a land type.',
     });
+  const advancement = advancementDefinitions.find(
+    (definition) =>
+      definition.classId === build.class?.classId &&
+      definition.characterLevel === draft.toLevel,
+  );
+  if (advancement && !draft.advancementChoice)
+    diagnostics.push({
+      type: 'missing-advancement-choice' as LevelUpDiagnosticType,
+      message:
+        'Choose an Ability Score Improvement or an eligible General Feat.',
+    });
+  if (draft.advancementChoice?.type === 'ability-score-improvement') {
+    const increases = draft.advancementChoice.increases;
+    const total = increases.reduce((sum, item) => sum + item.amount, 0);
+    if (
+      total !== 2 ||
+      !increases.length ||
+      increases.some((item) => !abilityNames.includes(item.ability))
+    )
+      diagnostics.push({
+        type: 'invalid-ability-improvement' as LevelUpDiagnosticType,
+        message: 'Increase one ability by 2 or two different abilities by 1.',
+      });
+    if (
+      new Set(increases.map((item) => item.ability)).size !== increases.length
+    )
+      diagnostics.push({
+        type: 'duplicate-asi-target' as LevelUpDiagnosticType,
+        message: 'Choose two different abilities for split improvements.',
+      });
+    if (
+      increases.some(
+        (item) => build.abilityScores[item.ability] + item.amount > 20,
+      )
+    )
+      diagnostics.push({
+        type: 'ability-score-cap-exceeded' as LevelUpDiagnosticType,
+        message: 'Ability scores cannot exceed 20.',
+      });
+  }
+  if (draft.advancementChoice?.type === 'general-feat') {
+    const feat = registry.feats[draft.advancementChoice.featId];
+    if (!feat || (build.featIds ?? []).includes(draft.advancementChoice.featId))
+      diagnostics.push({
+        type: 'invalid-feat-choice' as LevelUpDiagnosticType,
+        message:
+          'Choose an available supported feat whose prerequisites you meet.',
+      });
+  }
   if (diagnostics.length || !progression || !draft.hitPointChoice)
     return { success: false, diagnostics };
   const subclassId = build.class?.subclassId ?? draft.subclassId;
+  const abilityScores = { ...build.abilityScores };
+  if (draft.advancementChoice?.type === 'ability-score-improvement')
+    for (const increase of draft.advancementChoice.increases)
+      abilityScores[increase.ability] += increase.amount;
   const nextBuild: CharacterBuild = {
     ...build,
     totalLevel: draft.toLevel,
+    abilityScores,
+    advancementChoices: draft.advancementChoice
+      ? [
+          ...(build.advancementChoices ?? []),
+          {
+            characterLevel: draft.toLevel,
+            classId: 'druid',
+            choice: draft.advancementChoice,
+          },
+        ]
+      : build.advancementChoices,
+    featIds:
+      draft.advancementChoice?.type === 'general-feat'
+        ? [...(build.featIds ?? []), draft.advancementChoice.featId]
+        : build.featIds,
     class: {
       classId: 'druid',
       level: draft.toLevel,
@@ -178,6 +285,32 @@ export function previewLevelUp(
         label: 'Level',
         before: build.totalLevel,
         after: result.build.totalLevel,
+      },
+      ...abilityNames
+        .filter(
+          (ability) =>
+            build.abilityScores[ability] !==
+            result.build.abilityScores[ability],
+        )
+        .map((ability) => ({
+          label: ability[0].toUpperCase() + ability.slice(1),
+          before: build.abilityScores[ability],
+          after: result.build.abilityScores[ability],
+        })),
+      {
+        label: 'Spell Save DC',
+        before: before.spellcasting?.spellSaveDc.value ?? 0,
+        after: after.spellcasting?.spellSaveDc.value ?? 0,
+      },
+      {
+        label: 'Spell Attack',
+        before: before.spellcasting?.spellAttackBonus.value ?? 0,
+        after: after.spellcasting?.spellAttackBonus.value ?? 0,
+      },
+      {
+        label: 'Passive Perception',
+        before: before.passivePerception.value,
+        after: after.passivePerception.value,
       },
       {
         label: 'Maximum HP',

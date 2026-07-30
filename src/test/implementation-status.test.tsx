@@ -8,8 +8,9 @@ describe('implementation status', () => {
   test('provides the current milestone from one immutable definition', () => {
     expect(applicationImplementationStatus).toMatchObject({
       stage: '3',
-      iteration: '3.5B',
-      title: 'Druid Starting Equipment, Gold Alternatives and Purchasing',
+      iteration: '3.5C',
+      title:
+        'Druid Level Advancement, ASI, General Feats and Session Corrections',
     });
     expect(applicationImplementationStatus.implementedFeatures).toContain(
       'Character creation purchasing',

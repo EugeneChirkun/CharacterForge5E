@@ -35,7 +35,8 @@ export function migratePersistedCharacter(input: unknown): MigrationResult {
   if (
     input.schemaVersion !== 1 &&
     input.schemaVersion !== 2 &&
-    input.schemaVersion !== 3
+    input.schemaVersion !== 3 &&
+    input.schemaVersion !== 4
   )
     return fail(
       'unsupported-schema-version',
@@ -131,8 +132,15 @@ export function migratePersistedCharacter(input: unknown): MigrationResult {
     record: {
       ...input,
       build: migratedBuild,
-      schemaVersion: 3,
-      session: { ...input.session, inventory },
+      schemaVersion: 4,
+      session: {
+        ...input.session,
+        inventory,
+        maximumHpAdjustment:
+          typeof input.session.maximumHpAdjustment === 'number'
+            ? input.session.maximumHpAdjustment
+            : 0,
+      },
     } as unknown as CharacterRecord,
     diagnostics,
   };

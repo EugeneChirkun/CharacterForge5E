@@ -18,12 +18,16 @@ export function toCharacterViewModel(
     id: build.id,
     name: build.name,
     level: build.totalLevel,
-    primalOrder: c.druid?.primalOrder ? {
-      name: c.druid.primalOrder.name,
-      additionalCantrip: c.druid.primalOrder.additionalCantripId ? registry.spells[c.druid.primalOrder.additionalCantripId]?.name : undefined,
-      skillBonusTarget: c.druid.primalOrder.skillBonusTarget,
-      grantedProficiencies: c.druid.primalOrder.grantedProficiencies,
-    } : undefined,
+    primalOrder: c.druid?.primalOrder
+      ? {
+          name: c.druid.primalOrder.name,
+          additionalCantrip: c.druid.primalOrder.additionalCantripId
+            ? registry.spells[c.druid.primalOrder.additionalCantripId]?.name
+            : undefined,
+          skillBonusTarget: c.druid.primalOrder.skillBonusTarget,
+          grantedProficiencies: c.druid.primalOrder.grantedProficiencies,
+        }
+      : undefined,
     species: 'Tiefling',
     legacy: 'Chthonic',
     characterClass: 'Druid',
@@ -37,7 +41,13 @@ export function toCharacterViewModel(
     initiative: c.initiative.value,
     proficiencyBonus: c.proficiencyBonus.value,
     currentHp: c.currentHp,
-    maximumHp: c.maximumHp.value,
+    maximumHp: Math.max(
+      0,
+      c.maximumHp.value + (session.maximumHpAdjustment ?? 0),
+    ),
+    baseMaximumHp: c.maximumHp.value,
+    maximumHpAdjustment: session.maximumHpAdjustment ?? 0,
+    maximumHpAdjustmentReason: session.maximumHpAdjustmentReason,
     temporaryHp: c.temporaryHp,
     hitDice: `${build.totalLevel}d8`,
     passivePerception: c.passivePerception.value,

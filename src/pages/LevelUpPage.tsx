@@ -6,7 +6,9 @@ import {
   applyLevelUp,
   previewLevelUp,
   type LevelUpDraft,
+  advancementDefinitions,
 } from '../domain/leveling';
+import type { AbilityName } from '../domain/abilities';
 import { defaultRuleRegistry } from '../domain/rules';
 import {
   getAvailableClassCantrips,
@@ -23,6 +25,11 @@ export function LevelUpPage() {
   const [landType, setLandType] = useState<
     'arid' | 'polar' | 'temperate' | 'tropical'
   >('temperate');
+  const [advancementType, setAdvancementType] = useState<
+    'ability-score-improvement' | 'general-feat'
+  >('ability-score-improvement');
+  const [primaryAbility, setPrimaryAbility] = useState<AbilityName>('wisdom');
+  const [splitAbility, setSplitAbility] = useState<AbilityName | ''>('');
   useEffect(() => {
     void repo.get(id).then(setRecord);
   }, [id]);
@@ -49,6 +56,11 @@ export function LevelUpPage() {
       </main>
     );
   const toLevel = record.build.totalLevel + 1;
+  const advancementRequired = advancementDefinitions.some(
+    (definition) =>
+      definition.classId === record.build.class?.classId &&
+      definition.characterLevel === toLevel,
+  );
   const progression = defaultRuleRegistry.classes.druid.progression.find(
     (p) => p.level === toLevel,
   )!;
@@ -85,6 +97,22 @@ export function LevelUpPage() {
     selectedCantripIds,
     selectedPreparedSpellIds: prepared,
     ...(toLevel === 3 ? { subclassId: 'circle-of-the-land', landType } : {}),
+    ...(advancementRequired
+      ? {
+          advancementChoice:
+            advancementType === 'general-feat'
+              ? { type: 'general-feat' as const, featId: 'tough' }
+              : {
+                  type: 'ability-score-improvement' as const,
+                  increases: splitAbility
+                    ? [
+                        { ability: primaryAbility, amount: 1 as const },
+                        { ability: splitAbility, amount: 1 as const },
+                      ]
+                    : [{ ability: primaryAbility, amount: 2 as const }],
+                },
+        }
+      : {}),
   };
   const preview = previewLevelUp(
     record.build,
@@ -129,6 +157,69 @@ export function LevelUpPage() {
               {land}
             </label>
           ))}
+        </fieldset>
+      )}
+      {advancementRequired && (
+        <fieldset>
+          <legend>Advancement choice</legend>
+          <label>
+            <input
+              type="radio"
+              checked={advancementType === 'ability-score-improvement'}
+              onChange={() => setAdvancementType('ability-score-improvement')}
+            />{' '}
+            Ability Score Improvement
+          </label>
+          <label>
+            <input
+              type="radio"
+              checked={advancementType === 'general-feat'}
+              onChange={() => setAdvancementType('general-feat')}
+            />{' '}
+            General Feat
+          </label>
+          {advancementType === 'ability-score-improvement' ? (
+            <>
+              <label>
+                Primary ability{' '}
+                <select
+                  value={primaryAbility}
+                  onChange={(event) =>
+                    setPrimaryAbility(event.currentTarget.value as AbilityName)
+                  }
+                >
+                  {Object.keys(record.build.abilityScores).map((ability) => (
+                    <option key={ability}>{ability}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Split +1 / +1 (optional){' '}
+                <select
+                  value={splitAbility}
+                  onChange={(event) =>
+                    setSplitAbility(
+                      event.currentTarget.value as AbilityName | '',
+                    )
+                  }
+                >
+                  <option value="">Use +2</option>
+                  {Object.keys(record.build.abilityScores)
+                    .filter((ability) => ability !== primaryAbility)
+                    .map((ability) => (
+                      <option key={ability}>{ability}</option>
+                    ))}
+                </select>
+              </label>
+            </>
+          ) : (
+            <label>
+              Feat{' '}
+              <select aria-label="General Feat" defaultValue="tough">
+                <option value="tough">Tough</option>
+              </select>
+            </label>
+          )}
         </fieldset>
       )}
       <section className="wizard-panel">

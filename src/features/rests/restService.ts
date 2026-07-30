@@ -5,9 +5,16 @@ export function previewRest(
   c: CharacterViewModel,
 ): RestPreview {
   const resources = c.resources
-    .filter((r) => (r.recoveryOn?.includes(type) ?? r.recovery === type) && r.current < r.maximum)
+    .filter(
+      (r) =>
+        (r.recoveryOn?.includes(type) ?? r.recovery === type) &&
+        r.current < r.maximum,
+    )
     .map((r) => {
-      const after = type === 'short' && r.id === 'wild-shape' ? Math.min(r.maximum, r.current + 1) : r.maximum;
+      const after =
+        type === 'short' && r.id === 'wild-shape'
+          ? Math.min(r.maximum, r.current + 1)
+          : r.maximum;
       return `${r.name}: ${r.current} / ${r.maximum} → ${after} / ${r.maximum}`;
     });
   return {
@@ -18,6 +25,9 @@ export function previewRest(
             `HP: ${c.currentHp} → ${c.maximumHp}`,
             'Temporary HP cleared',
             'All spell slots restored',
+            ...(c.conditions?.length
+              ? [`Conditions cleared: ${c.conditions.join(', ')}`]
+              : []),
             ...resources,
           ]
         : resources,
@@ -36,10 +46,19 @@ export function performRest(
           temporaryHp: 0,
           landType: options?.landType ?? c.landType,
           spellSlots: c.spellSlots.map((s) => ({ ...s, current: s.maximum })),
+          conditions: [],
         }
       : {}),
     resources: c.resources.map((r) =>
-      (r.recoveryOn?.includes(type) ?? r.recovery === type) ? { ...r, current: type === 'short' && r.id === 'wild-shape' ? Math.min(r.maximum, r.current + 1) : r.maximum } : r,
+      (r.recoveryOn?.includes(type) ?? r.recovery === type)
+        ? {
+            ...r,
+            current:
+              type === 'short' && r.id === 'wild-shape'
+                ? Math.min(r.maximum, r.current + 1)
+                : r.maximum,
+          }
+        : r,
     ),
   };
 }
