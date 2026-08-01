@@ -7,6 +7,13 @@ import {
 import type { LandType, RuleRegistry } from '../rules';
 import { abilityNames, type AbilityName } from '../abilities';
 import { maximumSpellLevel, validatePreparedSpells } from '../spells';
+import {
+  applyGeneralFeatEffects,
+  generalFeatRegistry,
+  validateFeatSelection,
+  type FeatNestedChoices,
+} from '../feats';
+import { normalizeSubclassId, validateSubclassChoice } from '../subclasses';
 export interface LevelUpDraft {
   readonly characterId: string;
   readonly fromLevel: number;
@@ -17,7 +24,7 @@ export interface LevelUpDraft {
   };
   readonly selectedPreparedSpellIds: readonly string[];
   readonly selectedCantripIds: readonly string[];
-  readonly subclassId?: 'circle-of-the-land';
+  readonly subclassId?: string;
   readonly landType?: LandType;
   readonly advancementChoice?: AdvancementChoice;
 }
@@ -31,7 +38,7 @@ export interface AbilityScoreImprovementChoice {
 export interface GeneralFeatChoice {
   readonly type: 'general-feat';
   readonly featId: string;
-  readonly selections?: Readonly<Record<string, string>>;
+  readonly selections?: FeatNestedChoices;
 }
 export type AdvancementChoice =
   AbilityScoreImprovementChoice | GeneralFeatChoice;
@@ -150,16 +157,20 @@ export function applyLevelUp(
           'Select the target level’s valid cantrips and prepared spells.',
       });
   }
-  if (draft.toLevel === 3 && draft.subclassId !== 'circle-of-the-land')
-    diagnostics.push({
-      type: 'missing-subclass-choice',
-      message: 'Choose Circle of the Land.',
-    });
-  if (draft.toLevel === 3 && !draft.landType)
-    diagnostics.push({
-      type: 'missing-land-type',
-      message: 'Choose a land type.',
-    });
+  if (draft.toLevel === 3)
+    for (const diagnostic of validateSubclassChoice({
+      classId: 'druid',
+      level: draft.toLevel,
+      subclassId: draft.subclassId,
+      landId: draft.landType,
+    }))
+      diagnostics.push({
+        type:
+          diagnostic.code === 'missing-circle-land'
+            ? 'missing-land-type'
+            : 'missing-subclass-choice',
+        message: diagnostic.message,
+      });
   const advancement = advancementDefinitions.find(
     (definition) =>
       definition.classId === build.class?.classId &&
@@ -201,22 +212,32 @@ export function applyLevelUp(
       });
   }
   if (draft.advancementChoice?.type === 'general-feat') {
-    const feat = registry.feats[draft.advancementChoice.featId];
-    if (!feat || (build.featIds ?? []).includes(draft.advancementChoice.featId))
+    const feat = generalFeatRegistry[draft.advancementChoice.featId];
+    const featErrors = feat
+      ? validateFeatSelection(
+          feat,
+          draft.advancementChoice.selections ?? {},
+          build,
+          draft.toLevel,
+        )
+      : ['That feat is not supported.'];
+    if (!feat || featErrors.length)
       diagnostics.push({
         type: 'invalid-feat-choice' as LevelUpDiagnosticType,
         message:
+          featErrors[0] ??
           'Choose an available supported feat whose prerequisites you meet.',
       });
   }
   if (diagnostics.length || !progression || !draft.hitPointChoice)
     return { success: false, diagnostics };
-  const subclassId = build.class?.subclassId ?? draft.subclassId;
+  const subclassId =
+    build.class?.subclassId ?? normalizeSubclassId(draft.subclassId);
   const abilityScores = { ...build.abilityScores };
   if (draft.advancementChoice?.type === 'ability-score-improvement')
     for (const increase of draft.advancementChoice.increases)
       abilityScores[increase.ability] += increase.amount;
-  const nextBuild: CharacterBuild = {
+  let nextBuild: CharacterBuild = {
     ...build,
     totalLevel: draft.toLevel,
     abilityScores,
@@ -252,6 +273,14 @@ export function applyLevelUp(
     cantripIds: [...draft.selectedCantripIds],
     preparedSpellIds: [...draft.selectedPreparedSpellIds],
   };
+  if (draft.advancementChoice?.type === 'general-feat') {
+    const definition = generalFeatRegistry[draft.advancementChoice.featId];
+    nextBuild = applyGeneralFeatEffects(
+      nextBuild,
+      definition,
+      draft.advancementChoice.selections ?? {},
+    );
+  }
   const nextSession: CharacterSession = {
     ...session,
     spentSpellSlots: Object.fromEntries(

@@ -135,3 +135,9 @@ Persistence schema 3 adds starting-choice metadata conservatively. Existing stru
 ## Iteration 3.5C
 
 CharacterForge5E now supports data-driven Druid advancement through level 8, including **Ability Score Improvements** and supported **General Feats**, with calculation-engine previews and persistent advancement history. Session Mode includes a responsive **Conditions redesign**, long-rest condition recovery, and persistent **Maximum HP adjustment** with current-HP clamping. The Home page **Implementation Status** panel is sourced from the shared status module and is the authoritative deployed-feature report.
+
+## Iteration 3.5D
+
+General Feat advancement is now driven by a typed registry. Resilient and Skill Expert include persisted nested choices and calculation integration; Tough ownership is resolved from every build source and its non-repeatable grant cannot stack. Structured unavailable entries explain why crafting and Weapon Mastery feats remain deferred.
+
+Druids explicitly confirm Circle of the Land at level 3 and choose an initial Arid, Polar, Temperate, or Tropical land. The permanent subclass is stored separately from the session land. Confirmed Long Rests may change the land, and Circle spells are derived as unique, always-prepared grants that do not consume normal preparation capacity. Legacy level 3+ Druids with missing choices receive recoverable diagnostics rather than guessed defaults. See [the Iteration 3.5D architecture](docs/iteration-3-5d-druid-subclass-feats.md).

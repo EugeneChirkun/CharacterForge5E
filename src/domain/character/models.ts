@@ -23,7 +23,8 @@ export interface CharacterBuild {
   readonly advancementChoices?: readonly import('../leveling').CharacterAdvancementChoice[];
   readonly requiredBuildChoices?: readonly {
     readonly code: 'missing-required-build-choice';
-    readonly choiceId: 'druid.primal-order';
+    readonly choiceId:
+      'druid.primal-order' | 'druid.subclass' | 'druid.circle-land';
   }[];
   readonly id: string;
   readonly name: string;

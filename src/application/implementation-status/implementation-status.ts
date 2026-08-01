@@ -9,10 +9,10 @@ export interface ApplicationImplementationStatus {
 /** The single application-facing source for the currently implemented milestone. */
 export const applicationImplementationStatus = Object.freeze({
   stage: '3',
-  iteration: '3.5C',
-  title: 'Druid Level Advancement, ASI, General Feats and Session Corrections',
+  iteration: '3.5D',
+  title: 'Druid Subclass, Circle of the Land and General Feat Completion',
   summary:
-    'Ability Score Improvements, General Feat selection, advancement preview, Conditions redesign, condition recovery, session Maximum HP adjustments, and improved Session Mode.',
+    'Generic General Feat registry, supported feat selection, prerequisite diagnostics, Druid subclass selection, Circle of the Land progression, Long Rest land changes, and Circle spell integration.',
   implementedFeatures: Object.freeze([
     'Generic rules engine',
     'Character creation',
@@ -29,7 +29,13 @@ export const applicationImplementationStatus = Object.freeze({
     'Starting equipment',
     'Character creation purchasing',
     'Ability Score Improvement',
-    'General Feats',
+    'General Feat registry',
+    'Feat availability diagnostics',
+    'Supported General Feats',
+    'Druid subclass selection',
+    'Circle of the Land progression',
+    'Circle Land Long Rest selection',
+    'Circle spell recalculation',
     'Conditions redesign',
     'Maximum HP adjustment',
   ]),

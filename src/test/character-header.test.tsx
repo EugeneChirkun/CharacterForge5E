@@ -5,8 +5,19 @@ import { referenceCharacter } from '../features/characters/referenceCharacter';
 
 describe('CharacterHeader', () => {
   test('keeps a long identity and complete metadata in separate containers', () => {
-    const { container } = render(<CharacterHeader character={{ ...referenceCharacter, name: 'TestOneDruidWithAVeryLongCharacterName' }} onLandChange={() => undefined} />);
-    expect(screen.getByRole('heading', { name: 'TestOneDruidWithAVeryLongCharacterName' })).toHaveClass('character-header__name');
+    const { container } = render(
+      <CharacterHeader
+        character={{
+          ...referenceCharacter,
+          name: 'TestOneDruidWithAVeryLongCharacterName',
+        }}
+      />,
+    );
+    expect(
+      screen.getByRole('heading', {
+        name: 'TestOneDruidWithAVeryLongCharacterName',
+      }),
+    ).toHaveClass('character-header__name');
     expect(container.querySelector('.character-header__identity')).toBeTruthy();
     expect(container.querySelector('.character-header__metadata')).toBeTruthy();
     const identity = container.querySelector('.character-header__identity')!;
@@ -15,10 +26,21 @@ describe('CharacterHeader', () => {
     expect(identity.contains(screen.getByText('Level'))).toBe(false);
     expect(metadata.contains(screen.getByText('Level'))).toBe(true);
     expect(metadata.contains(screen.getByText('Species'))).toBe(true);
-    for (const label of ['Level', 'Class', 'Species', 'Legacy', 'Background', 'Subclass'])
+    for (const label of [
+      'Level',
+      'Class',
+      'Species',
+      'Legacy',
+      'Background',
+      'Subclass',
+    ])
       expect(screen.getByText(label)).toBeInTheDocument();
-    expect(container.querySelector('.character-header__metadata')).not.toHaveStyle({ position: 'absolute' });
-    expect(container.querySelector('.character-header')?.getAttribute('style') ?? '').not.toContain('position');
-    expect(screen.getByText('Circle land')).toBeInTheDocument();
+    expect(
+      container.querySelector('.character-header__metadata'),
+    ).not.toHaveStyle({ position: 'absolute' });
+    expect(
+      container.querySelector('.character-header')?.getAttribute('style') ?? '',
+    ).not.toContain('position');
+    expect(screen.getByText('Circle Land')).toBeInTheDocument();
   });
 });

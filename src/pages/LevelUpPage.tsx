@@ -9,6 +9,7 @@ import {
   advancementDefinitions,
 } from '../domain/leveling';
 import type { AbilityName } from '../domain/abilities';
+import { skillNames } from '../domain/skills';
 import { defaultRuleRegistry } from '../domain/rules';
 import {
   getAvailableClassCantrips,
@@ -16,6 +17,12 @@ import {
 } from '../domain/spells';
 import { LocalCharacterRepository } from '../infrastructure/persistence/local-character-repository';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
+import {
+  listGeneralFeatAvailability,
+  generalFeatRegistry,
+  type FeatNestedChoices,
+} from '../domain/feats';
+import { CIRCLE_OF_THE_LAND_ID } from '../domain/subclasses';
 const repo = new LocalCharacterRepository(localStorage);
 export function LevelUpPage() {
   const { id = '' } = useParams();
@@ -30,6 +37,12 @@ export function LevelUpPage() {
   >('ability-score-improvement');
   const [primaryAbility, setPrimaryAbility] = useState<AbilityName>('wisdom');
   const [splitAbility, setSplitAbility] = useState<AbilityName | ''>('');
+  const [subclassConfirmed, setSubclassConfirmed] = useState(false);
+  const [featId, setFeatId] = useState('resilient');
+  const [featChoices, setFeatChoices] = useState<FeatNestedChoices>({
+    ability: 'constitution',
+    savingThrow: 'constitution',
+  });
   useEffect(() => {
     void repo.get(id).then(setRecord);
   }, [id]);
@@ -96,12 +109,18 @@ export function LevelUpPage() {
     hitPointChoice: { type: 'fixed', baseHitPoints: 5 },
     selectedCantripIds,
     selectedPreparedSpellIds: prepared,
-    ...(toLevel === 3 ? { subclassId: 'circle-of-the-land', landType } : {}),
+    ...(toLevel === 3 && subclassConfirmed
+      ? { subclassId: CIRCLE_OF_THE_LAND_ID, landType }
+      : {}),
     ...(advancementRequired
       ? {
           advancementChoice:
             advancementType === 'general-feat'
-              ? { type: 'general-feat' as const, featId: 'tough' }
+              ? {
+                  type: 'general-feat' as const,
+                  featId,
+                  selections: featChoices,
+                }
               : {
                   type: 'ability-score-improvement' as const,
                   increases: splitAbility
@@ -146,7 +165,22 @@ export function LevelUpPage() {
       <h1>Level up to {toLevel}</h1>
       {toLevel === 3 && (
         <fieldset>
-          <legend>Circle of the Land selection</legend>
+          <legend>Choose Druid subclass</legend>
+          <p>
+            Circle of the Land is the only Druid subclass installed in the
+            current rules package.
+          </p>
+          <label>
+            <input
+              type="checkbox"
+              checked={subclassConfirmed}
+              onChange={(event) =>
+                setSubclassConfirmed(event.currentTarget.checked)
+              }
+            />{' '}
+            Confirm Circle of the Land as the permanent subclass
+          </label>
+          <h2>Initial Circle Land</h2>
           {(['arid', 'polar', 'temperate', 'tropical'] as const).map((land) => (
             <label key={land}>
               <input
@@ -213,12 +247,14 @@ export function LevelUpPage() {
               </label>
             </>
           ) : (
-            <label>
-              Feat{' '}
-              <select aria-label="General Feat" defaultValue="tough">
-                <option value="tough">Tough</option>
-              </select>
-            </label>
+            <FeatSelector
+              build={record.build}
+              level={toLevel}
+              featId={featId}
+              choices={featChoices}
+              onFeat={setFeatId}
+              onChoices={setFeatChoices}
+            />
           )}
         </fieldset>
       )}
@@ -256,5 +292,77 @@ export function LevelUpPage() {
         </button>
       </div>
     </main>
+  );
+}
+
+function FeatSelector({
+  build,
+  level,
+  featId,
+  choices,
+  onFeat,
+  onChoices,
+}: {
+  build: CharacterRecord['build'];
+  level: number;
+  featId: string;
+  choices: FeatNestedChoices;
+  onFeat: (id: string) => void;
+  onChoices: (choices: FeatNestedChoices) => void;
+}) {
+  const entries = listGeneralFeatAvailability(build, level);
+  const available = entries.filter(
+    (entry) => entry.availability.status === 'available',
+  );
+  const unavailable = entries.filter(
+    (entry) => entry.availability.status === 'unavailable',
+  );
+  const definition = generalFeatRegistry[featId];
+  return (
+    <div className="feat-selector">
+      <h2>Available Feats</h2>
+      {available.map(({ definition: feat }) => (
+        <label key={feat.id}>
+          <input
+            type="radio"
+            name="general-feat"
+            checked={featId === feat.id}
+            onChange={() => {
+              onFeat(feat.id);
+              onChoices({});
+            }}
+          />{' '}
+          <strong>{feat.name}</strong> — {feat.summary}
+        </label>
+      ))}
+      {definition?.choices.map((choice) => (
+        <label key={choice.id}>
+          {choice.type.replaceAll('-', ' ')}{' '}
+          <select
+            aria-label={choice.type}
+            value={choices[choice.id] ?? ''}
+            onChange={(event) =>
+              onChoices({ ...choices, [choice.id]: event.currentTarget.value })
+            }
+          >
+            <option value="">Choose…</option>
+            {choice.type.includes('skill')
+              ? skillNames.map((item) => <option key={item}>{item}</option>)
+              : Object.keys(build.abilityScores).map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
+          </select>
+        </label>
+      ))}
+      <h2>Unavailable Feats</h2>
+      {unavailable.map(({ definition: feat, availability }) => (
+        <div key={feat.id} aria-disabled="true">
+          <strong>{feat.name}</strong>
+          <p>
+            {availability.status === 'unavailable' ? availability.message : ''}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }

@@ -41,7 +41,7 @@ export interface CharacterDraft {
   readonly selectedCantripIds: readonly string[];
   readonly selectedPreparedSpellIds: readonly string[];
   readonly primalOrder?: DruidPrimalOrderSelection;
-  readonly subclassId?: 'circle-of-the-land';
+  readonly subclassId?: 'druid.circle-of-the-land' | 'circle-of-the-land';
   readonly landType?: LandType;
   readonly hitPointChoices: Readonly<Record<number, HitPointLevelChoice>>;
 }

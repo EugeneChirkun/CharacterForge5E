@@ -44,6 +44,8 @@ import {
   validatePreparedSpells,
   sortSpells,
 } from '../spells';
+import { generalFeatRegistry } from '../feats';
+import { toRulesSubclassId } from '../subclasses';
 
 export function computeCharacter(
   build: CharacterBuild,
@@ -66,7 +68,10 @@ export function computeCharacter(
   if (classDefinition && !classLevel)
     ruleDiagnostics.push({ type: 'unsupported-character-level', value: level });
   const subclassId = build.class?.subclassId;
-  const subclass = subclassId ? registry.subclasses[subclassId] : undefined;
+  const rulesSubclassId = toRulesSubclassId(subclassId);
+  const subclass = rulesSubclassId
+    ? registry.subclasses[rulesSubclassId]
+    : undefined;
   if (subclassId && !subclass)
     ruleDiagnostics.push({
       type: 'unknown-rule-id',
@@ -112,7 +117,7 @@ export function computeCharacter(
     });
   const featIds = build.featIds ?? build.feats.map((f) => f.toLowerCase());
   for (const id of featIds)
-    if (!registry.feats[id])
+    if (!registry.feats[id] && !generalFeatRegistry[id])
       ruleDiagnostics.push({ type: 'unknown-rule-id', category: 'feat', id });
   const abilityModifiers = Object.fromEntries(
     abilityNames.map((ability) => [
@@ -143,11 +148,21 @@ export function computeCharacter(
       }),
     ]),
   ) as Record<SkillName, ReturnType<typeof calculateSkillModifier>>;
-  const primalOrder = classId === 'druid' ? resolvePrimalOrder(build, registry) : { selection: undefined, diagnostics: [] };
-  for (const type of primalOrder.diagnostics) ruleDiagnostics.push({ type, value: undefined });
+  const primalOrder =
+    classId === 'druid'
+      ? resolvePrimalOrder(build, registry)
+      : { selection: undefined, diagnostics: [] };
+  for (const type of primalOrder.diagnostics)
+    ruleDiagnostics.push({ type, value: undefined });
   if (primalOrder.selection?.orderId === 'magician') {
     const target = primalOrder.selection.magicianChoices!.skillBonusTarget;
-    skills = { ...skills, [target]: applyMagicianSkillBonus(skills[target], abilityModifiers.wisdom.value) };
+    skills = {
+      ...skills,
+      [target]: applyMagicianSkillBonus(
+        skills[target],
+        abilityModifiers.wisdom.value,
+      ),
+    };
   }
   const initiative = calculateInitiative({
     dexterityModifier: abilityModifiers.dexterity.value,
@@ -215,11 +230,11 @@ export function computeCharacter(
       })()
     : undefined;
   const landType = session.selections?.circleOfTheLand?.landType;
-  if (subclassId === 'circle-of-the-land' && !landType)
+  if (rulesSubclassId === 'circle-of-the-land' && !landType)
     ruleDiagnostics.push({ type: 'missing-required-land-selection' });
   const ownerIds = [
     classId,
-    subclassId,
+    rulesSubclassId,
     speciesId,
     optionId,
     ...featIds,
@@ -263,7 +278,7 @@ export function computeCharacter(
     }));
   const grants = activeSpellGrants(registry, level, landType).filter(
     (g) =>
-      (g.sourceType === 'subclass' && subclassId === g.sourceId) ||
+      (g.sourceType === 'subclass' && rulesSubclassId === g.sourceId) ||
       (g.sourceType === 'species' && optionId === g.sourceId),
   );
   const preparation = classLevel
@@ -284,16 +299,21 @@ export function computeCharacter(
       };
   const accesses = new Map<string, ComputedCharacter['spells'][number]>();
   const cantripSelections = getResolvedCantripSelections(build);
-  for (const id of [...cantripSelections.map((choice) => choice.spellId), ...preparation.validPreparedSpellIds]) {
+  for (const id of [
+    ...cantripSelections.map((choice) => choice.spellId),
+    ...preparation.validPreparedSpellIds,
+  ]) {
     const s = registry.spells[id];
     if (s)
       accesses.set(id, {
         spellId: id,
         name: s.name,
         level: s.level,
-        sourceTypes: cantripSelections.find((choice) => choice.spellId === id)?.source === 'primal-order-magician'
-          ? ['primal-order']
-          : ['class'],
+        sourceTypes:
+          cantripSelections.find((choice) => choice.spellId === id)?.source ===
+          'primal-order-magician'
+            ? ['primal-order']
+            : ['class'],
         prepared: true,
         alwaysPrepared: false,
         available: true,
@@ -323,20 +343,48 @@ export function computeCharacter(
   }
   return {
     proficiencies: {
-      armor: [...(classDefinition?.armorTraining ?? []), ...(primalOrder.selection?.orderId === 'warden' ? ['Medium armor'] : [])],
-      weapons: [...(classDefinition?.weaponTraining ?? []), ...(primalOrder.selection?.orderId === 'warden' ? ['Martial weapons'] : [])],
+      armor: [
+        ...(classDefinition?.armorTraining ?? []),
+        ...(primalOrder.selection?.orderId === 'warden'
+          ? ['Medium armor']
+          : []),
+      ],
+      weapons: [
+        ...(classDefinition?.weaponTraining ?? []),
+        ...(primalOrder.selection?.orderId === 'warden'
+          ? ['Martial weapons']
+          : []),
+      ],
     },
-    druid: classId === 'druid' ? {
-      primalOrder: primalOrder.selection ? {
-        id: primalOrder.selection.orderId,
-        name: registry.druidPrimalOrders[primalOrder.selection.orderId].name,
-        ...(primalOrder.selection.orderId === 'magician' ? {
-          additionalCantripId: primalOrder.selection.magicianChoices!.additionalCantripId,
-          skillBonusTarget: primalOrder.selection.magicianChoices!.skillBonusTarget,
-          grantedProficiencies: [],
-        } : { grantedProficiencies: ['Medium armor', 'Martial weapons'] }),
-      } : undefined,
-    } : undefined,
+    druid:
+      classId === 'druid'
+        ? {
+            primalOrder: primalOrder.selection
+              ? {
+                  id: primalOrder.selection.orderId,
+                  name: registry.druidPrimalOrders[
+                    primalOrder.selection.orderId
+                  ].name,
+                  ...(primalOrder.selection.orderId === 'magician'
+                    ? {
+                        additionalCantripId:
+                          primalOrder.selection.magicianChoices!
+                            .additionalCantripId,
+                        skillBonusTarget:
+                          primalOrder.selection.magicianChoices!
+                            .skillBonusTarget,
+                        grantedProficiencies: [],
+                      }
+                    : {
+                        grantedProficiencies: [
+                          'Medium armor',
+                          'Martial weapons',
+                        ],
+                      }),
+                }
+              : undefined,
+          }
+        : undefined,
     abilityModifiers,
     proficiencyBonus,
     savingThrows,

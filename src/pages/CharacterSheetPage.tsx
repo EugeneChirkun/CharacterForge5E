@@ -48,7 +48,6 @@ export function CharacterSheetPage() {
     setSection(s);
     setMeta({ lastSection: s });
   };
-  const changeLand = (landType: LandType) => update({ ...character, landType });
   const startRest = (r: RestType) => {
     setRestLand(character.landType);
     setRest(r);
@@ -254,7 +253,7 @@ export function CharacterSheetPage() {
             <span>Maximum level reached</span>
           )}
         </div>
-        <CharacterHeader character={character} onLandChange={changeLand} />
+        <CharacterHeader character={character} />
         <div className="content">
           {section === 'summary' && (
             <>
