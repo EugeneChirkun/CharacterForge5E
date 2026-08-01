@@ -93,7 +93,22 @@
   gap: 1rem;
 }
 button.danger {
-  color: #8b1e1e;
+  background: var(--color-danger);
+  color: var(--color-danger-text);
+}
+button.danger:hover {
+  background: var(--color-danger-hover);
+}
+button.danger:active {
+  background: var(--color-danger-active);
+}
+button.danger:focus-visible {
+  outline-color: var(--color-danger-focus);
+}
+button.danger:disabled {
+  background: var(--color-danger-disabled);
+  color: var(--color-danger-text);
+  opacity: 1;
 }
 @media (max-width: 760px) {
   .inventory-groups {
@@ -195,8 +210,7 @@ button.danger {
   padding: 0;
   list-style: none;
 }
-.shop-list li,
-.cart-list li {
+.shop-list li {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -214,9 +228,47 @@ button.danger {
 .cart-list input {
   width: 5rem;
 }
+.cart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, auto) auto;
+  grid-template-areas: 'name quantity action';
+  align-items: end;
+  gap: 0.75rem;
+  border-top: 1px solid var(--border, #bbb);
+  padding-top: 0.75rem;
+}
+.cart-item-identity {
+  grid-area: name;
+  min-width: 0;
+}
+.cart-item-name {
+  overflow-wrap: anywhere;
+}
+.cart-quantity {
+  grid-area: quantity;
+}
+.cart-action {
+  grid-area: action;
+}
+.equipment-mechanical-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  list-style: none;
+}
 @media (max-width: 760px) {
   .starting-shop {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .cart-row {
+    grid-template-areas:
+      'name name'
+      'quantity action';
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
 html {

@@ -33,6 +33,8 @@ import {
 } from '../domain/equipment';
 import { computeCharacter } from '../domain/character';
 import { createCantripSelectionView } from '../application/characters/cantrip-selection-view';
+import { CartRow } from '../components/CartRow';
+import { EquipmentMechanicalSummary } from '../components/EquipmentMechanicalSummary';
 const steps = [
   'Basics',
   'Origin',
@@ -511,6 +513,9 @@ export function NewCharacterPage() {
                                   {(definition.priceCopper ?? 0) / 100} GP ·{' '}
                                   {definition.weight ?? '—'} lb
                                 </small>
+                                <EquipmentMechanicalSummary
+                                  definition={definition}
+                                />
                                 {warning && (
                                   <span className="equipment-warning">
                                     Warning: {warning}
@@ -539,54 +544,61 @@ export function NewCharacterPage() {
                     <h3>Cart</h3>
                     {draft.startingPurchaseCart.length ? (
                       <ul className="cart-list">
-                        {draft.startingPurchaseCart.map((row) => (
-                          <li key={row.equipmentDefinitionId}>
-                            <span>
-                              {
-                                equipmentRegistry[row.equipmentDefinitionId]
-                                  ?.name
+                        {draft.startingPurchaseCart.map((row) => {
+                          const itemName =
+                            equipmentRegistry[row.equipmentDefinitionId]
+                              ?.name ?? 'Unknown equipment';
+                          return (
+                            <CartRow
+                              key={row.equipmentDefinitionId}
+                              name={itemName}
+                              quantity={
+                                <label>
+                                  Quantity{' '}
+                                  <input
+                                    aria-label={`Quantity for ${equipmentRegistry[row.equipmentDefinitionId]?.name}`}
+                                    type="number"
+                                    min="1"
+                                    value={row.quantity}
+                                    onChange={(event) =>
+                                      applyCartResult(
+                                        setStartingPurchaseQuantity(
+                                          equipmentModel.purchaseDraft,
+                                          row.equipmentDefinitionId,
+                                          Number(event.target.value),
+                                        ),
+                                      )
+                                    }
+                                  />
+                                </label>
                               }
-                            </span>
-                            <label>
-                              Quantity{' '}
-                              <input
-                                aria-label={`Quantity for ${equipmentRegistry[row.equipmentDefinitionId]?.name}`}
-                                type="number"
-                                min="1"
-                                value={row.quantity}
-                                onChange={(event) =>
-                                  applyCartResult(
-                                    setStartingPurchaseQuantity(
-                                      equipmentModel.purchaseDraft,
-                                      row.equipmentDefinitionId,
-                                      Number(event.target.value),
-                                    ),
-                                  )
-                                }
-                              />
-                            </label>
-                            <button
-                              type="button"
-                              aria-label={`Remove ${equipmentRegistry[row.equipmentDefinitionId]?.name} from cart`}
-                              onClick={() =>
-                                applyCartResult(
-                                  removeStartingPurchaseItem(
-                                    equipmentModel.purchaseDraft,
-                                    row.equipmentDefinitionId,
-                                  ),
-                                )
+                              action={
+                                <button
+                                  type="button"
+                                  className="danger"
+                                  aria-label={`Remove ${itemName} from cart`}
+                                  onClick={() =>
+                                    applyCartResult(
+                                      removeStartingPurchaseItem(
+                                        equipmentModel.purchaseDraft,
+                                        row.equipmentDefinitionId,
+                                      ),
+                                    )
+                                  }
+                                >
+                                  Remove
+                                </button>
                               }
-                            >
-                              Remove
-                            </button>
-                          </li>
-                        ))}
+                            />
+                          );
+                        })}
                       </ul>
                     ) : (
                       <p>No purchases selected. Unspent funds are preserved.</p>
                     )}
                     <button
                       type="button"
+                      className="danger"
                       disabled={!draft.startingPurchaseCart.length}
                       onClick={() =>
                         applyCartResult(
