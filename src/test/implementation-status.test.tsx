@@ -8,9 +8,8 @@ describe('implementation status', () => {
   test('provides the current milestone from one immutable definition', () => {
     expect(applicationImplementationStatus).toMatchObject({
       stage: '3',
-      iteration: '3.5C',
-      title:
-        'Druid Level Advancement, ASI, General Feats and Session Corrections',
+      iteration: '3.5D',
+      title: 'Druid Subclass, Circle of the Land and General Feat Completion',
     });
     expect(applicationImplementationStatus.implementedFeatures).toContain(
       'Character creation purchasing',

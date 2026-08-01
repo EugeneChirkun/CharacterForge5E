@@ -252,7 +252,10 @@ export function validateCharacterDraft(
       );
   }
   if (draft.targetLevel >= cls.subclassUnlockLevel) {
-    if (draft.subclassId !== 'circle-of-the-land')
+    if (
+      draft.subclassId !== 'circle-of-the-land' &&
+      draft.subclassId !== 'druid.circle-of-the-land'
+    )
       out.push(
         diagnostic(
           'missing-subclass',

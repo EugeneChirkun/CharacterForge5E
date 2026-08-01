@@ -1,16 +1,9 @@
-import type {
-  CharacterViewModel,
-  LandType,
-} from '../features/characters/character.types';
-
-const lands: LandType[] = ['arid', 'polar', 'temperate', 'tropical'];
+import type { CharacterViewModel } from '../features/characters/character.types';
 
 export function CharacterHeader({
   character,
-  onLandChange,
 }: {
   character: CharacterViewModel;
-  onLandChange: (land: LandType) => void;
 }) {
   const details = [
     ['Level', character.level],
@@ -34,19 +27,15 @@ export function CharacterHeader({
           </div>
         ))}
       </dl>
-      <section className="character-header__options"><label className="land-select">
-        <span>Circle land</span>
-        <select
-          value={character.landType}
-          onChange={(event) => onLandChange(event.target.value as LandType)}
-        >
-          {lands.map((land) => (
-            <option value={land} key={land}>
-              {land[0].toUpperCase() + land.slice(1)}
-            </option>
-          ))}
-        </select>
-      </label></section>
+      <section className="character-header__options" aria-label="Circle Land">
+        <strong>Circle Land</strong>
+        <p>
+          {character.landType[0].toUpperCase() + character.landType.slice(1)}
+        </p>
+        <small>
+          Circle Land can be changed only when confirming a Long Rest.
+        </small>
+      </section>
     </header>
   );
 }

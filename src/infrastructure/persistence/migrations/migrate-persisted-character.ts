@@ -4,6 +4,7 @@ import {
   startingInventory,
   validateInventory,
 } from '../../../domain/equipment';
+import { normalizeSubclassId } from '../../../domain/subclasses';
 
 const object = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
@@ -98,6 +99,72 @@ export function migratePersistedCharacter(input: unknown): MigrationResult {
           ],
         }
       : build;
+  if (
+    cls?.classId === 'druid' &&
+    typeof cls.level === 'number' &&
+    cls.level >= 3
+  ) {
+    const subclassId = normalizeSubclassId(cls.subclassId);
+    const required = Array.isArray(migratedBuild.requiredBuildChoices)
+      ? migratedBuild.requiredBuildChoices
+      : [];
+    migratedBuild = {
+      ...migratedBuild,
+      class: { ...cls, ...(subclassId ? { subclassId } : {}) },
+      ...(!subclassId
+        ? {
+            requiredBuildChoices: [
+              ...required,
+              {
+                code: 'missing-required-build-choice',
+                choiceId: 'druid.subclass',
+              },
+            ],
+          }
+        : {}),
+    };
+    if (!subclassId)
+      diagnostics.push({
+        code: 'missing-required-subclass',
+        message:
+          'This Druid is missing required subclass information from an earlier application version.',
+        severity: 'warning',
+        characterId: input.build.id as string,
+      });
+    const selections = object(input.session.selections)
+      ? input.session.selections
+      : undefined;
+    const circle =
+      selections && object(selections.circleOfTheLand)
+        ? selections.circleOfTheLand
+        : undefined;
+    const legacyLand = circle?.landType;
+    const normalizedLand =
+      typeof legacyLand === 'string' ? legacyLand.toLowerCase() : undefined;
+    if (
+      subclassId &&
+      !['arid', 'polar', 'temperate', 'tropical'].includes(normalizedLand ?? '')
+    ) {
+      migratedBuild = {
+        ...migratedBuild,
+        requiredBuildChoices: [
+          ...(Array.isArray(migratedBuild.requiredBuildChoices)
+            ? migratedBuild.requiredBuildChoices
+            : []),
+          {
+            code: 'missing-required-build-choice',
+            choiceId: 'druid.circle-land',
+          },
+        ],
+      };
+      diagnostics.push({
+        code: 'missing-circle-land',
+        message: 'Choose a Circle Land before continuing.',
+        severity: 'warning',
+        characterId: input.build.id as string,
+      });
+    }
+  }
   if (migratedBuild !== build)
     diagnostics.push({
       code: 'missing-required-build-choice',

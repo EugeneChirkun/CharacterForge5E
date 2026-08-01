@@ -12,6 +12,7 @@ import {
   type CreationDiagnostic,
 } from './draft-validation';
 import { finalizeStartingEquipment } from '../equipment';
+import { toRulesSubclassId } from '../subclasses';
 export type CreateCharacterResult =
   | {
       readonly success: true;
@@ -94,7 +95,7 @@ export function createCharacterFromDraft(
   const resourceState = Object.fromEntries(
     resolveResources(registry, draft.targetLevel, {}, [
       'druid',
-      ...(draft.subclassId ? [draft.subclassId] : []),
+      ...(draft.subclassId ? [toRulesSubclassId(draft.subclassId)!] : []),
       'tiefling',
       'chthonic',
       'tough',
