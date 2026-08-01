@@ -1,5 +1,18 @@
 # Iteration 3.5B — Druid starting equipment and purchasing
 
+## UI maintenance patch
+
+The shared destructive-button treatment now uses a high-contrast red background,
+white text, and explicit hover, active, focus-visible, and disabled states. Purchase
+cart entries use one responsive grid row, allowing long equipment names to wrap
+without displacing quantity or removal controls. The equipment picker also exposes
+compact mechanics only where the verified registry already provides structured
+weapon, armor, or shield fields.
+
+Further Druidic Focus choices, multi-role quarterstaff modeling, price semantics,
+and broader mechanics remain explicitly deferred to the equipment follow-up
+backlog. This patch adds no focus choices and changes no equipment rules or prices.
+
 ## Architecture and verified definitions
 
 `starting-equipment.ts` owns source choices, typed package/gold registries, exact wallet arithmetic, immutable cart commands, diagnostics, proficiency warnings, and inventory materialization. React renders these results and sends intent back to commands; it neither prices purchases nor creates instances. Stable choices are `druid.class.starting-equipment` and `farmer.background.starting-equipment` with `package` or `gold`, so the decisions remain independent.

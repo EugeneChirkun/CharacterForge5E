@@ -8,7 +8,12 @@
   --border: #d8cdbd;
   --success: #286441;
   --warning: #9a651d;
-  --danger: #9b2f2f;
+  --color-danger: #a1261f;
+  --color-danger-hover: #7f1d1d;
+  --color-danger-active: #671717;
+  --color-danger-text: #ffffff;
+  --color-danger-focus: #f5a3a3;
+  --color-danger-disabled: #8f5a56;
   --space-1: 0.35rem;
   --space-2: 0.65rem;
   --space-3: 1rem;
