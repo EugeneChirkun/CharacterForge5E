@@ -13,6 +13,17 @@ export interface SubclassDefinition {
   readonly progression: readonly SubclassProgressionEntry[];
   readonly landIds: readonly CircleLandId[];
   readonly source: RuleSource;
+  readonly verified: boolean;
+}
+export interface SubclassRegistry {
+  readonly byId: Readonly<Record<string, SubclassDefinition>>;
+}
+export interface LandTypeDefinition {
+  readonly id: CircleLandId;
+  readonly name: string;
+  readonly summary: string;
+  readonly spellGrantIds: readonly string[];
+  readonly source: RuleSource;
 }
 export type SubclassDiagnosticCode =
   | 'missing-required-subclass'

@@ -1,6 +1,19 @@
 * {
   box-sizing: border-box;
 }
+.application-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.application-shell > main { flex: 1; }
+.application-footer { display: grid; gap: .55rem; padding: 1.25rem max(1rem, calc((100vw - 72rem) / 2)); background: #18372d; color: #fff; overflow-wrap: anywhere; }
+.application-footer div, .application-footer nav { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; }
+.application-footer p { margin: 0; }
+.application-footer a { color: #fff; text-underline-offset: .2em; }
+.about-page { width: min(72rem, 100%); margin-inline: auto; padding: 2rem 1rem 5rem; display: grid; gap: 1.5rem; }
+.about-page > section, .about-grid > section, .feature-groups > section { padding: 1.25rem; border-radius: .8rem; background: var(--surface, #fff); }
+.about-grid, .feature-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.latest-release { border: 3px solid #38765d; background: #edf8f1 !important; }
+.feature-list { display: grid; gap: 1rem; padding-left: 1.2rem; }
+.feature-list p { margin: .2rem 0; }
+@media (max-width: 700px) { .about-grid, .feature-groups { grid-template-columns: 1fr; } }
 
 .equipment-heading {
   display: flex;

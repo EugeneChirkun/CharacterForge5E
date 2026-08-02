@@ -869,7 +869,7 @@ export function NewCharacterPage() {
                         checked={draft.landType === land}
                         onChange={() =>
                           patch({
-                            subclassId: 'druid.circle-of-the-land',
+                            subclassId: 'circle-of-the-land',
                             landType: land,
                           })
                         }

@@ -64,7 +64,16 @@ function transition(
   },
 ) {
   const errors: { type: 'invalid-land-selection'; value: string }[] = [];
-  if (input.selectedLandType && !isLandType(input.selectedLandType))
+  const changesLand =
+    type === 'long' &&
+    input.selectedLandType &&
+    input.selectedLandType !==
+      input.session.selections?.circleOfTheLand?.landType;
+  if (
+    input.selectedLandType &&
+    (!isLandType(input.selectedLandType) ||
+      (changesLand && !input.activeOwnerIds.includes('circle-of-the-land')))
+  )
     errors.push({
       type: 'invalid-land-selection',
       value: input.selectedLandType,
