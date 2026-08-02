@@ -9,6 +9,7 @@ import type {
   AbilityAssignment,
   AbilityGenerationMethod,
 } from './ability-generation';
+import type { CharacterAdvancementChoice } from '../leveling';
 export interface HitPointLevelChoice {
   readonly type: 'fixed';
   readonly baseHitPoints: number;
@@ -44,6 +45,8 @@ export interface CharacterDraft {
   readonly subclassId?: 'druid.circle-of-the-land' | 'circle-of-the-land';
   readonly landType?: LandType;
   readonly hitPointChoices: Readonly<Record<number, HitPointLevelChoice>>;
+  /** Permanent milestone decisions. Preview data is deliberately not stored. */
+  readonly advancementChoices: readonly CharacterAdvancementChoice[];
 }
 export function newCharacterDraft(
   id: string = crypto.randomUUID(),
@@ -93,5 +96,6 @@ export function newCharacterDraft(
     selectedCantripIds: [],
     selectedPreparedSpellIds: [],
     hitPointChoices: { 1: { type: 'fixed', baseHitPoints: 8 } },
+    advancementChoices: [],
   };
 }

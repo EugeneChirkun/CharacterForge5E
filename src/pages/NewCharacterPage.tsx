@@ -44,6 +44,7 @@ const steps = [
   'Equipment',
   'Spells',
   'Subclass',
+  'Advancement',
   'Review',
 ] as const;
 const draftRepo = new LocalCharacterDraftRepository(localStorage);
@@ -87,7 +88,9 @@ export function NewCharacterPage() {
   )!;
   const visibleSteps = steps.filter(
     (s) =>
-      s !== 'Subclass' || draft.targetLevel >= classRule.subclassUnlockLevel,
+      (s !== 'Subclass' ||
+        draft.targetLevel >= classRule.subclassUnlockLevel) &&
+      (s !== 'Advancement' || draft.targetLevel >= 4),
   );
   const current = visibleSteps[Math.min(step, visibleSteps.length - 1)];
   const patch = (value: Partial<CharacterDraft>) =>
@@ -253,6 +256,9 @@ export function NewCharacterPage() {
                   patch({
                     targetLevel,
                     hitPointChoices,
+                    advancementChoices: draft.advancementChoices.filter(
+                      (choice) => choice.characterLevel <= targetLevel,
+                    ),
                     ...(targetLevel < 3
                       ? { subclassId: undefined, landType: undefined }
                       : {}),
@@ -875,6 +881,92 @@ export function NewCharacterPage() {
               </fieldset>
             </>
           )}
+          {current === 'Advancement' && (
+            <>
+              <p>Choose one permanent advancement at each Druid milestone.</p>
+              {[4, 8]
+                .filter((level) => draft.targetLevel >= level)
+                .map((level) => {
+                  const selected = draft.advancementChoices.find(
+                    (item) => item.characterLevel === level,
+                  );
+                  const setChoice = (
+                    choice: import('../domain/leveling').AdvancementChoice,
+                  ) =>
+                    patch({
+                      advancementChoices: [
+                        ...draft.advancementChoices.filter(
+                          (item) => item.characterLevel !== level,
+                        ),
+                        { classId: 'druid', characterLevel: level, choice },
+                      ],
+                    });
+                  return (
+                    <fieldset key={level}>
+                      <legend>Level {level} Advancement</legend>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setChoice({
+                            type: 'ability-score-improvement',
+                            increases: [{ ability: 'wisdom', amount: 2 }],
+                          })
+                        }
+                      >
+                        Ability Score Improvement
+                      </button>{' '}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setChoice({
+                            type: 'general-feat',
+                            featId: 'resilient',
+                            selections: {
+                              ability: 'constitution',
+                              savingThrow: 'constitution',
+                            },
+                          })
+                        }
+                      >
+                        Resilient (General Feat)
+                      </button>
+                      {selected?.choice.type ===
+                        'ability-score-improvement' && (
+                        <label>
+                          Increase one ability by 2
+                          <select
+                            value={selected.choice.increases[0]?.ability}
+                            onChange={(event) =>
+                              setChoice({
+                                type: 'ability-score-improvement',
+                                increases: [
+                                  {
+                                    ability: event.target.value as AbilityName,
+                                    amount: 2,
+                                  },
+                                ],
+                              })
+                            }
+                          >
+                            {abilityNames.map((ability) => (
+                              <option key={ability}>{ability}</option>
+                            ))}
+                          </select>
+                        </label>
+                      )}
+                      {selected && (
+                        <p>
+                          Selected:{' '}
+                          {selected.choice.type === 'ability-score-improvement'
+                            ? `${label(selected.choice.increases[0].ability)} +2`
+                            : 'Resilient (Constitution +1)'}
+                        </p>
+                      )}
+                    </fieldset>
+                  );
+                })}
+            </>
+          )}
           {current === 'Review' && (
             <>
               {preview ? (
@@ -893,6 +985,16 @@ export function NewCharacterPage() {
                   </dd>
                   <dt>Maximum HP</dt>
                   <dd>{preview.maximumHp}</dd>
+                  {draft.advancementChoices.map((choice) => (
+                    <div key={choice.characterLevel}>
+                      <dt>Level {choice.characterLevel} Advancement</dt>
+                      <dd>
+                        {choice.choice.type === 'ability-score-improvement'
+                          ? `Ability Score Improvement — ${choice.choice.increases.map((increase) => `${label(increase.ability)} +${increase.amount}`).join(', ')}`
+                          : `General Feat — ${choice.choice.featId}`}
+                      </dd>
+                    </div>
+                  ))}
                   <dt>Primal Order</dt>
                   <dd>{preview.primalOrder?.name ?? 'Incomplete'}</dd>
                   <dt>Armor Class</dt>

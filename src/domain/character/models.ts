@@ -24,7 +24,11 @@ export interface CharacterBuild {
   readonly requiredBuildChoices?: readonly {
     readonly code: 'missing-required-build-choice';
     readonly choiceId:
-      'druid.primal-order' | 'druid.subclass' | 'druid.circle-land';
+      | 'druid.primal-order'
+      | 'druid.subclass'
+      | 'druid.circle-land'
+      | 'druid.advancement.4'
+      | 'druid.advancement.8';
   }[];
   readonly id: string;
   readonly name: string;

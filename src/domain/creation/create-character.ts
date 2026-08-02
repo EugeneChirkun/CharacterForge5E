@@ -13,6 +13,7 @@ import {
 } from './draft-validation';
 import { finalizeStartingEquipment } from '../equipment';
 import { toRulesSubclassId } from '../subclasses';
+import { applyGeneralFeatEffects, generalFeatRegistry } from '../feats';
 export type CreateCharacterResult =
   | {
       readonly success: true;
@@ -49,12 +50,18 @@ export function createCharacterFromDraft(
   const slotProgression = Object.fromEntries(
     cls.progression.map((p) => [p.level, p.spellSlots]),
   );
-  const build: CharacterBuild = {
+  const abilityScores = { ...scores };
+  for (const selection of draft.advancementChoices)
+    if (selection.choice.type === 'ability-score-improvement')
+      for (const increase of selection.choice.increases)
+        abilityScores[increase.ability] += increase.amount;
+  let build: CharacterBuild = {
     id: draft.id,
     name: draft.name.trim(),
     ruleset: '5e-2024',
     totalLevel: draft.targetLevel,
-    abilityScores: scores,
+    abilityScores,
+    advancementChoices: [...draft.advancementChoices],
     hitPointProgression: {
       hitDie: 8,
       levelGains: Object.entries(draft.hitPointChoices).map(
@@ -87,11 +94,26 @@ export function createCharacterFromDraft(
       spellcastingAbility: 'wisdom',
     },
     backgroundId: 'farmer',
-    featIds: ['tough'],
+    featIds: [
+      'tough',
+      ...draft.advancementChoices
+        .filter((item) => item.choice.type === 'general-feat')
+        .map(
+          (item) =>
+            (item.choice as import('../leveling').GeneralFeatChoice).featId,
+        ),
+    ],
     cantripIds: [...draft.selectedCantripIds],
     preparedSpellIds: [...draft.selectedPreparedSpellIds],
     startingEquipmentChoices: [...draft.startingEquipmentChoices],
   };
+  for (const selection of draft.advancementChoices)
+    if (selection.choice.type === 'general-feat')
+      build = applyGeneralFeatEffects(
+        build,
+        generalFeatRegistry[selection.choice.featId],
+        selection.choice.selections ?? {},
+      );
   const resourceState = Object.fromEntries(
     resolveResources(registry, draft.targetLevel, {}, [
       'druid',

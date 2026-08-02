@@ -18,6 +18,24 @@ export const referenceBuild: CharacterBuild = {
   name: 'Reference Character',
   ruleset: '5e-2024',
   totalLevel: 8,
+  advancementChoices: [
+    {
+      characterLevel: 4,
+      classId: 'druid',
+      choice: {
+        type: 'ability-score-improvement',
+        increases: [{ ability: 'wisdom', amount: 2 }],
+      },
+    },
+    {
+      characterLevel: 8,
+      classId: 'druid',
+      choice: {
+        type: 'ability-score-improvement',
+        increases: [{ ability: 'wisdom', amount: 2 }],
+      },
+    },
+  ],
   abilityScores: {
     strength: 8,
     dexterity: 14,
@@ -53,7 +71,12 @@ export const referenceBuild: CharacterBuild = {
     },
   },
   feats: ['Tough'],
-  class: { classId: 'druid', level: 8, subclassId: 'circle-of-the-land', primalOrder: { orderId: 'warden' } },
+  class: {
+    classId: 'druid',
+    level: 8,
+    subclassId: 'circle-of-the-land',
+    primalOrder: { orderId: 'warden' },
+  },
   species: {
     speciesId: 'tiefling',
     optionId: 'chthonic',
@@ -97,7 +120,10 @@ export const referenceCharacter: CharacterViewModel = {
   id: referenceBuild.id,
   name: referenceBuild.name,
   level: referenceBuild.totalLevel,
-  primalOrder: { name: 'Warden', grantedProficiencies: ['Medium armor', 'Martial weapons'] },
+  primalOrder: {
+    name: 'Warden',
+    grantedProficiencies: ['Medium armor', 'Martial weapons'],
+  },
   species: 'Tiefling',
   legacy: 'Chthonic',
   characterClass: 'Druid',

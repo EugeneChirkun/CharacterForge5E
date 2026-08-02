@@ -47,6 +47,115 @@ export interface CharacterAdvancementChoice {
   readonly classId: string;
   readonly choice: AdvancementChoice;
 }
+/** Pure milestone validation shared by creation, migration resolution, and level-up. */
+export function validateAdvancementChoices(
+  classId: string,
+  classLevel: number,
+  selections: readonly CharacterAdvancementChoice[],
+  startingScores: Readonly<Record<AbilityName, number>>,
+  existingFeatIds: readonly string[] = [],
+): readonly LevelUpDiagnostic[] {
+  const diagnostics: LevelUpDiagnostic[] = [];
+  const relevant = selections.filter(
+    (selection) => selection.classId === classId,
+  );
+  const scores = { ...startingScores };
+  const featIds = [...existingFeatIds];
+  for (const selection of relevant) {
+    if (
+      ![4, 8].includes(selection.characterLevel) ||
+      selection.characterLevel > classLevel
+    ) {
+      diagnostics.push({
+        type: 'invalid-advancement-choice',
+        message: `A level ${selection.characterLevel} advancement cannot be selected for this character.`,
+      });
+      continue;
+    }
+    if (
+      relevant.filter(
+        (item) => item.characterLevel === selection.characterLevel,
+      ).length > 1
+    ) {
+      diagnostics.push({
+        type: 'invalid-advancement-choice',
+        message: `Only one Druid level ${selection.characterLevel} advancement may be selected.`,
+      });
+      continue;
+    }
+    if (selection.choice.type === 'ability-score-improvement') {
+      const increases = selection.choice.increases;
+      const total = increases.reduce((sum, item) => sum + item.amount, 0);
+      if (
+        total !== 2 ||
+        ![1, 2].includes(increases.length) ||
+        new Set(increases.map((item) => item.ability)).size !==
+          increases.length ||
+        increases.some(
+          (item) =>
+            !abilityNames.includes(item.ability) ||
+            (increases.length === 1 ? item.amount !== 2 : item.amount !== 1),
+        )
+      ) {
+        diagnostics.push({
+          type: 'invalid-ability-improvement',
+          message: 'Increase one ability by 2 or two different abilities by 1.',
+        });
+        continue;
+      }
+      for (const increase of increases) {
+        if (scores[increase.ability] + increase.amount > 20)
+          diagnostics.push({
+            type: 'ability-score-cap-exceeded',
+            message: `${increase.ability} cannot exceed 20.`,
+          });
+        else scores[increase.ability] += increase.amount;
+      }
+    } else {
+      const feat = generalFeatRegistry[selection.choice.featId];
+      if (
+        !feat ||
+        (!feat.repeatable && featIds.includes(selection.choice.featId))
+      )
+        diagnostics.push({
+          type: 'invalid-feat-choice',
+          message: feat
+            ? `${feat.name} cannot be selected more than once.`
+            : 'That verified General Feat is not installed.',
+        });
+      else {
+        const errors = validateFeatSelection(
+          feat,
+          selection.choice.selections ?? {},
+          {
+            abilityScores: scores,
+            savingThrowProficiencies: [],
+            skillProficiencies: [],
+            expertiseSkills: [],
+            featIds,
+          } as unknown as CharacterBuild,
+          selection.characterLevel,
+        );
+        if (errors.length)
+          diagnostics.push({ type: 'invalid-feat-choice', message: errors[0] });
+        else featIds.push(feat.id);
+      }
+    }
+  }
+  for (const definition of advancementDefinitions)
+    if (
+      definition.classId === classId &&
+      classLevel >= definition.characterLevel &&
+      !relevant.some(
+        (selection) => selection.characterLevel === definition.characterLevel,
+      )
+    )
+      diagnostics.push({
+        type: 'missing-advancement-choice',
+        message: `This Druid is missing the required level ${definition.characterLevel} advancement choice. Choose Ability Score Improvement or an eligible General Feat.`,
+      });
+  return diagnostics;
+}
 /** Data, rather than control flow, declares every supported choice milestone. */
 export const advancementDefinitions = Object.freeze([
   {
@@ -75,7 +184,8 @@ export type LevelUpDiagnosticType =
   | 'ability-score-cap-exceeded'
   | 'duplicate-asi-target'
   | 'missing-advancement-choice'
-  | 'invalid-feat-choice';
+  | 'invalid-feat-choice'
+  | 'invalid-advancement-choice';
 export interface LevelUpDiagnostic {
   readonly type: LevelUpDiagnosticType;
   readonly message: string;
