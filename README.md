@@ -1,5 +1,13 @@
 # Character Forge 5E
 
+> **Current release:** Iteration **3.5D — Druid Subclass and Circle of the Land Completion**, application version **0.1.0**.
+
+The supported rules scope is D&D 5e 2024 Druid levels 1–8, Tiefling with Chthonic Legacy, Farmer, Tough, Magician and Warden Primal Orders, and Circle of the Land with Arid, Polar, Temperate, and Tropical lands. Circle selection is explicit and permanent; its active land is session state selected initially in creation or level-up and changeable only through a confirmed Long Rest. Circle spells are always prepared, source-labelled, level-gated, and excluded from the normal preparation allowance.
+
+Every primary route now includes a compact release footer. The new `#/about` page displays supported scope, all implemented functionality grouped by category, the distinct latest-iteration additions, structured release notes, known limitations, and a clearly planned roadmap. These views derive from the centralized `src/meta` registry rather than duplicated JSX lists. See [the subclass architecture](docs/iteration-3-5d-druid-subclass-circle-land.md) and [metadata maintenance rule](docs/application-iterations-and-features.md).
+
+Current limitations: no other class or Druid subclass, no levels above 8, multiclassing, Wild Shape creature-form automation, complete PHB compendium, combat automation, account, or cloud synchronization. Recommended next work is compatibility design for broader licensed rules and optional synchronization while preserving local-first use; it remains planned, not implemented.
+
 > **Implementation status:** The milestone banner on the character-list page is rendered from the single authoritative [`applicationImplementationStatus`](src/application/implementation-status/implementation-status.ts) definition. Future iterations update that module; React components contain no milestone strings.
 
 ## Release quality (Iteration 3.4)
