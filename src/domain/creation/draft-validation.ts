@@ -13,6 +13,7 @@ import {
   validateStandardArrayAssignment,
 } from './ability-generation';
 import type { CharacterDraft } from './character-draft';
+import { validateAdvancementChoices } from '../leveling';
 
 export type CreationDiagnosticType =
   | 'invalid-name'
@@ -48,6 +49,8 @@ export type CreationDiagnosticType =
   | 'invalid-hit-point-choice'
   | 'missing-rule-definition'
   | 'unsupported-option'
+  | 'missing-level-advancement-choice'
+  | 'invalid-advancement-choice'
   | 'corrupt-draft';
 export interface CreationDiagnostic {
   readonly type: CreationDiagnosticType;
@@ -141,6 +144,25 @@ export function validateCharacterDraft(
         'Farmer grants +2/+1 or +1/+1/+1 among Strength, Constitution, and Wisdom; final scores cannot exceed 20.',
       ),
     );
+  if (finals) {
+    const advancementDiagnostics = validateAdvancementChoices(
+      draft.classId,
+      draft.targetLevel,
+      draft.advancementChoices,
+      finals,
+      draft.featIds,
+    );
+    out.push(
+      ...advancementDiagnostics.map((entry) =>
+        diagnostic(
+          entry.type === 'missing-advancement-choice'
+            ? 'missing-level-advancement-choice'
+            : 'invalid-advancement-choice',
+          entry.message,
+        ),
+      ),
+    );
+  }
   const cls = registry.classes.druid;
   out.push(
     ...validateDruidPrimalOrder(

@@ -20,6 +20,7 @@ import { getAvailableClassSpells } from '../domain/spells';
 describe('Iteration 3.5C', () => {
   const level3 = {
     ...referenceBuild,
+    advancementChoices: [],
     abilityScores: { ...referenceBuild.abilityScores, wisdom: 18 },
     totalLevel: 3,
     class: { ...referenceBuild.class!, level: 3 },

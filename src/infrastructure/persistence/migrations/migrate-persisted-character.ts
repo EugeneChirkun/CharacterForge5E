@@ -165,6 +165,50 @@ export function migratePersistedCharacter(input: unknown): MigrationResult {
       });
     }
   }
+  if (cls?.classId === 'druid' && typeof cls.level === 'number') {
+    const choices = Array.isArray(migratedBuild.advancementChoices)
+      ? (migratedBuild.advancementChoices as Record<string, unknown>[])
+      : [];
+    const required = Array.isArray(migratedBuild.requiredBuildChoices)
+      ? migratedBuild.requiredBuildChoices
+      : [];
+    const missingLevels = [4, 8].filter(
+      (level) =>
+        (cls.level as number) >= level &&
+        !choices.some(
+          (choice) =>
+            choice.classId === 'druid' && choice.characterLevel === level,
+        ),
+    );
+    if (missingLevels.length) {
+      migratedBuild = {
+        ...migratedBuild,
+        requiredBuildChoices: [
+          ...required,
+          ...missingLevels
+            .filter(
+              (level) =>
+                !required.some(
+                  (choice) =>
+                    object(choice) &&
+                    choice.choiceId === `druid.advancement.${level}`,
+                ),
+            )
+            .map((level) => ({
+              code: 'missing-required-build-choice',
+              choiceId: `druid.advancement.${level}`,
+            })),
+        ],
+      };
+      for (const level of missingLevels)
+        diagnostics.push({
+          code: 'missing-level-advancement-choice',
+          message: `This Druid is missing the required level ${level} advancement choice. Choose Ability Score Improvement or an eligible General Feat.`,
+          severity: 'warning',
+          characterId: input.build.id as string,
+        });
+    }
+  }
   if (migratedBuild !== build)
     diagnostics.push({
       code: 'missing-required-build-choice',

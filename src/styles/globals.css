@@ -106,8 +106,8 @@ button.danger:focus-visible {
   outline-color: var(--color-danger-focus);
 }
 button.danger:disabled {
-  background: var(--color-danger-disabled);
-  color: var(--color-danger-text);
+  background: var(--color-danger-disabled-bg);
+  color: var(--color-danger-disabled-text);
   opacity: 1;
 }
 @media (max-width: 760px) {

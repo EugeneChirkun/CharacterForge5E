@@ -54,6 +54,34 @@ const completeDraft = (level = 1) => ({
       { type: 'fixed' as const, baseHitPoints: i ? 5 : 8 },
     ]),
   ),
+  advancementChoices: [
+    ...(level >= 4
+      ? [
+          {
+            classId: 'druid' as const,
+            characterLevel: 4,
+            choice: {
+              type: 'ability-score-improvement' as const,
+              increases: [{ ability: 'wisdom' as const, amount: 2 as const }],
+            },
+          },
+        ]
+      : []),
+    ...(level >= 8
+      ? [
+          {
+            classId: 'druid' as const,
+            characterLevel: 8,
+            choice: {
+              type: 'ability-score-improvement' as const,
+              increases: [
+                { ability: 'intelligence' as const, amount: 2 as const },
+              ],
+            },
+          },
+        ]
+      : []),
+  ],
   ...(level >= 3
     ? {
         subclassId: 'circle-of-the-land' as const,
