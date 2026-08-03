@@ -8,6 +8,7 @@ import {
   type CurrencyWallet,
   type EquipmentDefinition,
   type InventoryItem,
+  materializeEquipmentPackage,
 } from './index';
 
 export type StartingEquipmentChoiceType = 'package' | 'gold' | 'legacy-unknown';
@@ -79,7 +80,7 @@ export const startingEquipmentPackages = Object.freeze([
       item('leather-armor', 'equipped'),
       item('shield', 'equipped'),
       item('sickle'),
-      item('druidic-focus-quarterstaff'),
+      item('quarterstaff'),
       item('explorers-pack'),
       item('herbalism-kit'),
       { type: 'currency', wallet: wallet(9) },
@@ -455,16 +456,29 @@ export function finalizeStartingEquipment(
       success: false,
       diagnostics: [diag('insufficient-starting-funds')],
     };
-  const items: InventoryItem[] = resolved.grants.map(
-    ({ grant, sourceId }, index) => ({
-      instanceId: `starting-${sourceId}-${grant.type === 'item' ? grant.equipmentDefinitionId : index}`,
-      definitionId: grant.type === 'item' ? grant.equipmentDefinitionId : '',
-      quantity: grant.type === 'item' ? grant.quantity : 1,
-      carried: grant.type === 'item' && grant.carried,
-      equipped: grant.type === 'item' && grant.equipPolicy === 'equipped',
-      attuned: false,
-      acquisitionSource: { type: 'starting-package', sourceId },
-    }),
+  const items: InventoryItem[] = resolved.grants.flatMap(
+    ({ grant, sourceId }, index) => {
+      if (
+        grant.type === 'item' &&
+        grant.equipmentDefinitionId === 'explorers-pack'
+      )
+        return materializeEquipmentPackage(
+          'explorers-pack',
+          `starting-${sourceId}-explorers-pack`,
+        );
+      return [
+        {
+          instanceId: `starting-${sourceId}-${grant.type === 'item' ? grant.equipmentDefinitionId : index}`,
+          definitionId:
+            grant.type === 'item' ? grant.equipmentDefinitionId : '',
+          quantity: grant.type === 'item' ? grant.quantity : 1,
+          carried: grant.type === 'item' && grant.carried,
+          equipped: grant.type === 'item' && grant.equipPolicy === 'equipped',
+          attuned: false,
+          acquisitionSource: { type: 'starting-package' as const, sourceId },
+        },
+      ];
+    },
   );
   draft.items.forEach((row) =>
     items.push({

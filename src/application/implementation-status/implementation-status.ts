@@ -10,7 +10,7 @@ export interface ApplicationImplementationStatus {
 export const applicationImplementationStatus = Object.freeze({
   stage: '3',
   iteration: CURRENT_ITERATION.id,
-  title: 'Druid Subclass, Circle of the Land and General Feat Completion',
+  title: 'Smart Choice Filtering and Equipment UX Completion',
   summary:
     'Generic General Feat registry, supported feat selection, prerequisite diagnostics, Druid subclass selection, Circle of the Land progression, Long Rest land changes, and Circle spell integration.',
   implementedFeatures: Object.freeze([

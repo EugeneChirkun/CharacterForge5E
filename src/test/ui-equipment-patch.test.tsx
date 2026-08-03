@@ -96,7 +96,7 @@ describe('EquipmentMechanicalSummary', () => {
     expect(summary).toHaveTextContent('Simple melee weapon');
     expect(summary).toHaveTextContent('Damage: 1d6 bludgeoning');
     expect(summary).toHaveTextContent('Properties: Versatile');
-    expect(summary).not.toHaveTextContent('1d8');
+    expect(summary).toHaveTextContent('Versatile (1d8)');
   });
 
   test('shows armor Dexterity and shield AC rules', () => {

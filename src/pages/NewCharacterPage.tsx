@@ -30,10 +30,13 @@ import {
   setStartingPurchaseQuantity,
   summarizeStartingPurchase,
   type StartingEquipmentSourceId,
+  equipmentPackageRegistry,
+  findPackageDuplicateWarning,
 } from '../domain/equipment';
 import { computeCharacter } from '../domain/character';
 import { createCantripSelectionView } from '../application/characters/cantrip-selection-view';
 import { CartRow } from '../components/CartRow';
+import { EquipmentPackageViewer } from '../components/EquipmentPackageViewer';
 import { EquipmentMechanicalSummary } from '../components/EquipmentMechanicalSummary';
 const steps = [
   'Basics',
@@ -430,6 +433,11 @@ export function NewCharacterPage() {
                     />
                     {packageLabel}
                   </label>
+                  {sourceId === 'druid.class.starting-equipment' && (
+                    <EquipmentPackageViewer
+                      definition={equipmentPackageRegistry['explorers-pack']}
+                    />
+                  )}
                   <label>
                     <input
                       type="radio"
@@ -522,6 +530,22 @@ export function NewCharacterPage() {
                                 <EquipmentMechanicalSummary
                                   definition={definition}
                                 />
+                                {draft.startingEquipmentChoices.some(
+                                  (choice) =>
+                                    choice.sourceId ===
+                                      'druid.class.starting-equipment' &&
+                                    choice.choiceType === 'package',
+                                ) &&
+                                  findPackageDuplicateWarning(definition.id, [
+                                    'explorers-pack',
+                                  ]) && (
+                                    <span className="equipment-warning">
+                                      {findPackageDuplicateWarning(
+                                        definition.id,
+                                        ['explorers-pack'],
+                                      )}
+                                    </span>
+                                  )}
                                 {warning && (
                                   <span className="equipment-warning">
                                     Warning: {warning}

@@ -9,7 +9,6 @@ import {
   advancementDefinitions,
 } from '../domain/leveling';
 import type { AbilityName } from '../domain/abilities';
-import { skillNames } from '../domain/skills';
 import { defaultRuleRegistry } from '../domain/rules';
 import {
   getAvailableClassCantrips,
@@ -21,6 +20,8 @@ import {
   listGeneralFeatAvailability,
   generalFeatRegistry,
   type FeatNestedChoices,
+  evaluateChoiceDefinition,
+  reconcileFeatChoices,
 } from '../domain/feats';
 import { CIRCLE_OF_THE_LAND_ID } from '../domain/subclasses';
 const repo = new LocalCharacterRepository(localStorage);
@@ -335,25 +336,47 @@ function FeatSelector({
           <strong>{feat.name}</strong> — {feat.summary}
         </label>
       ))}
-      {definition?.choices.map((choice) => (
-        <label key={choice.id}>
-          {choice.type.replaceAll('-', ' ')}{' '}
-          <select
-            aria-label={choice.type}
-            value={choices[choice.id] ?? ''}
-            onChange={(event) =>
-              onChoices({ ...choices, [choice.id]: event.currentTarget.value })
-            }
-          >
-            <option value="">Choose…</option>
-            {choice.type.includes('skill')
-              ? skillNames.map((item) => <option key={item}>{item}</option>)
-              : Object.keys(build.abilityScores).map((item) => (
-                  <option key={item}>{item}</option>
+      {definition?.choices.map((choice) => {
+        const result = evaluateChoiceDefinition(choice, {
+          build,
+          selections: choices,
+        });
+        return (
+          <label key={choice.id}>
+            {choice.type.replaceAll('-', ' ')}{' '}
+            <select
+              aria-label={choice.type}
+              value={result.selectedValue ?? ''}
+              onChange={(event) => {
+                const candidate = {
+                  ...choices,
+                  [choice.id]: event.currentTarget.value || undefined,
+                };
+                onChoices(
+                  reconcileFeatChoices(definition.choices, build, candidate)
+                    .choices,
+                );
+              }}
+            >
+              <option value="">Choose…</option>
+              {result.options
+                .filter((option) => option.visible)
+                .map((option) => (
+                  <option
+                    key={option.id}
+                    value={option.id}
+                    disabled={!option.enabled}
+                  >
+                    {option.label}
+                  </option>
                 ))}
-          </select>
-        </label>
-      ))}
+            </select>
+            {result.clearedReason && (
+              <small role="status">{result.clearedReason}</small>
+            )}
+          </label>
+        );
+      })}
       <h2>Unavailable Feats</h2>
       {unavailable.map(({ definition: feat, availability }) => (
         <div key={feat.id} aria-disabled="true">
