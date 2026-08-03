@@ -5,6 +5,8 @@ import {
   equipmentRegistry,
   sortInventoryItems,
   type EquipmentCategory,
+  type EquipmentDefinition,
+  equipmentPackageRegistry,
 } from '../../domain/equipment';
 import {
   addInventoryItem,
@@ -21,6 +23,8 @@ import {
   updateInventoryItemNotes,
   type InventoryCommandResult,
 } from '../../application/inventory';
+import { EquipmentMechanicalSummary } from '../../components/EquipmentMechanicalSummary';
+import { EquipmentPackageViewer } from '../../components/EquipmentPackageViewer';
 
 export function EquipmentPage({
   character,
@@ -32,6 +36,9 @@ export function EquipmentPage({
   const dialogTitle = useId();
   const [addOpen, setAddOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<'alphabetical' | 'cost' | 'weight'>(
+    'alphabetical',
+  );
   const [category, setCategory] = useState<EquipmentCategory | 'all'>('all');
   const [diagnostics, setDiagnostics] = useState<readonly string[]>([]);
   const apply = (result: InventoryCommandResult) => {
@@ -88,12 +95,25 @@ export function EquipmentPage({
       ),
     ],
   ] as const;
-  const available = equipmentDefinitions.filter(
-    (d) =>
-      d.source.verified &&
-      d.name.toLowerCase().includes(search.toLowerCase()) &&
-      (category === 'all' || d.category === category),
-  );
+  const query = search.trim().toLowerCase();
+  const available = (equipmentDefinitions as readonly EquipmentDefinition[])
+    .filter(
+      (d) =>
+        d.source.verified &&
+        [d.name, ...(d.aliases ?? []), d.category].some((value) =>
+          value.toLowerCase().includes(query),
+        ) &&
+        (category === 'all' || d.category === category),
+    )
+    .sort((a, b) =>
+      sort === 'cost'
+        ? (a.priceCopper ?? Number.MAX_SAFE_INTEGER) -
+          (b.priceCopper ?? Number.MAX_SAFE_INTEGER)
+        : sort === 'weight'
+          ? (a.weight ?? Number.MAX_SAFE_INTEGER) -
+            (b.weight ?? Number.MAX_SAFE_INTEGER)
+          : a.name.localeCompare(b.name),
+    );
   return (
     <section className="equipment-page">
       <header className="equipment-heading">
@@ -339,11 +359,28 @@ export function EquipmentPage({
                 )}
               </select>
             </label>
+            <label>
+              Sort
+              <select
+                value={sort}
+                onChange={(event) => setSort(event.target.value as typeof sort)}
+              >
+                <option value="alphabetical">Alphabetical</option>
+                <option value="cost">Cost</option>
+                <option value="weight">Weight</option>
+              </select>
+            </label>
             <ul className="add-items">
               {available.map((d) => (
                 <li key={d.id}>
                   <span>
                     {d.name} <small>{d.category}</small>
+                    <EquipmentMechanicalSummary definition={d} />
+                    {equipmentPackageRegistry[d.id] && (
+                      <EquipmentPackageViewer
+                        definition={equipmentPackageRegistry[d.id]}
+                      />
+                    )}
                   </span>
                   <button
                     onClick={() => {

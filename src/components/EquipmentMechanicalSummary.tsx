@@ -5,8 +5,10 @@ const titleCase = (value: string) =>
 
 export function EquipmentMechanicalSummary({
   definition,
+  proficient,
 }: {
   readonly definition: EquipmentDefinition;
+  readonly proficient?: boolean;
 }) {
   const mechanics: string[] = [];
 
@@ -40,12 +42,32 @@ export function EquipmentMechanicalSummary({
             ? ` + Dexterity modifier (maximum +${definition.dexterityModifier.maximum})`
             : '';
       mechanics.push(`AC: ${definition.baseArmorClass}${dexterityRule}`);
+      mechanics.push(
+        `Strength requirement: ${definition.strengthRequirement ?? 'None'}`,
+      );
+      mechanics.push(
+        `Stealth: ${definition.stealthDisadvantage ? 'Disadvantage' : 'Normal'}`,
+      );
       break;
     }
     case 'shield':
       mechanics.push(`AC bonus: +${definition.armorClassBonus}`);
       break;
   }
+
+  if (mechanics.length && definition.priceCopper !== undefined)
+    mechanics.push(
+      `Cost: ${definition.priceCopper < 100 ? `${definition.priceCopper / 10} SP` : `${definition.priceCopper / 100} GP`}`,
+    );
+  if (mechanics.length && definition.weight !== undefined)
+    mechanics.push(`Weight: ${definition.weight} lb`);
+  if (
+    proficient !== undefined &&
+    ['weapon', 'armor', 'shield'].includes(definition.category)
+  )
+    mechanics.push(
+      `Proficiency: ${proficient ? 'Proficient' : 'Not proficient'}`,
+    );
 
   if (!mechanics.length) return null;
 

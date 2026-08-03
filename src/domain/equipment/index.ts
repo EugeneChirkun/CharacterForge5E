@@ -8,6 +8,8 @@ export type EquipmentCategory =
   | 'adventuring-gear'
   | 'container'
   | 'spellcasting-focus';
+export type EquipmentCapability =
+  'weapon' | 'spellcasting-focus' | 'armor' | 'shield' | 'tool' | 'container';
 export interface CurrencyWallet {
   readonly cp: number;
   readonly sp: number;
@@ -25,6 +27,8 @@ interface EquipmentBase {
   readonly id: string;
   readonly name: string;
   readonly category: EquipmentCategory;
+  readonly aliases?: readonly string[];
+  readonly capabilities?: readonly EquipmentCapability[];
   readonly weight?: number;
   /** Verified list price, normalized to copper pieces for exact arithmetic. */
   readonly priceCopper?: number;
@@ -36,6 +40,8 @@ export interface ArmorDefinition extends EquipmentBase {
   readonly category: 'armor';
   readonly armorCategory: 'light' | 'medium' | 'heavy';
   readonly baseArmorClass: number;
+  readonly strengthRequirement?: number;
+  readonly stealthDisadvantage?: boolean;
   readonly dexterityModifier:
     | { readonly type: 'full' }
     | { readonly type: 'capped'; readonly maximum: number }
@@ -139,7 +145,9 @@ export const equipmentDefinitions = [
     weaponCategory: 'simple',
     weaponType: 'melee',
     damage: { diceCount: 1, dieSize: 6, damageType: 'bludgeoning' },
-    properties: ['versatile'],
+    properties: ['versatile (1d8)'],
+    aliases: ['staff', 'druidic focus'],
+    capabilities: ['weapon', 'spellcasting-focus'],
     weight: 4,
     priceCopper: 20,
     stackable: false,
@@ -177,19 +185,10 @@ export const equipmentDefinitions = [
     name: 'Druidic Focus',
     category: 'spellcasting-focus',
     focusTypes: ['druidic'],
+    capabilities: ['spellcasting-focus'],
     weight: 0,
     stackable: false,
     source: verified('Legacy structured-inventory compatibility'),
-  },
-  {
-    id: 'druidic-focus-quarterstaff',
-    name: 'Druidic Focus (Quarterstaff)',
-    category: 'spellcasting-focus',
-    focusTypes: ['druidic'],
-    weight: 4,
-    priceCopper: 500,
-    stackable: false,
-    source: verified('Free Rules 2024 class equipment'),
   },
   {
     id: 'herbalism-kit',
@@ -236,6 +235,43 @@ export const equipmentDefinitions = [
     priceCopper: 100,
     stackable: false,
     source: verified('Free Rules 2024 equipment table'),
+  },
+  {
+    id: 'mess-kit',
+    name: 'Mess Kit',
+    category: 'adventuring-gear',
+    weight: 1,
+    priceCopper: 20,
+    stackable: false,
+    source: verified('Free Rules 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'tinderbox',
+    name: 'Tinderbox',
+    category: 'adventuring-gear',
+    weight: 1,
+    priceCopper: 50,
+    stackable: false,
+    source: verified('Free Rules 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'torch',
+    name: 'Torch',
+    aliases: ['torches'],
+    category: 'adventuring-gear',
+    weight: 1,
+    priceCopper: 1,
+    stackable: true,
+    source: verified('Free Rules 2024 / Adventuring Gear'),
+  },
+  {
+    id: 'waterskin',
+    name: 'Waterskin',
+    category: 'container',
+    weight: 5,
+    priceCopper: 20,
+    stackable: false,
+    source: verified('Free Rules 2024 / Adventuring Gear'),
   },
   {
     id: 'explorers-pack',
@@ -306,6 +342,13 @@ export const equipmentDefinitions = [
     source: verified('PHB 2024 / Weapons'),
   },
 ] as const satisfies readonly EquipmentDefinition[];
+export const hasEquipmentCapability = (
+  definition: EquipmentDefinition,
+  capability: EquipmentCapability,
+): boolean =>
+  definition.capabilities?.includes(capability) ??
+  definition.category === capability;
+
 export const equipmentRegistry: Readonly<Record<string, EquipmentDefinition>> =
   Object.freeze(Object.fromEntries(equipmentDefinitions.map((d) => [d.id, d])));
 
@@ -504,10 +547,10 @@ export function selectEquipment(
     equippedArmor: armor,
     equippedShield: shield,
     equippedWeapons: equipped
-      .filter(({ definition }) => definition.category === 'weapon')
+      .filter(({ definition }) => hasEquipmentCapability(definition, 'weapon'))
       .map(({ definition }) => definition),
-    equippedFocus: equipped.find(
-      ({ definition }) => definition.category === 'spellcasting-focus',
+    equippedFocus: equipped.find(({ definition }) =>
+      hasEquipmentCapability(definition, 'spellcasting-focus'),
     )?.definition,
     carriedWeight: weight((i) => i.carried),
     storedWeight: weight((i) => !i.carried),
@@ -550,3 +593,5 @@ export function validateEquipment(
 }
 
 export * from './starting-equipment';
+
+export * from './packages';
