@@ -24,11 +24,14 @@ function isLegacyOrCurrentRecord(v: unknown): v is Omit<
   CharacterRecord,
   'schemaVersion'
 > & {
-  readonly schemaVersion: 1 | 2 | 3;
+  readonly schemaVersion: 1 | 2 | 3 | 4;
 } {
   return (
     object(v) &&
-    (v.schemaVersion === 1 || v.schemaVersion === 2 || v.schemaVersion === 3) &&
+    (v.schemaVersion === 1 ||
+      v.schemaVersion === 2 ||
+      v.schemaVersion === 3 ||
+      v.schemaVersion === 4) &&
     object(v.build) &&
     typeof v.build.id === 'string' &&
     v.build.id !== 'reference' &&
@@ -40,7 +43,7 @@ function isLegacyOrCurrentRecord(v: unknown): v is Omit<
 export function isCharacterRecord(v: unknown): v is CharacterRecord {
   return (
     isLegacyOrCurrentRecord(v) &&
-    (v.schemaVersion === 2 || v.schemaVersion === 3) &&
+    (v.schemaVersion === 2 || v.schemaVersion === 3 || v.schemaVersion === 4) &&
     object(v.session.inventory) &&
     Array.isArray(v.session.inventory.items) &&
     object(v.session.inventory.currency) &&

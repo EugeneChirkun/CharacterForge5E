@@ -8,8 +8,8 @@ describe('implementation status', () => {
   test('provides the current milestone from one immutable definition', () => {
     expect(applicationImplementationStatus).toMatchObject({
       stage: '3',
-      iteration: '3.5E',
-      title: 'Smart Choice Filtering and Equipment UX Completion',
+      iteration: '3.5F',
+      title: 'Character State System and Wild Shape',
     });
     expect(applicationImplementationStatus.implementedFeatures).toContain(
       'Character creation purchasing',

@@ -60,6 +60,8 @@ export interface CharacterBuild {
   readonly startingEquipmentChoices?: readonly StartingEquipmentSourceChoice[];
 }
 export interface CharacterSession {
+  readonly characterState?: import('../character-state').CharacterState;
+  readonly characterStateHistory?: readonly import('../character-state').CharacterState[];
   readonly currentHp: number;
   readonly temporaryHp: number;
   readonly spentHitDice: number;
@@ -97,6 +99,8 @@ export interface ComputedSpellAccess {
   readonly castingAbility: AbilityName;
 }
 export interface ComputedCharacter {
+  readonly activeState: import('../character-state').CharacterState;
+  readonly availableWildShapeForms: readonly import('../character-state').BeastDefinition[];
   readonly proficiencies: {
     readonly armor: readonly string[];
     readonly weapons: readonly string[];

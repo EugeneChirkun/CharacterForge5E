@@ -21,7 +21,12 @@ export interface DruidPrimalOrderSelection {
 export interface DruidPrimalOrderDefinition {
   readonly id: DruidPrimalOrderId;
   readonly name: string;
-  readonly grants: readonly ('additional-druid-cantrip' | 'wisdom-skill-bonus' | 'medium-armor' | 'martial-weapons')[];
+  readonly grants: readonly (
+    | 'additional-druid-cantrip'
+    | 'wisdom-skill-bonus'
+    | 'medium-armor'
+    | 'martial-weapons'
+  )[];
   readonly choices: readonly ('additional-cantrip' | 'skill-bonus-target')[];
   readonly source: RuleSource;
 }
@@ -183,7 +188,8 @@ export interface SpellDefinition {
   readonly description?: string;
   readonly source: RuleSource;
 }
-export type SpellGrantSourceType = 'class' | 'subclass' | 'species' | 'primal-order';
+export type SpellGrantSourceType =
+  'class' | 'subclass' | 'species' | 'primal-order';
 export interface SpellGrant {
   readonly id: string;
   readonly spellId: string;
@@ -200,7 +206,9 @@ export interface SpellGrant {
 }
 export type LandType = 'arid' | 'polar' | 'temperate' | 'tropical';
 export interface RuleRegistry {
-  readonly druidPrimalOrders: Readonly<Record<DruidPrimalOrderId, DruidPrimalOrderDefinition>>;
+  readonly druidPrimalOrders: Readonly<
+    Record<DruidPrimalOrderId, DruidPrimalOrderDefinition>
+  >;
   readonly classes: Readonly<Record<string, ClassDefinition>>;
   readonly subclasses: Readonly<Record<string, SubclassDefinition>>;
   readonly species: Readonly<Record<string, SpeciesDefinition>>;
@@ -233,9 +241,12 @@ export type RuleDiagnostic =
         | 'missing-required-land-selection'
         | 'invalid-land-selection'
         | 'unsupported-character-level'
-        | 'missing-primal-order' | 'invalid-primal-order'
-        | 'missing-magician-cantrip' | 'invalid-magician-cantrip'
-        | 'missing-magician-skill-choice' | 'stale-primal-order-choice'
+        | 'missing-primal-order'
+        | 'invalid-primal-order'
+        | 'missing-magician-cantrip'
+        | 'invalid-magician-cantrip'
+        | 'missing-magician-skill-choice'
+        | 'stale-primal-order-choice'
         | 'duplicate-cantrip-selection';
       readonly value?: string | number;
     }
@@ -245,4 +256,13 @@ export type RuleDiagnostic =
       readonly remaining: number;
       readonly maximum: number;
     }
-  | { readonly type: 'unverified-rule'; readonly ruleId: string };
+  | { readonly type: 'unverified-rule'; readonly ruleId: string }
+  | {
+      readonly type:
+        | 'invalid-character-state'
+        | 'invalid-wild-shape'
+        | 'unknown-beast'
+        | 'no-wild-shape-uses'
+        | 'invalid-transformation'
+        | 'invalid-reversion';
+    };

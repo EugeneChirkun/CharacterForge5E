@@ -8,13 +8,21 @@ import type { RuleRegistry } from '../../domain/rules';
 import { skillNames } from '../../domain/skills';
 import type { CharacterViewModel } from './character.types';
 import { emptyInventory } from '../../domain/equipment';
+import { beastRegistry } from '../../domain/character-state';
 export function toCharacterViewModel(
   build: CharacterBuild,
   session: CharacterSession,
   registry: RuleRegistry,
 ): CharacterViewModel {
   const c = computeCharacter(build, session, registry);
+  const beast =
+    c.activeState.type === 'wild-shape'
+      ? beastRegistry[c.activeState.payload.beastId]
+      : undefined;
   return {
+    characterState: c.activeState,
+    characterStateHistory: session.characterStateHistory ?? [],
+    availableWildShapeForms: c.availableWildShapeForms,
     id: build.id,
     name: build.name,
     level: build.totalLevel,
@@ -36,8 +44,10 @@ export function toCharacterViewModel(
       : 'Not yet selected',
     background: 'Farmer',
     landType: c.activeLandType ?? 'temperate',
-    speed: 30,
-    armorClass: c.armorClass.value,
+    speed: beast?.speedFeet ?? 30,
+    armorClass: beast?.armorClass ?? c.armorClass.value,
+    baseArmorClass: c.armorClass.value,
+    baseSpeed: 30,
     initiative: c.initiative.value,
     proficiencyBonus: c.proficiencyBonus.value,
     currentHp: c.currentHp,
@@ -54,6 +64,23 @@ export function toCharacterViewModel(
     spellSaveDc: c.spellcasting?.spellSaveDc.value ?? 0,
     spellAttackBonus: c.spellcasting?.spellAttackBonus.value ?? 0,
     abilities: Object.fromEntries(
+      abilityNames.map((a) => [
+        a,
+        {
+          score:
+            beast && ['strength', 'dexterity', 'constitution'].includes(a)
+              ? beast.abilityScores[a]
+              : build.abilityScores[a],
+          modifier:
+            beast && ['strength', 'dexterity', 'constitution'].includes(a)
+              ? Math.floor((beast.abilityScores[a] - 10) / 2)
+              : c.abilityModifiers[a].value,
+          savingThrow: c.savingThrows[a].value,
+          proficientInSave: build.savingThrowProficiencies.includes(a),
+        },
+      ]),
+    ) as CharacterViewModel['abilities'],
+    baseAbilities: Object.fromEntries(
       abilityNames.map((a) => [
         a,
         {

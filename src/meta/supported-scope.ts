@@ -10,7 +10,6 @@ export const SUPPORTED_SCOPE = Object.freeze([
 
 export const ROADMAP = Object.freeze([
   'Broader licensed rules content',
-  'Wild Shape creature-form support',
+  'Additional temporary character states such as Polymorph and mounted state',
   'Optional synchronization architecture',
 ] as const);
-

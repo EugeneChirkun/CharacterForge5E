@@ -40,6 +40,7 @@ export function performRest(
 ): CharacterViewModel {
   return {
     ...c,
+    ...(type === 'long' ? { characterState: { type: 'normal' as const } } : {}),
     ...(type === 'long'
       ? {
           currentHp: c.maximumHp,

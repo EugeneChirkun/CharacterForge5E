@@ -10,9 +10,9 @@ export interface ApplicationImplementationStatus {
 export const applicationImplementationStatus = Object.freeze({
   stage: '3',
   iteration: CURRENT_ITERATION.id,
-  title: 'Smart Choice Filtering and Equipment UX Completion',
+  title: 'Character State System and Wild Shape',
   summary:
-    'Generic General Feat registry, supported feat selection, prerequisite diagnostics, Druid subclass selection, Circle of the Land progression, Long Rest land changes, and Circle spell integration.',
+    'Generic persistent CharacterState overlays, verified Wild Shape forms, transformation preview, Beast HP routing, reversion, and Beast details on the normal Druid sheet.',
   implementedFeatures: Object.freeze([
     'Generic rules engine',
     'Character creation',
@@ -38,6 +38,8 @@ export const applicationImplementationStatus = Object.freeze({
     'Circle spell recalculation',
     'Conditions redesign',
     'Maximum HP adjustment',
+    'Generic Character State',
+    'Playable Wild Shape',
   ]),
 } as const satisfies ApplicationImplementationStatus);
 import { CURRENT_ITERATION } from '../../meta';

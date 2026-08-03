@@ -117,6 +117,9 @@ export const referenceSession: CharacterSession = {
 
 const computed = computeCharacter(referenceBuild, referenceSession);
 export const referenceCharacter: CharacterViewModel = {
+  characterState: computed.activeState,
+  characterStateHistory: [],
+  availableWildShapeForms: computed.availableWildShapeForms,
   id: referenceBuild.id,
   name: referenceBuild.name,
   level: referenceBuild.totalLevel,
@@ -131,7 +134,9 @@ export const referenceCharacter: CharacterViewModel = {
   background: 'Farmer',
   landType: 'temperate',
   speed: 30,
+  baseSpeed: 30,
   armorClass: computed.armorClass.value,
+  baseArmorClass: computed.armorClass.value,
   initiative: computed.initiative.value,
   proficiencyBonus: computed.proficiencyBonus.value,
   currentHp: computed.currentHp,

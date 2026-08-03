@@ -13,7 +13,7 @@ import {
 describe('Iteration 3.5D release metadata', () => {
   test('registry references are unique and complete', () => {
     const all = IMPLEMENTED_FEATURES.map((feature) => feature.id);
-    expect(CURRENT_ITERATION.id).toBe('3.5E');
+    expect(CURRENT_ITERATION.id).toBe('3.5F');
     expect(new Set(all).size).toBe(all.length);
     expect(LATEST_ITERATION_FEATURE_IDS.length).toBeGreaterThan(0);
     expect(new Set(LATEST_ITERATION_FEATURE_IDS).size).toBe(

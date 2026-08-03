@@ -128,7 +128,7 @@ describe('Iteration 3.5C', () => {
     expect(performLongRest(input).session.conditions).toEqual([]);
   });
   it('publishes the shared implementation status', () => {
-    expect(applicationImplementationStatus.iteration).toBe('3.5E');
+    expect(applicationImplementationStatus.iteration).toBe('3.5F');
     expect(applicationImplementationStatus.implementedFeatures).toContain(
       'Maximum HP adjustment',
     );

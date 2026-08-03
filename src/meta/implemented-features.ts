@@ -287,6 +287,34 @@ const entries: readonly [
     '3.5E',
     'Verified weapon, armor, shield, cost, weight, and proficiency details.',
   ],
+  [
+    'character-state',
+    'Generic character state',
+    'session',
+    '3.5F',
+    'Immutable, persistent temporary-state overlay architecture.',
+  ],
+  [
+    'wild-shape-mode',
+    'Playable Wild Shape',
+    'druid',
+    '3.5F',
+    'Eligible Beast selection, preview, transformation, reversion, and HP routing.',
+  ],
+  [
+    'beast-registry',
+    'Verified Beast registry',
+    'rules-engine',
+    '3.5F',
+    'Small verified registry with complete informational stat blocks.',
+  ],
+  [
+    'active-state-card',
+    'Active character state card',
+    'session',
+    '3.5F',
+    'Generic computed-state presentation directly below the character header.',
+  ],
 ];
 export const IMPLEMENTED_FEATURES: readonly ImplementedFeature[] =
   Object.freeze(
@@ -296,7 +324,7 @@ export const IMPLEMENTED_FEATURES: readonly ImplementedFeature[] =
     ),
   );
 export const LATEST_ITERATION_FEATURE_IDS = Object.freeze(
-  IMPLEMENTED_FEATURES.filter((feature) => feature.introducedIn === '3.5E').map(
+  IMPLEMENTED_FEATURES.filter((feature) => feature.introducedIn === '3.5F').map(
     (feature) => feature.id,
   ),
 );
