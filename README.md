@@ -159,3 +159,7 @@ Stored user Druids missing historical milestones receive ordered, recoverable re
 ## Iteration 3.5E
 
 Smart choice filtering now makes the rules engine the source of visible and legal options, including Skill Expert's interdependent proficiency and Expertise selections. Equipment has verified mechanical summaries, alias/category search, sorting, structured Explorer's Pack contents and totals, informational duplicate warnings, and source-preserving package materialization. Quarterstaff is one multi-capability inventory object that functions as both a weapon and Druidic Focus. See [the Iteration 3.5E architecture notes](docs/iteration-3-5e-equipment-and-choice-ux.md).
+
+## Iteration 3.5F
+
+The generic, immutable `CharacterState` overlay now powers a playable Wild Shape mode without replacing the Druid character sheet. The rules layer filters a deliberately small verified Beast registry; transformation preview, Beast HP damage and healing, overflow damage, automatic and manual reversion, rests, refresh persistence, undo history, a reusable active-state card, and informational Beast details all operate on the same character. See [the Iteration 3.5F architecture notes](docs/iteration-3-5f-character-state-and-wild-shape.md).

@@ -9,4 +9,3 @@ export interface ApplicationBuildInfo {
 export const APPLICATION_BUILD_INFO: ApplicationBuildInfo = Object.freeze({
   version: APPLICATION_VERSION,
 });
-

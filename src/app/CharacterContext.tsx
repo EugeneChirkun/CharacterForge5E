@@ -41,6 +41,8 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
         if (record) {
           const session = {
             ...record.session,
+            characterState: character.characterState,
+            characterStateHistory: character.characterStateHistory,
             currentHp: character.currentHp,
             temporaryHp: character.temporaryHp,
             spentSpellSlots: Object.fromEntries(

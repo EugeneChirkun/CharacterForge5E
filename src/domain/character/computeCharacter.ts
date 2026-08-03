@@ -46,6 +46,11 @@ import {
 } from '../spells';
 import { generalFeatRegistry } from '../feats';
 import { toRulesSubclassId } from '../subclasses';
+import {
+  availableWildShapeForms,
+  beastRegistry,
+  normalCharacterState,
+} from '../character-state';
 
 export function computeCharacter(
   build: CharacterBuild,
@@ -125,6 +130,13 @@ export function computeCharacter(
       getAbilityModifier(build.abilityScores[ability]),
     ]),
   ) as Record<AbilityName, ReturnType<typeof getAbilityModifier>>;
+  const activeState = session.characterState ?? normalCharacterState();
+  const activeBeast =
+    activeState.type === 'wild-shape'
+      ? beastRegistry[activeState.payload.beastId]
+      : undefined;
+  if (activeState.type === 'wild-shape' && !activeBeast)
+    ruleDiagnostics.push({ type: 'unknown-beast' });
   const proficiencyBonus = getProficiencyBonus(build.totalLevel);
   const savingThrows = Object.fromEntries(
     abilityNames.map((ability) => [
@@ -342,6 +354,8 @@ export function computeCharacter(
     });
   }
   return {
+    activeState,
+    availableWildShapeForms: availableWildShapeForms(build),
     proficiencies: {
       armor: [
         ...(classDefinition?.armorTraining ?? []),
@@ -385,13 +399,28 @@ export function computeCharacter(
               : undefined,
           }
         : undefined,
-    abilityModifiers,
+    abilityModifiers: activeBeast
+      ? ({
+          ...abilityModifiers,
+          ...Object.fromEntries(
+            (['strength', 'dexterity', 'constitution'] as const).map((name) => [
+              name,
+              {
+                ...abilityModifiers[name],
+                value: Math.floor((activeBeast.abilityScores[name] - 10) / 2),
+              },
+            ]),
+          ),
+        } as typeof abilityModifiers)
+      : abilityModifiers,
     proficiencyBonus,
     savingThrows,
     skills,
     initiative,
     passivePerception,
-    armorClass,
+    armorClass: activeBeast
+      ? { ...armorClass, value: activeBeast.armorClass }
+      : armorClass,
     equipment: {
       equippedArmor: equipment.equippedArmor,
       equippedShield: equipment.equippedShield,

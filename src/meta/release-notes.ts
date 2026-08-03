@@ -14,11 +14,11 @@ export const RELEASE_NOTES: readonly IterationReleaseNote[] = Object.freeze([
     iterationId: CURRENT_ITERATION.id,
     title: CURRENT_ITERATION.name,
     summary:
-      'Completes rules-owned choice filtering and the structured equipment, focus, package, and inventory experience.',
+      'Adds the generic CharacterState overlay and a complete persistent Wild Shape gameplay mode.',
     addedFeatureIds: LATEST_ITERATION_FEATURE_IDS,
     fixes: [
-      'Illegal Skill Expert options are filtered and stale selections are cleared.',
-      'Explorer’s Pack materializes into sourced inventory items without duplicating Quarterstaff.',
+      'Damage is routed through Beast HP and overflow reaches character HP after automatic reversion.',
+      'The normal character sheet remains mounted while physical statistics reflect the active form.',
     ],
     knownLimitations: KNOWN_LIMITATIONS,
   },

@@ -1,6 +1,10 @@
 import type { AbilityName } from '../../domain/abilities';
 import type { SkillName } from '../../domain/skills';
 import type { CharacterInventory } from '../../domain/equipment';
+import type {
+  BeastDefinition,
+  CharacterState,
+} from '../../domain/character-state';
 export type { AbilityName } from '../../domain/abilities';
 export type LandType = 'arid' | 'polar' | 'temperate' | 'tropical';
 export type RecoveryType = 'short' | 'long' | 'manual';
@@ -24,6 +28,12 @@ export interface ResourceViewModel {
   recoveryOn?: readonly ('short' | 'long')[];
 }
 export interface CharacterViewModel {
+  characterState: CharacterState;
+  characterStateHistory?: readonly CharacterState[];
+  availableWildShapeForms: readonly BeastDefinition[];
+  baseArmorClass?: number;
+  baseSpeed?: number;
+  baseAbilities?: Record<AbilityName, AbilityViewModel>;
   primalOrder?: {
     name: string;
     additionalCantrip?: string;

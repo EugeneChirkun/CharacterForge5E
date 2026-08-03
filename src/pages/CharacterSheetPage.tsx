@@ -18,6 +18,17 @@ import {
 } from '../components/SessionControls';
 import { EquipmentPage } from '../features/equipment/EquipmentPage';
 import type { ConditionId } from '../application/session';
+import { ActiveCharacterStateCard } from '../components/ActiveCharacterStateCard';
+import {
+  damageView,
+  healView,
+  previewTransformation,
+  revertView,
+  transformView,
+  type TransformationPreview,
+} from '../application/wild-shape/wild-shape';
+import { beastRegistry } from '../domain/character-state';
+import { characterStateDiagnosticMessage } from '../application/wild-shape/diagnostics';
 export function CharacterSheetPage() {
   const { id = 'reference' } = useParams();
   const context = useCharacter();
@@ -37,6 +48,9 @@ export function CharacterSheetPage() {
   );
   const [history, setHistory] = useState<readonly string[]>([]);
   const [error, setError] = useState('');
+  const [shapePicker, setShapePicker] = useState(false);
+  const [shapePreview, setShapePreview] =
+    useState<TransformationPreview | null>(null);
   if (missing)
     return (
       <main className="center-page">
@@ -74,7 +88,7 @@ export function CharacterSheetPage() {
       setHistory((h) => [message, ...h]);
       setError('');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Session change failed.');
+      setError(characterStateDiagnosticMessage(e));
     }
   };
   const requireWhole = (value: number, name: string) => {
@@ -86,18 +100,21 @@ export function CharacterSheetPage() {
       execute(() => {
         requireWhole(amount, 'Damage');
         const absorbed = Math.min(character.temporaryHp, amount);
-        return {
+        const afterTemp = {
           ...character,
           temporaryHp: character.temporaryHp - absorbed,
-          currentHp: Math.max(0, character.currentHp - amount + absorbed),
         };
+        return damageView(afterTemp, amount - absorbed);
       }, `Took ${amount} damage`),
     heal: (amount) =>
       execute(() => {
         requireWhole(amount, 'Healing');
-        if (character.currentHp + amount > character.maximumHp)
+        if (
+          character.characterState.type === 'normal' &&
+          character.currentHp + amount > character.maximumHp
+        )
           throw new Error('Healing would exceed maximum HP.');
-        return { ...character, currentHp: character.currentHp + amount };
+        return healView(character, amount);
       }, `Recovered ${amount} HP`),
     setHp: (value) =>
       execute(() => {
@@ -254,6 +271,22 @@ export function CharacterSheetPage() {
           )}
         </div>
         <CharacterHeader character={character} />
+        <ActiveCharacterStateCard
+          activeState={{
+            state: character.characterState,
+            beast:
+              character.characterState.type === 'wild-shape'
+                ? beastRegistry[character.characterState.payload.beastId]
+                : undefined,
+            uses:
+              character.resources.find((r) => r.id === 'wild-shape')?.current ??
+              0,
+          }}
+          onTransform={() => setShapePicker(true)}
+          onRevert={() =>
+            execute(() => revertView(character), 'Ended Wild Shape')
+          }
+        />
         <div className="content">
           {section === 'summary' && (
             <>
@@ -300,6 +333,83 @@ export function CharacterSheetPage() {
           confirm={confirm}
         />
       )}{' '}
+      {shapePicker && (
+        <div className="dialog-backdrop">
+          <section
+            className="dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Choose Wild Shape form"
+          >
+            <h2>Choose a Beast</h2>
+            {character.availableWildShapeForms.map((beast) => (
+              <button
+                className="beast-choice"
+                key={beast.id}
+                onClick={() =>
+                  setShapePreview(previewTransformation(character, beast.id))
+                }
+              >
+                <strong>{beast.name}</strong>
+                <span>
+                  CR {beast.challengeRating} · AC {beast.armorClass} · HP{' '}
+                  {beast.hitPoints}
+                </span>
+              </button>
+            ))}
+            <button
+              className="secondary"
+              onClick={() => {
+                setShapePicker(false);
+                setShapePreview(null);
+              }}
+            >
+              Cancel
+            </button>
+          </section>
+        </div>
+      )}
+      {shapePreview && (
+        <div className="dialog-backdrop">
+          <section
+            className="dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Wild Shape transformation preview"
+          >
+            <h2>Transformation Preview</h2>
+            <p>
+              Current Character ↓ <strong>{shapePreview.beastName}</strong> ↓
+              Changes
+            </p>
+            <dl className="preview-changes">
+              {shapePreview.changes.map((x) => (
+                <div key={x.label}>
+                  <dt>{x.label}</dt>
+                  <dd>
+                    {x.before} → {x.after}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <button
+              onClick={() => {
+                execute(
+                  () => transformView(character, shapePreview.beastId),
+                  'Transformed with Wild Shape',
+                );
+                setShapePicker(false);
+                setShapePreview(null);
+              }}
+            >
+              Confirm Transformation
+            </button>
+            <button className="secondary" onClick={() => setShapePreview(null)}>
+              Back
+            </button>
+          </section>
+        </div>
+      )}
       {toast && (
         <div className="toast" role="status">
           <span>{toast}</span>
