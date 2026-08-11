@@ -122,7 +122,7 @@ export function CharacterListPage() {
           <span className="plus">+</span>
           <span>
             <strong>Create Character</strong>
-            <small>Druid levels 1–8 · draft saved in this browser</small>
+            <small>Druid levels 1–9 · draft saved in this browser</small>
           </span>
         </Link>
       </section>

@@ -1,6 +1,6 @@
 export const SUPPORTED_SCOPE = Object.freeze([
   'D&D 5e 2024 rules',
-  'Druid levels 1–8',
+  'Druid levels 1–9',
   'Circle of the Land',
   'Arid, Polar, Temperate, and Tropical lands',
   'Tiefling with Chthonic Legacy',

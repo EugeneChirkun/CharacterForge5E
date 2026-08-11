@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCharacter } from '../app/CharacterContext';
+import { SUPPORTED_DRUID_LEVEL_RANGE } from '../domain/rules';
 import type {
   CharacterViewModel,
   LandType,
@@ -261,14 +262,16 @@ export function CharacterSheetPage() {
           <Link className="button" to={`/character/${id}/spellbook`}>
             Open Spellbook
           </Link>
-          {id !== 'reference' && character.level < 8 && (
-            <Link className="button" to={`/character/${id}/level-up`}>
-              Level Up
-            </Link>
-          )}
-          {id !== 'reference' && character.level >= 8 && (
-            <span>Maximum level reached</span>
-          )}
+          {id !== 'reference' &&
+            character.level < SUPPORTED_DRUID_LEVEL_RANGE.maximum && (
+              <Link className="button" to={`/character/${id}/level-up`}>
+                Level Up
+              </Link>
+            )}
+          {id !== 'reference' &&
+            character.level >= SUPPORTED_DRUID_LEVEL_RANGE.maximum && (
+              <span>Maximum level reached</span>
+            )}
         </div>
         <CharacterHeader character={character} />
         <ActiveCharacterStateCard

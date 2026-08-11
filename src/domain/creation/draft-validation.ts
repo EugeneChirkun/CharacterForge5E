@@ -3,7 +3,11 @@ import {
   type AbilityName,
   type AbilityScores,
 } from '../abilities';
-import { validateDruidPrimalOrder, type RuleRegistry } from '../rules';
+import {
+  SUPPORTED_DRUID_LEVEL_RANGE,
+  validateDruidPrimalOrder,
+  type RuleRegistry,
+} from '../rules';
 import { maximumSpellLevel, validatePreparedSpells } from '../spells';
 import { finalizeStartingEquipment } from '../equipment';
 import {
@@ -82,13 +86,13 @@ export function validateCharacterDraft(
     out.push(diagnostic('invalid-name', 'Enter a name of 1–80 characters.'));
   if (
     !Number.isInteger(draft.targetLevel) ||
-    draft.targetLevel < 1 ||
-    draft.targetLevel > 8
+    draft.targetLevel < SUPPORTED_DRUID_LEVEL_RANGE.minimum ||
+    draft.targetLevel > SUPPORTED_DRUID_LEVEL_RANGE.maximum
   )
     out.push(
       diagnostic(
         'invalid-target-level',
-        'Level must be an integer from 1 to 8.',
+        `Level must be an integer from ${SUPPORTED_DRUID_LEVEL_RANGE.minimum} to ${SUPPORTED_DRUID_LEVEL_RANGE.maximum}.`,
       ),
     );
   if (

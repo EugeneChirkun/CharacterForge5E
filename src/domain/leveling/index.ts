@@ -4,7 +4,11 @@ import {
   type CharacterSession,
   type ComputedCharacter,
 } from '../character';
-import type { LandType, RuleRegistry } from '../rules';
+import {
+  SUPPORTED_DRUID_LEVEL_RANGE,
+  type LandType,
+  type RuleRegistry,
+} from '../rules';
 import { abilityNames, type AbilityName } from '../abilities';
 import { maximumSpellLevel, validatePreparedSpells } from '../spells';
 import {
@@ -223,10 +227,10 @@ export function applyLevelUp(
       type: 'unsupported-character',
       message: 'Only saved Druid characters can level up.',
     });
-  if (build.totalLevel >= 8)
+  if (build.totalLevel >= SUPPORTED_DRUID_LEVEL_RANGE.maximum)
     diagnostics.push({
       type: 'maximum-level-reached',
-      message: 'Level 8 is the current maximum.',
+      message: `Level ${SUPPORTED_DRUID_LEVEL_RANGE.maximum} is the current maximum.`,
     });
   if (
     draft.fromLevel !== build.totalLevel ||

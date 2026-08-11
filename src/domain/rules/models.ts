@@ -145,7 +145,7 @@ export interface ResourceDefinition {
   readonly recovery: readonly RecoveryRule[];
   readonly source: RuleSource;
 }
-export type SpellLevel = 0 | 1 | 2 | 3 | 4;
+export type SpellLevel = 0 | 1 | 2 | 3 | 4 | 5;
 export type SpellSchool =
   | 'abjuration'
   | 'conjuration'
