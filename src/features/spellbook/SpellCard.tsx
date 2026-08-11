@@ -51,6 +51,9 @@ export function SpellCard({
         <small>
           {spell.castingTime} · {spell.range} · {spell.duration}
         </small>
+        {spell.attackOrSaveLabel && <small>{spell.attackOrSaveLabel}</small>}
+        {spell.damageSummary && <small>Damage: {spell.damageSummary}</small>}
+        {spell.healingSummary && <small>Healing: {spell.healingSummary}</small>}
         <small>
           {spell.components.join(', ') || 'No components listed'}
           {spell.components.includes('Material') ? ' · Material required' : ''}

@@ -25,8 +25,16 @@ export interface SpellCardView {
   readonly materialRequirement?: string;
   readonly tags: readonly SpellTag[];
   readonly canTogglePreparation: boolean;
+  readonly attackOrSaveLabel?: string;
+  readonly damageSummary?: string;
+  readonly healingSummary?: string;
+  readonly scalingSummary?: string;
+  readonly description: string;
+  readonly higherLevels?: string;
+  readonly sourceLabel: string;
+  readonly completeness: import('../rules').ContentCompleteness;
 }
-export type SpellDetailView = SpellCardView & { readonly description?: string };
+export type SpellDetailView = SpellCardView;
 export interface SpellLevelGroup {
   readonly level: number;
   readonly label: string;
@@ -80,7 +88,7 @@ export const searchSpells = (
 ) => {
   const term = search.trim().toLocaleLowerCase();
   return term
-    ? spells.filter((spell) => spell.name.toLocaleLowerCase().includes(term))
+    ? spells.filter((spell) => [spell.name, spell.school, spell.sourceLabel, spell.damageSummary ?? ''].join(' ').toLocaleLowerCase().includes(term))
     : spells;
 };
 export function filterSpells(

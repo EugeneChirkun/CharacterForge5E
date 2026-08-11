@@ -32,7 +32,9 @@ export interface DruidPrimalOrderDefinition {
 }
 export type OwnerType =
   'class' | 'subclass' | 'species' | 'background' | 'feat';
-export type DamageType = 'fire' | 'necrotic' | 'poison';
+export type DamageType =
+  | 'acid' | 'cold' | 'fire' | 'force' | 'lightning' | 'necrotic'
+  | 'piercing' | 'poison' | 'radiant' | 'thunder';
 export type RuleEffect =
   | {
       readonly type: 'grant-saving-throw-proficiency';
@@ -171,6 +173,25 @@ export interface SpellComponents {
   /** A non-copyrighted indicator only; material prose is deliberately not stored. */
   readonly materialRequirement?: string;
 }
+export type ContentCompleteness = 'full' | 'summary' | 'mechanics-only';
+export interface DiceExpression {
+  readonly count: number;
+  readonly die: number;
+  readonly modifier?: number;
+}
+export interface SpellDamageDefinition {
+  readonly dice: DiceExpression;
+  readonly damageType: DamageType;
+  readonly condition?: string;
+}
+export interface SpellHealingDefinition {
+  readonly dice: DiceExpression;
+  readonly abilityModifier?: AbilityName;
+}
+export interface CantripScaling {
+  readonly type: 'character-level';
+  readonly steps: readonly { readonly minimumLevel: number; readonly dice: DiceExpression }[];
+}
 export interface SpellDefinition {
   readonly id: string;
   readonly name: string;
@@ -184,8 +205,18 @@ export interface SpellDefinition {
   readonly duration: string;
   readonly components: SpellComponents;
   readonly tags: readonly SpellTag[];
-  /** Reserved for user-imported, appropriately licensed content. */
-  readonly description?: string;
+  readonly attackType?: 'melee-spell' | 'ranged-spell';
+  readonly savingThrow?: AbilityName;
+  readonly damage?: readonly SpellDamageDefinition[];
+  readonly healing?: readonly SpellHealingDefinition[];
+  readonly scaling?: CantripScaling;
+  /** Authored prose is content, never input to rules calculations. */
+  readonly description: string;
+  readonly higherLevels?: string;
+  readonly content: {
+    readonly completeness: ContentCompleteness;
+    readonly source: string;
+  };
   readonly source: RuleSource;
 }
 export type SpellGrantSourceType =

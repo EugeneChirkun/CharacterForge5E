@@ -262,13 +262,12 @@ export function applyLevelUp(
     });
     if (
       spells.diagnostics.length ||
-      draft.selectedPreparedSpellIds.length !== progression.preparedSpells ||
       draft.selectedCantripIds.length !== progression.cantripsKnown
     )
       diagnostics.push({
         type: 'invalid-spell-choice',
         message:
-          'Select the target level’s valid cantrips and prepared spells.',
+          'Select valid cantrips and no more than the target level’s prepared-spell limit.',
       });
   }
   if (draft.toLevel === 3)

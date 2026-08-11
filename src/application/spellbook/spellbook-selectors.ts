@@ -9,6 +9,7 @@ import {
   type SpellbookView,
   type SpellCardView,
 } from '../../domain/spells';
+import { createSpellDetailView, type ResolvedSpellSource } from '../spells/spell-detail-view';
 
 const componentLabels = (spell: RuleRegistry['spells'][string]) => [
   ...(spell.components.verbal ? ['Verbal'] : []),
@@ -41,6 +42,12 @@ export function selectSpellCards(
         spell.level === 0
           ? !!current
           : prepared.has(spell.id) || alwaysPrepared;
+      const resolvedSources: ResolvedSpellSource[] = sources.map((source) => ({
+        type: source === 'subclass' || source === 'species' || source === 'primal-order' ? source : 'class',
+        sourceId: source,
+        label: source === 'subclass' ? 'Circle of the Land' : source === 'species' ? 'Chthonic Legacy' : source === 'primal-order' ? 'Primal Order — Magician' : 'Druid',
+      }));
+      const detail = createSpellDetailView(spell, resolvedSources);
       return {
         id: spell.id,
         name: spell.name,
@@ -61,6 +68,14 @@ export function selectSpellCards(
         tags: spell.tags,
         canTogglePreparation:
           spell.level > 0 && classAccessible && !alwaysPrepared && !granted,
+        attackOrSaveLabel: detail.attackOrSaveLabel,
+        damageSummary: detail.damageSummary,
+        healingSummary: detail.healingSummary,
+        scalingSummary: detail.scalingSummary,
+        description: detail.description,
+        higherLevels: detail.higherLevels,
+        sourceLabel: detail.sourceLabel,
+        completeness: detail.completeness,
       };
     });
 }

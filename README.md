@@ -1,5 +1,7 @@
 # Character Forge 5E
 
+Stage 4 spell experiences include shared rich, expandable details in creation, the Magician picker, preparation flows, and Spellbook. The content schema supports full bundled descriptions plus structured mechanics and completeness metadata; currently installed summaries and mechanics-only entries are identified honestly. Level-up now requires manual preparation review, preserves existing choices without auto-picking, and exposes level-5 spells to level-9 Druids. Circle and species grants remain derived and separate from ordinary preparation. UI content access is routed through registries and selectors for future content packs.
+
 > **Current release:** Iteration **3.5D — Druid Subclass and Circle of the Land Completion**, application version **0.1.0**.
 
 The supported rules scope is D&D 5e 2024 Druid levels 1–9, Tiefling with Chthonic Legacy, Farmer, Tough, Magician and Warden Primal Orders, and Circle of the Land with Arid, Polar, Temperate, and Tropical lands. Circle selection is explicit and permanent; its active land is session state selected initially in creation or level-up and changeable only through a confirmed Long Rest. Circle spells are always prepared, source-labelled, level-gated, and excluded from the normal preparation allowance.
