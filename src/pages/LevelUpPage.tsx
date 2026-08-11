@@ -9,7 +9,10 @@ import {
   advancementDefinitions,
 } from '../domain/leveling';
 import type { AbilityName } from '../domain/abilities';
-import { defaultRuleRegistry } from '../domain/rules';
+import {
+  defaultRuleRegistry,
+  SUPPORTED_DRUID_LEVEL_RANGE,
+} from '../domain/rules';
 import {
   getAvailableClassCantrips,
   getAvailableClassSpells,
@@ -61,11 +64,14 @@ export function LevelUpPage() {
         <Link to="/characters">Return to characters</Link>
       </main>
     );
-  if (record.build.totalLevel >= 8)
+  if (record.build.totalLevel >= SUPPORTED_DRUID_LEVEL_RANGE.maximum)
     return (
       <main className="center-page">
         <h1>Maximum level reached</h1>
-        <p>Level 8 is the maximum supported level.</p>
+        <p>
+          Level {SUPPORTED_DRUID_LEVEL_RANGE.maximum} is the maximum supported
+          level.
+        </p>
         <Link to={`/character/${id}`}>Return to character</Link>
       </main>
     );

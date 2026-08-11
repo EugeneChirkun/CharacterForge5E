@@ -1,5 +1,9 @@
 import { phb2024 } from '../rules/registry';
-import type { LandTypeDefinition, SubclassDefinition, SubclassRegistry } from './subclass-definition';
+import type {
+  LandTypeDefinition,
+  SubclassDefinition,
+  SubclassRegistry,
+} from './subclass-definition';
 export const CIRCLE_OF_THE_LAND_ID = 'circle-of-the-land';
 export const circleOfTheLand: SubclassDefinition = Object.freeze({
   id: CIRCLE_OF_THE_LAND_ID,
@@ -28,19 +32,56 @@ const landSummary = {
   tropical: 'Magic adapted to warm, lush regions.',
 } as const;
 const landSpellIds = {
-  arid: ['fire-bolt', 'burning-hands', 'blur', 'fireball', 'blight'],
-  polar: ['ray-of-frost', 'fog-cloud', 'hold-person', 'sleet-storm', 'ice-storm'],
-  temperate: ['shocking-grasp', 'sleep', 'misty-step', 'lightning-bolt', 'freedom-of-movement'],
-  tropical: ['acid-splash', 'ray-of-sickness', 'web', 'stinking-cloud', 'polymorph'],
+  arid: [
+    'fire-bolt',
+    'burning-hands',
+    'blur',
+    'fireball',
+    'blight',
+    'wall-of-stone',
+  ],
+  polar: [
+    'ray-of-frost',
+    'fog-cloud',
+    'hold-person',
+    'sleet-storm',
+    'ice-storm',
+    'cone-of-cold',
+  ],
+  temperate: [
+    'shocking-grasp',
+    'sleep',
+    'misty-step',
+    'lightning-bolt',
+    'freedom-of-movement',
+    'tree-stride',
+  ],
+  tropical: [
+    'acid-splash',
+    'ray-of-sickness',
+    'web',
+    'stinking-cloud',
+    'polymorph',
+    'insect-plague',
+  ],
 } as const;
 export const landTypeRegistry: Readonly<Record<string, LandTypeDefinition>> =
-  Object.freeze(Object.fromEntries(circleOfTheLand.landIds.map((id) => [id, Object.freeze({
-    id,
-    name: id[0].toUpperCase() + id.slice(1),
-    summary: landSummary[id],
-    spellGrantIds: Object.freeze(landSpellIds[id].map((spellId) => `land-${id}-${spellId}`)),
-    source: phb2024,
-  })])));
+  Object.freeze(
+    Object.fromEntries(
+      circleOfTheLand.landIds.map((id) => [
+        id,
+        Object.freeze({
+          id,
+          name: id[0].toUpperCase() + id.slice(1),
+          summary: landSummary[id],
+          spellGrantIds: Object.freeze(
+            landSpellIds[id].map((spellId) => `land-${id}-${spellId}`),
+          ),
+          source: phb2024,
+        }),
+      ]),
+    ),
+  );
 export function normalizeSubclassId(value: unknown): string | undefined {
   return typeof value === 'string' &&
     (value === circleOfTheLand.id || circleOfTheLand.legacyIds.includes(value))

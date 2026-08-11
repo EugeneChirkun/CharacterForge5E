@@ -63,3 +63,9 @@ The supported rules subset was audited without expanding it with unverified or 2
 | ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------- | -------- | -------------------------- | ------------------------------ | --------------------------------------------------------------------- |
 | `short-rest` | Apply explicit resource recoveries only                                            | phb-2024-private / Short Rest               | Verified | `src/domain/rest/index.ts` | `src/test/iteration2b.test.ts` | Hit Dice spending deferred                                            |
 | `long-rest`  | Restore HP, slots, eligible resources and species free uses; permit Land selection | phb-2024-private / Long Rest, Circle Spells | Verified | `src/domain/rest/index.ts` | `src/test/iteration2b.test.ts` | Hit Dice recovery not automated because session lacks individual dice |
+
+## Druid level 9 extension (Iteration 3.6)
+
+Verified 2024 progression: proficiency bonus +4; Wild Shape maximum 3; normal Druid cantrips 3; prepared class spells 14; spell slots 4/3/3/3/1; maximum spell level 5; no new base class feature. Magician's additional cantrip remains outside the normal allowance.
+
+Circle of the Land's level-9 always-prepared grants are Arid — Wall of Stone, Polar — Cone of Cold, Temperate — Tree Stride, and Tropical — Insect Plague. These derived subclass grants do not count against prepared class spells.

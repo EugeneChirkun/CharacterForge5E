@@ -2,7 +2,7 @@
 
 > **Current release:** Iteration **3.5D — Druid Subclass and Circle of the Land Completion**, application version **0.1.0**.
 
-The supported rules scope is D&D 5e 2024 Druid levels 1–8, Tiefling with Chthonic Legacy, Farmer, Tough, Magician and Warden Primal Orders, and Circle of the Land with Arid, Polar, Temperate, and Tropical lands. Circle selection is explicit and permanent; its active land is session state selected initially in creation or level-up and changeable only through a confirmed Long Rest. Circle spells are always prepared, source-labelled, level-gated, and excluded from the normal preparation allowance.
+The supported rules scope is D&D 5e 2024 Druid levels 1–9, Tiefling with Chthonic Legacy, Farmer, Tough, Magician and Warden Primal Orders, and Circle of the Land with Arid, Polar, Temperate, and Tropical lands. Circle selection is explicit and permanent; its active land is session state selected initially in creation or level-up and changeable only through a confirmed Long Rest. Circle spells are always prepared, source-labelled, level-gated, and excluded from the normal preparation allowance.
 
 Every primary route now includes a compact release footer. The new `#/about` page displays supported scope, all implemented functionality grouped by category, the distinct latest-iteration additions, structured release notes, known limitations, and a clearly planned roadmap. These views derive from the centralized `src/meta` registry rather than duplicated JSX lists. See [the subclass architecture](docs/iteration-3-5d-druid-subclass-circle-land.md) and [metadata maintenance rule](docs/application-iterations-and-features.md).
 
@@ -108,11 +108,11 @@ See [the compact verification matrix](docs/rules-verification/druid-tiefling-lev
 
 ## Iteration 2C: creation and level-up
 
-The guided creation workflow supports **only Druid levels 1–8, Tiefling with Chthonic Legacy, Farmer, Tough, and Circle of the Land** (Arid, Polar, Temperate, or Tropical). Its responsive steps cover basics/class, fixed origin, Standard Array/27-point Point Buy/strict Manual scores, Farmer adjustments, Druid skills, one verified MVP equipment preset, class cantrips and prepared spells, the level-3 subclass choice, and a computed review. Spell descriptions from the PHB are not bundled.
+The guided creation workflow supports **only Druid levels 1–9, Tiefling with Chthonic Legacy, Farmer, Tough, and Circle of the Land** (Arid, Polar, Temperate, or Tropical). Its responsive steps cover basics/class, fixed origin, Standard Array/27-point Point Buy/strict Manual scores, Farmer adjustments, Druid skills, one verified MVP equipment preset, class cantrips and prepared spells, the level-3 subclass choice, and a computed review. Spell descriptions from the PHB are not bundled.
 
 Creation choices live in a serializable schema-v1 `CharacterDraft`, separate from completed characters. The browser saves it under `character-forge-creation-draft-v1`, restores it after refresh, and removes it after confirmation or confirmed cancellation. Completed schema-v1 build/session records use `character-forge-records-v1`; computed characters and rule definitions are never stored. Remove those two local-storage keys plus `character-forge-state-v2` in browser developer tools to reset all browser data.
 
-Hash routes are `#/characters`, `#/characters/new`, `#/characters/new/:step`, `#/character/reference`, `#/character/:id`, and `#/character/:id/level-up`. The seeded reference remains read-only and cannot be deleted or leveled. User characters advance exactly one level through level 8. Level-up preserves current and temporary HP and spent resources/slots rather than performing a Long Rest; level 3 requires Circle and land selection. Cantrip replacement and other uncertain replacement rules are deliberately deferred.
+Hash routes are `#/characters`, `#/characters/new`, `#/characters/new/:step`, `#/character/reference`, `#/character/:id`, and `#/character/:id/level-up`. The seeded reference remains read-only and cannot be deleted or leveled. User characters advance exactly one level through level 9. Level-up preserves current and temporary HP and spent resources/slots rather than performing a Long Rest; level 3 requires Circle and land selection. Cantrip replacement and other uncertain replacement rules are deliberately deferred.
 
 See [the Iteration 2C architecture notes](docs/iteration-2c-character-creation.md). Run verification with `npm ci`, `npm run lint`, `npm run test`, and `npm run build`.
 
@@ -142,7 +142,7 @@ Persistence schema 3 adds starting-choice metadata conservatively. Existing stru
 
 ## Iteration 3.5C
 
-CharacterForge5E now supports data-driven Druid advancement through level 8, including **Ability Score Improvements** and supported **General Feats**, with calculation-engine previews and persistent advancement history. Session Mode includes a responsive **Conditions redesign**, long-rest condition recovery, and persistent **Maximum HP adjustment** with current-HP clamping. The Home page **Implementation Status** panel is sourced from the shared status module and is the authoritative deployed-feature report.
+CharacterForge5E now supports data-driven Druid advancement through level 9, including **Ability Score Improvements** and supported **General Feats**, with calculation-engine previews and persistent advancement history. Session Mode includes a responsive **Conditions redesign**, long-rest condition recovery, and persistent **Maximum HP adjustment** with current-HP clamping. The Home page **Implementation Status** panel is sourced from the shared status module and is the authoritative deployed-feature report.
 
 ## Iteration 3.5D
 

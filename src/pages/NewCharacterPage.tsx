@@ -7,7 +7,10 @@ import {
   newCharacterDraft,
   type CharacterDraft,
 } from '../domain/creation';
-import { defaultRuleRegistry } from '../domain/rules';
+import {
+  defaultRuleRegistry,
+  SUPPORTED_DRUID_LEVEL_RANGE,
+} from '../domain/rules';
 import { getResolvedCantripSelections } from '../domain/rules';
 import {
   getAvailableClassCantrips,
@@ -171,9 +174,13 @@ export function NewCharacterPage() {
     setErrors([]);
     if (
       current === 'Basics' &&
-      (!draft.name.trim() || draft.targetLevel < 1 || draft.targetLevel > 8)
+      (!draft.name.trim() ||
+        draft.targetLevel < SUPPORTED_DRUID_LEVEL_RANGE.minimum ||
+        draft.targetLevel > SUPPORTED_DRUID_LEVEL_RANGE.maximum)
     )
-      return setErrors(['Enter a name and a level from 1 to 8.']);
+      return setErrors([
+        `Enter a name and a level from ${SUPPORTED_DRUID_LEVEL_RANGE.minimum} to ${SUPPORTED_DRUID_LEVEL_RANGE.maximum}.`,
+      ]);
     setStep((n) => Math.min(n + 1, visibleSteps.length - 1));
   };
   const finish = async () => {
@@ -207,7 +214,7 @@ export function NewCharacterPage() {
   return (
     <main className="wizard-page">
       <header>
-        <p className="eyebrow">Druid MVP · levels 1–8</p>
+        <p className="eyebrow">Druid MVP · levels 1–9</p>
         <h1 tabIndex={-1}>Create a character</h1>
         <p>
           Only Druid, Tiefling (Chthonic), Farmer, Tough, and Circle of the Land
@@ -246,7 +253,7 @@ export function NewCharacterPage() {
                 id="level"
                 type="number"
                 min="1"
-                max="8"
+                max={SUPPORTED_DRUID_LEVEL_RANGE.maximum}
                 value={draft.targetLevel}
                 onChange={(e) => {
                   const targetLevel = Number(e.target.value);

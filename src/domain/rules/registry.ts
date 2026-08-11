@@ -206,6 +206,7 @@ const progression = [
     3,
     ['druid-ability-score-improvement-8'],
   ],
+  [9, 3, 14, { 1: 4, 2: 3, 3: 3, 4: 3, 5: 1 }, 3, []],
 ] as const;
 const spellRows: Array<
   [
@@ -328,6 +329,69 @@ const spellRows: Array<
     ['druid'],
   ],
   ['stone-shape', 'Stone Shape', 4, 'transmutation', false, false, ['druid']],
+  ['antilife-shell', 'Antilife Shell', 5, 'abjuration', false, true, ['druid']],
+  ['awaken', 'Awaken', 5, 'transmutation', false, false, ['druid']],
+  [
+    'commune-with-nature',
+    'Commune with Nature',
+    5,
+    'divination',
+    true,
+    false,
+    ['druid'],
+  ],
+  [
+    'conjure-elemental',
+    'Conjure Elemental',
+    5,
+    'conjuration',
+    false,
+    true,
+    ['druid'],
+  ],
+  ['contagion', 'Contagion', 5, 'necromancy', false, false, ['druid']],
+  [
+    'greater-restoration',
+    'Greater Restoration',
+    5,
+    'abjuration',
+    false,
+    false,
+    ['druid'],
+  ],
+  ['insect-plague', 'Insect Plague', 5, 'conjuration', false, true, ['druid']],
+  [
+    'mass-cure-wounds',
+    'Mass Cure Wounds',
+    5,
+    'abjuration',
+    false,
+    false,
+    ['druid'],
+  ],
+  [
+    'planar-binding',
+    'Planar Binding',
+    5,
+    'abjuration',
+    false,
+    false,
+    ['druid'],
+  ],
+  ['reincarnate', 'Reincarnate', 5, 'necromancy', false, false, ['druid']],
+  ['scrying', 'Scrying', 5, 'divination', false, true, ['druid']],
+  [
+    'transmute-rock',
+    'Transmute Rock',
+    5,
+    'transmutation',
+    false,
+    false,
+    ['druid'],
+  ],
+  ['tree-stride', 'Tree Stride', 5, 'conjuration', false, true, ['druid']],
+  ['wall-of-stone', 'Wall of Stone', 5, 'evocation', false, true, ['druid']],
+  ['cone-of-cold', 'Cone of Cold', 5, 'evocation', false, false, []],
 ];
 const spells = Object.fromEntries(
   spellRows.map(
@@ -389,6 +453,7 @@ const landData = {
     [3, 'blur'],
     [5, 'fireball'],
     [7, 'blight'],
+    [9, 'wall-of-stone'],
   ],
   polar: [
     [3, 'ray-of-frost'],
@@ -396,6 +461,7 @@ const landData = {
     [3, 'hold-person'],
     [5, 'sleet-storm'],
     [7, 'ice-storm'],
+    [9, 'cone-of-cold'],
   ],
   temperate: [
     [3, 'shocking-grasp'],
@@ -403,6 +469,7 @@ const landData = {
     [3, 'misty-step'],
     [5, 'lightning-bolt'],
     [7, 'freedom-of-movement'],
+    [9, 'tree-stride'],
   ],
   tropical: [
     [3, 'acid-splash'],
@@ -410,6 +477,7 @@ const landData = {
     [3, 'web'],
     [5, 'stinking-cloud'],
     [7, 'polymorph'],
+    [9, 'insect-plague'],
   ],
 } as const;
 const grants: SpellGrant[] = Object.entries(landData)
@@ -439,13 +507,18 @@ const grants: SpellGrant[] = Object.entries(landData)
 export const defaultRuleRegistry: RuleRegistry = {
   druidPrimalOrders: {
     magician: {
-      id: 'magician', name: 'Magician',
+      id: 'magician',
+      name: 'Magician',
       grants: ['additional-druid-cantrip', 'wisdom-skill-bonus'],
-      choices: ['additional-cantrip', 'skill-bonus-target'], source: phb2024,
+      choices: ['additional-cantrip', 'skill-bonus-target'],
+      source: phb2024,
     },
     warden: {
-      id: 'warden', name: 'Warden',
-      grants: ['medium-armor', 'martial-weapons'], choices: [], source: phb2024,
+      id: 'warden',
+      name: 'Warden',
+      grants: ['medium-armor', 'martial-weapons'],
+      choices: [],
+      source: phb2024,
     },
   },
   classes: {
@@ -571,7 +644,7 @@ export const defaultRuleRegistry: RuleRegistry = {
       maximum: {
         type: 'by-class-level',
         classId: 'druid',
-        values: { 2: 2, 3: 2, 4: 2, 5: 2, 6: 3, 7: 3, 8: 3 },
+        values: { 2: 2, 3: 2, 4: 2, 5: 2, 6: 3, 7: 3, 8: 3, 9: 3 },
       },
       recovery: [
         { restType: 'short', amount: 1 },

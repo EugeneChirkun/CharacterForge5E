@@ -114,7 +114,7 @@ const entries: readonly [
   ],
   [
     'druid-levels',
-    'Druid levels 1–8',
+    'Druid levels 1–9',
     'druid',
     '2B',
     'Verified progression, slots, features, and resources.',

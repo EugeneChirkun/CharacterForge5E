@@ -16,7 +16,7 @@ export const applicationImplementationStatus = Object.freeze({
   implementedFeatures: Object.freeze([
     'Generic rules engine',
     'Character creation',
-    'Druid levels 1–8',
+    'Druid levels 1–9',
     'Circle of the Land',
     'Tiefling (Chthonic)',
     'Farmer',
