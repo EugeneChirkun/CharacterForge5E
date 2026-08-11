@@ -51,6 +51,14 @@ export function SpellDetailPanel({
           ].join(', ') || 'None'}
         </dd>
       </dl>
+      {spell.attackOrSaveLabel && <p><strong>Attack / save:</strong> {spell.attackOrSaveLabel}</p>}
+      {spell.damageSummary && <p><strong>Damage:</strong> {spell.damageSummary}</p>}
+      {spell.healingSummary && <p><strong>Healing:</strong> {spell.healingSummary}</p>}
+      {spell.scalingSummary && <p><strong>Scaling:</strong> {spell.scalingSummary}</p>}
+      <h3>Description</h3>
+      <p>{spell.description}</p>
+      {spell.higherLevels && <><h3>At Higher Levels / Scaling</h3><p>{spell.higherLevels}</p></>}
+      <p><strong>Content:</strong> {spell.completeness === 'full' ? 'Full description' : spell.completeness === 'summary' ? 'Summary only' : 'Mechanics only'}</p>
     </aside>
   );
 }

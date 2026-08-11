@@ -393,11 +393,59 @@ const spellRows: Array<
   ['wall-of-stone', 'Wall of Stone', 5, 'evocation', false, true, ['druid']],
   ['cone-of-cold', 'Cone of Cold', 5, 'evocation', false, false, []],
 ];
+const cantripDice = (die: number) => ({
+  type: 'character-level' as const,
+  steps: [1, 5, 11, 17].map((minimumLevel, index) => ({
+    minimumLevel,
+    dice: { count: index + 1, die },
+  })),
+});
+const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
+  'thorn-whip': {
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: true, materialRequirement: 'the stem of a plant with thorns' },
+    duration: 'Instantaneous',
+    attackType: 'melee-spell',
+    damage: [{ dice: { count: 1, die: 6 }, damageType: 'piercing' }],
+    scaling: cantripDice(6),
+    description: 'You create a vine-like whip covered in thorns that lashes at one creature in range. Make a melee spell attack. On a hit, the target takes piercing damage, and if it is Large or smaller, you can pull it up to 10 feet closer to you.',
+    higherLevels: 'The damage increases by one die at character levels 5, 11, and 17.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+  'produce-flame': {
+    range: 'Self', duration: '10 minutes',
+    description: 'A flickering flame appears in your hand. It sheds light and harms neither you nor your equipment. While it lasts, you can take a Magic action to hurl fire at a creature or object within 60 feet, making a ranged spell attack.',
+    attackType: 'ranged-spell',
+    damage: [{ dice: { count: 1, die: 8 }, damageType: 'fire' }],
+    scaling: cantripDice(8),
+    higherLevels: 'The damage increases by one die at character levels 5, 11, and 17.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+  'call-lightning': {
+    range: '120 feet', duration: 'Concentration, up to 10 minutes', savingThrow: 'dexterity',
+    damage: [{ dice: { count: 3, die: 10 }, damageType: 'lightning' }],
+    description: 'A storm cloud appears at a point in range. When it appears, and on later turns when you use a Magic action, choose a point beneath it. Lightning flashes down and creatures near that point make a Dexterity saving throw, taking lightning damage on a failed save or half as much on a success.',
+    higherLevels: 'The damage increases by 1d10 for each spell-slot level above 3.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+  'cure-wounds': {
+    range: 'Touch', duration: 'Instantaneous',
+    healing: [{ dice: { count: 2, die: 8 }, abilityModifier: 'wisdom' }],
+    description: 'A creature you touch regains Hit Points. This spell has no effect on Constructs or Undead.',
+    higherLevels: 'The healing increases by 2d8 for each spell-slot level above 1.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+  'tree-stride': {
+    range: 'Self', duration: 'Concentration, up to 1 minute',
+    description: 'You gain the ability to enter a living tree and move from inside it to another living tree of the same kind within range. Each tree must be Large or bigger.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+};
 const spells = Object.fromEntries(
   spellRows.map(
     ([id, name, level, school, ritual, concentration, classIds]) => [
       id,
-      {
+      ({
         id,
         name,
         level,
@@ -421,8 +469,11 @@ const spells = Object.fromEntries(
             : []),
           ...(concentration ? (['control'] as const) : (['utility'] as const)),
         ],
+        description: 'Detailed rules text is not yet bundled for this spell. Its verified structured mechanics remain available.',
+        content: { completeness: 'mechanics-only', source: 'phb-2024' },
         source: phb2024,
-      },
+        ...richSpellContent[id],
+      } satisfies SpellDefinition),
     ],
   ),
 );

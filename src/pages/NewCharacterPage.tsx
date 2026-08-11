@@ -41,6 +41,8 @@ import { createCantripSelectionView } from '../application/characters/cantrip-se
 import { CartRow } from '../components/CartRow';
 import { EquipmentPackageViewer } from '../components/EquipmentPackageViewer';
 import { EquipmentMechanicalSummary } from '../components/EquipmentMechanicalSummary';
+import { SpellCard } from '../components/SpellCard';
+import { createSpellDetailView } from '../application/spells/spell-detail-view';
 const steps = [
   'Basics',
   'Origin',
@@ -722,19 +724,17 @@ export function NewCharacterPage() {
               </fieldset>
               {draft.primalOrder?.orderId === 'magician' && (
                 <>
-                  <label>
-                    Additional Druid cantrip
-                    <select
-                      value={
-                        draft.primalOrder.magicianChoices
-                          ?.additionalCantripId ?? ''
-                      }
-                      onChange={(e) =>
+                  <fieldset className="rich-spell-list">
+                    <legend>Additional Druid cantrip</legend>
+                    {cantrips.map((s) => {
+                      const duplicate = draft.selectedCantripIds.includes(s.id);
+                      const selected = draft.primalOrder?.orderId === 'magician' && draft.primalOrder.magicianChoices?.additionalCantripId === s.id;
+                      return <SpellCard key={s.id} spell={createSpellDetailView(s, [{ type: 'primal-order', sourceId: 'magician', label: 'Primal Order — Magician' }])} selected={selected} disabled={duplicate} disabledReason={duplicate ? 'Already selected as a normal Druid cantrip.' : undefined} actionLabel="Choose" onToggle={() =>
                         patch({
                           primalOrder: {
                             orderId: 'magician',
                             magicianChoices: {
-                              additionalCantripId: e.target.value,
+                              additionalCantripId: s.id,
                               skillBonusTarget:
                                 draft.primalOrder?.orderId === 'magician'
                                   ? (draft.primalOrder.magicianChoices
@@ -742,24 +742,9 @@ export function NewCharacterPage() {
                                   : 'arcana',
                             },
                           },
-                        })
-                      }
-                    >
-                      <option value="">Choose a cantrip</option>
-                      {cantrips.map((s) => (
-                        <option
-                          key={s.id}
-                          value={s.id}
-                          disabled={draft.selectedCantripIds.includes(s.id)}
-                        >
-                          {s.name}
-                          {draft.selectedCantripIds.includes(s.id)
-                            ? ' — already selected as a Druid cantrip'
-                            : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                        })} />;
+                    })}
+                  </fieldset>
                   <fieldset>
                     <legend>Skill bonus</legend>
                     {(['arcana', 'nature'] as const).map((skill) => (
@@ -802,41 +787,24 @@ export function NewCharacterPage() {
                   Druid cantrips ({cantripView.summary.normalSelected}/
                   {cantripView.summary.normalLimit} selected)
                 </legend>
-                {cantripView.options.map((option) => (
-                  <label
+                <div className="rich-spell-list">{cantripView.options.map((option) => {
+                  const definition = defaultRuleRegistry.spells[option.spellId];
+                  return <SpellCard
                     key={option.spellId}
-                    className={
-                      option.selectionSource === 'magician'
-                        ? 'granted-cantrip'
-                        : undefined
-                    }
-                  >
-                    <input
-                      type="checkbox"
-                      checked={option.checked}
-                      disabled={option.disabled}
-                      aria-describedby={
-                        option.sourceLabel
-                          ? `cantrip-${option.spellId}-source`
-                          : undefined
-                      }
-                      onChange={() =>
+                    spell={createSpellDetailView(definition, option.selectionSource === 'magician' ? [{ type: 'primal-order', sourceId: 'magician', label: 'Primal Order — Magician' }] : undefined)}
+                    selected={option.checked} disabled={option.disabled}
+                    disabledReason={option.disabled ? 'Granted by Magician; this additional cantrip cannot be toggled here.' : undefined}
+                    actionLabel="Select"
+                    status={option.sourceLabel && <span className="badge">{option.sourceLabel}</span>}
+                    onToggle={() =>
                         patch({
                           selectedCantripIds: toggle(
                             draft.selectedCantripIds,
                             option.spellId,
                           ),
-                        })
-                      }
-                    />
-                    <span>{option.name}</span>
-                    {option.sourceLabel && (
-                      <small id={`cantrip-${option.spellId}-source`}>
-                        {option.sourceLabel}
-                      </small>
-                    )}
-                  </label>
-                ))}
+                        })}
+                  />;
+                })}</div>
                 {magicianCantripId && (
                   <div className="cantrip-selection-summary">
                     <p>
@@ -858,28 +826,18 @@ export function NewCharacterPage() {
               </fieldset>
               <fieldset>
                 <legend>
-                  Prepared spells ({draft.selectedPreparedSpellIds.length}/
+                  Prepared Druid spells ({draft.selectedPreparedSpellIds.length}/
                   {progression.preparedSpells})
                 </legend>
-                {leveled.map((s) => (
-                  <label key={s.id}>
-                    <input
-                      type="checkbox"
-                      checked={draft.selectedPreparedSpellIds.includes(s.id)}
-                      onChange={() =>
+                <div className="rich-spell-list">{leveled.map((s) => (
+                  <SpellCard key={s.id} spell={createSpellDetailView(s)} selected={draft.selectedPreparedSpellIds.includes(s.id)} actionLabel="Prepare" onToggle={() =>
                         patch({
                           selectedPreparedSpellIds: toggle(
                             draft.selectedPreparedSpellIds,
                             s.id,
                           ),
-                        })
-                      }
-                    />
-                    {s.name} · Level {s.level}
-                    {s.ritual ? ' · Ritual' : ''}
-                    {s.concentration ? ' · Concentration' : ''}
-                  </label>
-                ))}
+                        })} />
+                ))}</div>
               </fieldset>
               <p>
                 Circle and Chthonic spells are granted separately and do not
