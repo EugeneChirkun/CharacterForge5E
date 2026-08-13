@@ -181,6 +181,27 @@ export interface SpellComponents {
   /** A non-copyrighted indicator only; material prose is deliberately not stored. */
   readonly materialRequirement?: string;
 }
+export type SpellCastingTime =
+  | { readonly type: 'action' }
+  | { readonly type: 'bonus-action' }
+  | { readonly type: 'reaction'; readonly trigger?: string }
+  | { readonly type: 'minute'; readonly amount: number }
+  | { readonly type: 'hour'; readonly amount: number }
+  | { readonly type: 'special'; readonly label: string };
+export type SpellRange =
+  | { readonly type: 'self' }
+  | { readonly type: 'touch' }
+  | { readonly type: 'distance'; readonly feet: number }
+  | { readonly type: 'sight' }
+  | { readonly type: 'unlimited' }
+  | { readonly type: 'special'; readonly label: string };
+export type SpellDuration =
+  | { readonly type: 'instantaneous' }
+  | { readonly type: 'rounds'; readonly amount: number; readonly concentration: boolean }
+  | { readonly type: 'minutes'; readonly amount: number; readonly concentration: boolean }
+  | { readonly type: 'hours'; readonly amount: number; readonly concentration: boolean }
+  | { readonly type: 'until-dispelled' }
+  | { readonly type: 'special'; readonly label: string };
 export type SpellDescriptionAvailability = 'none' | 'summary' | 'full';
 /** @deprecated Use SpellDescriptionAvailability. */
 export type ContentCompleteness =
@@ -227,6 +248,13 @@ export interface CantripScaling {
     readonly dice: DiceExpression;
   }[];
 }
+export interface SlotScaling {
+  readonly type: 'slot-level';
+  readonly perSlotLevel: DiceExpression;
+  readonly startsAboveBaseLevel: true;
+  readonly effect: 'damage' | 'healing';
+}
+export type SpellScaling = CantripScaling | SlotScaling;
 export interface SpellDefinition {
   readonly id: string;
   readonly name: string;
@@ -235,9 +263,9 @@ export interface SpellDefinition {
   readonly classIds: readonly string[];
   readonly ritual: boolean;
   readonly concentration: boolean;
-  readonly castingTime?: string;
-  readonly range?: string;
-  readonly duration?: string;
+  readonly castingTime: SpellCastingTime;
+  readonly range: SpellRange;
+  readonly duration: SpellDuration;
   readonly components: SpellComponents;
   readonly tags: readonly SpellTag[];
   readonly attackType?: 'melee-spell' | 'ranged-spell';
@@ -246,7 +274,7 @@ export interface SpellDefinition {
   readonly healing?: readonly SpellHealingDefinition[];
   readonly area?: SpellAreaDefinition;
   readonly effects?: readonly SpellEffectSummary[];
-  readonly scaling?: CantripScaling;
+  readonly scaling?: SpellScaling;
   /** Authored prose is content, never input to rules calculations. */
   readonly summary?: string;
   readonly description?: string;

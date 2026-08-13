@@ -134,7 +134,7 @@ export function SpellCard({
               <p>{spell.summary}</p>
             </>
           ) : (
-            <p>Description not available in installed content.</p>
+            <p>Structured spell summary unavailable.</p>
           )}
           {spell.higherLevels && (
             <>

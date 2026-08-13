@@ -19,19 +19,18 @@ describe('stabilized production spell content', () => {
     for (const spell of Object.values(defaultRuleRegistry.spells)) {
       expect(JSON.stringify(spell), spell.id).not.toMatch(forbidden);
       expect(spell.source.sourceId, spell.id).toBeTruthy();
-      expect(spell.content.completeness === 'full').toBe(
-        Boolean(spell.description),
-      );
+      expect(spell.summary ?? spell.description, spell.id).toBeTruthy();
     }
   });
 
-  test('unknown examples are neutral while Thorn Whip retains shared rich mechanics', () => {
+  test('previously incomplete examples and Thorn Whip share rich mechanics', () => {
     for (const id of ['animal-friendship', 'shocking-grasp'] as const) {
       const view = createSpellDetailView(defaultRuleRegistry.spells[id]);
       expect(
         `${view.rangeLabel} ${view.durationLabel} ${view.description ?? ''}`,
       ).not.toMatch(/see Details|uses its PHB/i);
-      expect(view.completeness).toBe('none');
+      expect(['summary', 'full']).toContain(view.completeness);
+      expect(view.description ?? view.summary).toBeTruthy();
     }
     const thorn = createSpellDetailView(
       defaultRuleRegistry.spells['thorn-whip'],
