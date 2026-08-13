@@ -9,7 +9,10 @@ import {
   type SpellbookView,
   type SpellCardView,
 } from '../../domain/spells';
-import { createSpellDetailView, type ResolvedSpellSource } from '../spells/spell-detail-view';
+import {
+  createSpellDetailView,
+  type ResolvedSpellSource,
+} from '../spells/spell-detail-view';
 
 const componentLabels = (spell: RuleRegistry['spells'][string]) => [
   ...(spell.components.verbal ? ['Verbal'] : []),
@@ -43,11 +46,27 @@ export function selectSpellCards(
           ? !!current
           : prepared.has(spell.id) || alwaysPrepared;
       const resolvedSources: ResolvedSpellSource[] = sources.map((source) => ({
-        type: source === 'subclass' || source === 'species' || source === 'primal-order' ? source : 'class',
+        type:
+          source === 'subclass' ||
+          source === 'species' ||
+          source === 'primal-order'
+            ? source
+            : 'class',
         sourceId: source,
-        label: source === 'subclass' ? 'Circle of the Land' : source === 'species' ? 'Chthonic Legacy' : source === 'primal-order' ? 'Primal Order — Magician' : 'Druid',
+        label:
+          source === 'subclass'
+            ? 'Circle of the Land'
+            : source === 'species'
+              ? 'Chthonic Legacy'
+              : source === 'primal-order'
+                ? 'Primal Order — Magician'
+                : 'Druid',
       }));
-      const detail = createSpellDetailView(spell, resolvedSources);
+      const detail = createSpellDetailView(
+        spell,
+        resolvedSources,
+        character.level,
+      );
       return {
         id: spell.id,
         name: spell.name,
@@ -71,6 +90,8 @@ export function selectSpellCards(
         attackOrSaveLabel: detail.attackOrSaveLabel,
         damageSummary: detail.damageSummary,
         healingSummary: detail.healingSummary,
+        areaLabel: detail.areaLabel,
+        effectLabels: detail.effectLabels,
         scalingSummary: detail.scalingSummary,
         description: detail.description,
         higherLevels: detail.higherLevels,
@@ -125,12 +146,17 @@ export function selectSpellbook(
 function spellPreparationDiagnosticMessage(code: string): string {
   const messages: Readonly<Record<string, string>> = {
     'too-many-prepared-spells': 'Too many Druid spells are prepared.',
-    'inaccessible-spell-level': 'A prepared spell is above the maximum spell level.',
+    'inaccessible-spell-level':
+      'A prepared spell is above the maximum spell level.',
     'not-on-class-list': 'A prepared spell is not on the Druid spell list.',
-    'duplicate-spell-selection': 'A prepared spell was selected more than once.',
-    'missing-spell-definition': 'A prepared spell is no longer available in these rules.',
-    'cantrip-in-prepared-spells': 'Cantrips do not use prepared spell selections.',
-    'granted-spell-counted-as-class': 'A granted spell does not count against the preparation limit.',
+    'duplicate-spell-selection':
+      'A prepared spell was selected more than once.',
+    'missing-spell-definition':
+      'A prepared spell is no longer available in these rules.',
+    'cantrip-in-prepared-spells':
+      'Cantrips do not use prepared spell selections.',
+    'granted-spell-counted-as-class':
+      'A granted spell does not count against the preparation limit.',
   };
   return messages[code] ?? 'A spell preparation choice needs attention.';
 }

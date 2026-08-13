@@ -28,6 +28,8 @@ export interface SpellCardView {
   readonly attackOrSaveLabel?: string;
   readonly damageSummary?: string;
   readonly healingSummary?: string;
+  readonly areaLabel?: string;
+  readonly effectLabels: readonly string[];
   readonly scalingSummary?: string;
   readonly description: string;
   readonly higherLevels?: string;
@@ -88,7 +90,12 @@ export const searchSpells = (
 ) => {
   const term = search.trim().toLocaleLowerCase();
   return term
-    ? spells.filter((spell) => [spell.name, spell.school, spell.sourceLabel, spell.damageSummary ?? ''].join(' ').toLocaleLowerCase().includes(term))
+    ? spells.filter((spell) =>
+        [spell.name, spell.school, spell.sourceLabel, spell.damageSummary ?? '']
+          .join(' ')
+          .toLocaleLowerCase()
+          .includes(term),
+      )
     : spells;
 };
 export function filterSpells(
