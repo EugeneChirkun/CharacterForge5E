@@ -31,9 +31,11 @@ export interface SpellCardView {
   readonly areaLabel?: string;
   readonly effectLabels: readonly string[];
   readonly scalingSummary?: string;
-  readonly description: string;
+  readonly summary?: string;
+  readonly description?: string;
   readonly higherLevels?: string;
   readonly sourceLabel: string;
+  readonly grantSourceLabels: readonly string[];
   readonly completeness: import('../rules').ContentCompleteness;
 }
 export type SpellDetailView = SpellCardView;

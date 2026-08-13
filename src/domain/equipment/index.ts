@@ -352,6 +352,74 @@ export const hasEquipmentCapability = (
 export const equipmentRegistry: Readonly<Record<string, EquipmentDefinition>> =
   Object.freeze(Object.fromEntries(equipmentDefinitions.map((d) => [d.id, d])));
 
+export interface EquipmentCatalogQuery {
+  readonly registry: Readonly<Record<string, EquipmentDefinition>>;
+  readonly category: EquipmentCategory | 'all';
+  readonly search: string;
+  readonly verifiedOnly: boolean;
+  readonly purchasableOnly?: boolean;
+}
+
+/** One immutable, deterministic filtering path for every equipment catalog. */
+export function getEquipmentCatalogItems({
+  registry,
+  category,
+  search,
+  verifiedOnly,
+  purchasableOnly = false,
+}: EquipmentCatalogQuery): readonly EquipmentDefinition[] {
+  const term = search.trim().toLocaleLowerCase();
+  return Object.values(registry)
+    .filter(
+      (item) =>
+        (!verifiedOnly || item.source.verified) &&
+        (!purchasableOnly || item.priceCopper !== undefined),
+    )
+    .filter(
+      (item) =>
+        category === 'all' ||
+        item.category === category ||
+        (category === 'spellcasting-focus' &&
+          hasEquipmentCapability(item, category)),
+    )
+    .filter(
+      (item) =>
+        !term ||
+        [item.name, ...(item.aliases ?? [])]
+          .join(' ')
+          .toLocaleLowerCase()
+          .includes(term),
+    )
+    .sort(
+      (left, right) =>
+        left.name.localeCompare(right.name) || left.id.localeCompare(right.id),
+    );
+}
+
+export const productionEquipmentCategories = (
+  registry: Readonly<Record<string, EquipmentDefinition>>,
+): readonly EquipmentCategory[] =>
+  (
+    [
+      'armor',
+      'shield',
+      'weapon',
+      'tool',
+      'adventuring-gear',
+      'container',
+      'spellcasting-focus',
+    ] as const
+  ).filter(
+    (category) =>
+      getEquipmentCatalogItems({
+        registry,
+        category,
+        search: '',
+        verifiedOnly: true,
+        purchasableOnly: true,
+      }).length > 0,
+  );
+
 export interface InventoryItem {
   readonly instanceId: string;
   readonly definitionId: string;

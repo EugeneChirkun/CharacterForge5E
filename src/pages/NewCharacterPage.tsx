@@ -22,12 +22,16 @@ import {
 } from '../infrastructure/persistence/local-character-repository';
 import { useCharacter } from '../app/CharacterContext';
 import { toCharacterViewModel } from '../features/characters/toCharacterViewModel';
-import { equipmentRegistry } from '../domain/equipment';
+import {
+  equipmentRegistry,
+  getEquipmentCatalogItems,
+  productionEquipmentCategories,
+  type EquipmentCategory,
+} from '../domain/equipment';
 import {
   addStartingPurchaseItem,
   clearStartingPurchaseCart,
   equipmentProficiencyWarning,
-  getPurchasableStartingEquipment,
   removeStartingPurchaseItem,
   resolveStartingChoices,
   setStartingPurchaseQuantity,
@@ -154,6 +158,21 @@ export function NewCharacterPage() {
       computed,
     };
   }, [draft]);
+  const equipmentCategories = useMemo(
+    () => productionEquipmentCategories(equipmentRegistry),
+    [],
+  );
+  const equipmentCatalog = useMemo(
+    () =>
+      getEquipmentCatalogItems({
+        registry: equipmentRegistry,
+        category: equipmentCategory as EquipmentCategory | 'all',
+        search: equipmentSearch,
+        verifiedOnly: true,
+        purchasableOnly: true,
+      }),
+    [equipmentCategory, equipmentSearch],
+  );
   const chooseEquipment = (
     sourceId: StartingEquipmentSourceId,
     choiceType: 'package' | 'gold',
@@ -496,31 +515,15 @@ export function NewCharacterPage() {
                       }
                     >
                       <option value="all">All categories</option>
-                      {[
-                        'armor',
-                        'shield',
-                        'weapon',
-                        'tool',
-                        'adventuring-gear',
-                        'container',
-                        'spellcasting-focus',
-                      ].map((category) => (
+                      {equipmentCategories.map((category) => (
                         <option key={category} value={category}>
                           {label(category)}
                         </option>
                       ))}
                     </select>
-                    <ul className="shop-list">
-                      {getPurchasableStartingEquipment()
-                        .filter(
-                          (definition) =>
-                            definition.name
-                              .toLowerCase()
-                              .includes(equipmentSearch.trim().toLowerCase()) &&
-                            (equipmentCategory === 'all' ||
-                              definition.category === equipmentCategory),
-                        )
-                        .map((definition) => {
+                    {equipmentCatalog.length ? (
+                      <ul className="shop-list">
+                        {equipmentCatalog.map((definition) => {
                           const warning = equipmentModel.computed
                             ? equipmentProficiencyWarning(
                                 definition,
@@ -577,7 +580,14 @@ export function NewCharacterPage() {
                             </li>
                           );
                         })}
-                    </ul>
+                      </ul>
+                    ) : (
+                      <p role="status">
+                        {equipmentSearch.trim()
+                          ? 'No equipment matches the current search and category filters.'
+                          : 'No equipment is available in this category.'}
+                      </p>
+                    )}
                   </section>
                   <section>
                     <h3>Cart</h3>
@@ -728,21 +738,45 @@ export function NewCharacterPage() {
                     <legend>Additional Druid cantrip</legend>
                     {cantrips.map((s) => {
                       const duplicate = draft.selectedCantripIds.includes(s.id);
-                      const selected = draft.primalOrder?.orderId === 'magician' && draft.primalOrder.magicianChoices?.additionalCantripId === s.id;
-                      return <SpellCard key={s.id} spell={createSpellDetailView(s, [{ type: 'primal-order', sourceId: 'magician', label: 'Primal Order — Magician' }])} selected={selected} disabled={duplicate} disabledReason={duplicate ? 'Already selected as a normal Druid cantrip.' : undefined} actionLabel="Choose" onToggle={() =>
-                        patch({
-                          primalOrder: {
-                            orderId: 'magician',
-                            magicianChoices: {
-                              additionalCantripId: s.id,
-                              skillBonusTarget:
-                                draft.primalOrder?.orderId === 'magician'
-                                  ? (draft.primalOrder.magicianChoices
-                                      ?.skillBonusTarget ?? 'arcana')
-                                  : 'arcana',
+                      const selected =
+                        draft.primalOrder?.orderId === 'magician' &&
+                        draft.primalOrder.magicianChoices
+                          ?.additionalCantripId === s.id;
+                      return (
+                        <SpellCard
+                          key={s.id}
+                          spell={createSpellDetailView(s, [
+                            {
+                              type: 'primal-order',
+                              sourceId: 'magician',
+                              label: 'Primal Order — Magician',
                             },
-                          },
-                        })} />;
+                          ])}
+                          selected={selected}
+                          disabled={duplicate}
+                          disabledReason={
+                            duplicate
+                              ? 'Already selected as a normal Druid cantrip.'
+                              : undefined
+                          }
+                          actionLabel="Choose"
+                          onToggle={() =>
+                            patch({
+                              primalOrder: {
+                                orderId: 'magician',
+                                magicianChoices: {
+                                  additionalCantripId: s.id,
+                                  skillBonusTarget:
+                                    draft.primalOrder?.orderId === 'magician'
+                                      ? (draft.primalOrder.magicianChoices
+                                          ?.skillBonusTarget ?? 'arcana')
+                                      : 'arcana',
+                                },
+                              },
+                            })
+                          }
+                        />
+                      );
                     })}
                   </fieldset>
                   <fieldset>
@@ -787,24 +821,50 @@ export function NewCharacterPage() {
                   Druid cantrips ({cantripView.summary.normalSelected}/
                   {cantripView.summary.normalLimit} selected)
                 </legend>
-                <div className="rich-spell-list">{cantripView.options.map((option) => {
-                  const definition = defaultRuleRegistry.spells[option.spellId];
-                  return <SpellCard
-                    key={option.spellId}
-                    spell={createSpellDetailView(definition, option.selectionSource === 'magician' ? [{ type: 'primal-order', sourceId: 'magician', label: 'Primal Order — Magician' }] : undefined)}
-                    selected={option.checked} disabled={option.disabled}
-                    disabledReason={option.disabled ? 'Granted by Magician; this additional cantrip cannot be toggled here.' : undefined}
-                    actionLabel="Select"
-                    status={option.sourceLabel && <span className="badge">{option.sourceLabel}</span>}
-                    onToggle={() =>
-                        patch({
-                          selectedCantripIds: toggle(
-                            draft.selectedCantripIds,
-                            option.spellId,
-                          ),
-                        })}
-                  />;
-                })}</div>
+                <div className="rich-spell-list">
+                  {cantripView.options.map((option) => {
+                    const definition =
+                      defaultRuleRegistry.spells[option.spellId];
+                    return (
+                      <SpellCard
+                        key={option.spellId}
+                        spell={createSpellDetailView(
+                          definition,
+                          option.selectionSource === 'magician'
+                            ? [
+                                {
+                                  type: 'primal-order',
+                                  sourceId: 'magician',
+                                  label: 'Primal Order — Magician',
+                                },
+                              ]
+                            : undefined,
+                        )}
+                        selected={option.checked}
+                        disabled={option.disabled}
+                        disabledReason={
+                          option.disabled
+                            ? 'Granted by Magician; this additional cantrip cannot be toggled here.'
+                            : undefined
+                        }
+                        actionLabel="Select"
+                        status={
+                          option.sourceLabel && (
+                            <span className="badge">{option.sourceLabel}</span>
+                          )
+                        }
+                        onToggle={() =>
+                          patch({
+                            selectedCantripIds: toggle(
+                              draft.selectedCantripIds,
+                              option.spellId,
+                            ),
+                          })
+                        }
+                      />
+                    );
+                  })}
+                </div>
                 {magicianCantripId && (
                   <div className="cantrip-selection-summary">
                     <p>
@@ -826,18 +886,27 @@ export function NewCharacterPage() {
               </fieldset>
               <fieldset>
                 <legend>
-                  Prepared Druid spells ({draft.selectedPreparedSpellIds.length}/
-                  {progression.preparedSpells})
+                  Prepared Druid spells ({draft.selectedPreparedSpellIds.length}
+                  /{progression.preparedSpells})
                 </legend>
-                <div className="rich-spell-list">{leveled.map((s) => (
-                  <SpellCard key={s.id} spell={createSpellDetailView(s)} selected={draft.selectedPreparedSpellIds.includes(s.id)} actionLabel="Prepare" onToggle={() =>
+                <div className="rich-spell-list">
+                  {leveled.map((s) => (
+                    <SpellCard
+                      key={s.id}
+                      spell={createSpellDetailView(s)}
+                      selected={draft.selectedPreparedSpellIds.includes(s.id)}
+                      actionLabel="Prepare"
+                      onToggle={() =>
                         patch({
                           selectedPreparedSpellIds: toggle(
                             draft.selectedPreparedSpellIds,
                             s.id,
                           ),
-                        })} />
-                ))}</div>
+                        })
+                      }
+                    />
+                  ))}
+                </div>
               </fieldset>
               <p>
                 Circle and Chthonic spells are granted separately and do not

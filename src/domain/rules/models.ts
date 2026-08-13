@@ -181,7 +181,10 @@ export interface SpellComponents {
   /** A non-copyrighted indicator only; material prose is deliberately not stored. */
   readonly materialRequirement?: string;
 }
-export type ContentCompleteness = 'full' | 'summary' | 'mechanics-only';
+export type SpellDescriptionAvailability = 'none' | 'summary' | 'full';
+/** @deprecated Use SpellDescriptionAvailability. */
+export type ContentCompleteness =
+  SpellDescriptionAvailability | 'mechanics-only';
 export interface DiceExpression {
   readonly count: number;
   readonly die: number;
@@ -232,9 +235,9 @@ export interface SpellDefinition {
   readonly classIds: readonly string[];
   readonly ritual: boolean;
   readonly concentration: boolean;
-  readonly castingTime: string;
-  readonly range: string;
-  readonly duration: string;
+  readonly castingTime?: string;
+  readonly range?: string;
+  readonly duration?: string;
   readonly components: SpellComponents;
   readonly tags: readonly SpellTag[];
   readonly attackType?: 'melee-spell' | 'ranged-spell';
@@ -245,10 +248,11 @@ export interface SpellDefinition {
   readonly effects?: readonly SpellEffectSummary[];
   readonly scaling?: CantripScaling;
   /** Authored prose is content, never input to rules calculations. */
-  readonly description: string;
+  readonly summary?: string;
+  readonly description?: string;
   readonly higherLevels?: string;
   readonly content: {
-    readonly completeness: ContentCompleteness;
+    readonly completeness: SpellDescriptionAvailability;
     readonly source: string;
   };
   readonly source: RuleSource;

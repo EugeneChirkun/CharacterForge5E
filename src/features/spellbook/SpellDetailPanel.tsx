@@ -40,8 +40,10 @@ export function SpellDetailPanel({
                 ? 'Prepared'
                 : 'Not Prepared'}
         </dd>
-        <dt>Sources</dt>
-        <dd>{spell.sources.map((source) => source === 'primal-order' ? 'Primal Order: Magician' : source).join(', ') || 'No character source'}</dd>
+        <dt>Granted by</dt>
+        <dd>{spell.grantSourceLabels.join(', ') || 'No character grant'}</dd>
+        <dt>Rules source</dt>
+        <dd>{spell.sourceLabel}</dd>
         <dt>Mechanical tags</dt>
         <dd>
           {[
@@ -51,14 +53,50 @@ export function SpellDetailPanel({
           ].join(', ') || 'None'}
         </dd>
       </dl>
-      {spell.attackOrSaveLabel && <p><strong>Attack / save:</strong> {spell.attackOrSaveLabel}</p>}
-      {spell.damageSummary && <p><strong>Damage:</strong> {spell.damageSummary}</p>}
-      {spell.healingSummary && <p><strong>Healing:</strong> {spell.healingSummary}</p>}
-      {spell.scalingSummary && <p><strong>Scaling:</strong> {spell.scalingSummary}</p>}
-      <h3>Description</h3>
-      <p>{spell.description}</p>
-      {spell.higherLevels && <><h3>At Higher Levels / Scaling</h3><p>{spell.higherLevels}</p></>}
-      <p><strong>Content:</strong> {spell.completeness === 'full' ? 'Full description' : spell.completeness === 'summary' ? 'Summary only' : 'Mechanics only'}</p>
+      {spell.attackOrSaveLabel && (
+        <p>
+          <strong>Attack / save:</strong> {spell.attackOrSaveLabel}
+        </p>
+      )}
+      {spell.damageSummary && (
+        <p>
+          <strong>Damage:</strong> {spell.damageSummary}
+        </p>
+      )}
+      {spell.healingSummary && (
+        <p>
+          <strong>Healing:</strong> {spell.healingSummary}
+        </p>
+      )}
+      {spell.scalingSummary && (
+        <p>
+          <strong>Scaling:</strong> {spell.scalingSummary}
+        </p>
+      )}
+      {spell.description ? (
+        <>
+          <h3>Description</h3>
+          <p>{spell.description}</p>
+        </>
+      ) : spell.summary ? (
+        <>
+          <h3>Summary</h3>
+          <p>{spell.summary}</p>
+        </>
+      ) : (
+        <p>Description not available in installed content.</p>
+      )}
+      {spell.higherLevels && (
+        <>
+          <h3>At Higher Levels / Scaling</h3>
+          <p>{spell.higherLevels}</p>
+        </>
+      )}
+      {spell.completeness === 'summary' && (
+        <p>
+          <strong>Content:</strong> Summary available
+        </p>
+      )}
     </aside>
   );
 }
