@@ -123,8 +123,19 @@ export function SpellCard({
               <strong>Scaling:</strong> {spell.scalingSummary}
             </p>
           )}
-          <h4>Description</h4>
-          <p>{spell.description}</p>
+          {spell.description ? (
+            <>
+              <h4>Description</h4>
+              <p>{spell.description}</p>
+            </>
+          ) : spell.summary ? (
+            <>
+              <h4>Summary</h4>
+              <p>{spell.summary}</p>
+            </>
+          ) : (
+            <p>Description not available in installed content.</p>
+          )}
           {spell.higherLevels && (
             <>
               <h4>At Higher Levels / Scaling</h4>
@@ -132,15 +143,14 @@ export function SpellCard({
             </>
           )}
           <p>
-            <strong>Source:</strong> {spell.sourceLabel}
+            <strong>Granted by:</strong>{' '}
+            {spell.sources.map((source) => source.label).join(', ') ||
+              'No character grant'}
           </p>
-          <small>
-            {spell.completeness === 'full'
-              ? 'Full description'
-              : spell.completeness === 'summary'
-                ? 'Summary only'
-                : 'Mechanics only'}
-          </small>
+          <p>
+            <strong>Rules source:</strong> {spell.sourceLabel}
+          </p>
+          {spell.completeness === 'summary' && <small>Summary available</small>}
         </section>
       )}
     </article>

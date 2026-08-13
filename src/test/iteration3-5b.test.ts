@@ -57,12 +57,18 @@ describe('Iteration 3.5B package registry and currency', () => {
     const first = { cp: 5, sp: 2, ep: 1, gp: 3, pp: 1 } as const;
     const copy = structuredClone(first);
     expect(walletToCopper(first)).toBe(1375);
-    expect(copperToWallet(3650)).toEqual({ cp: 0, sp: 0, ep: 1, gp: 6, pp: 3 });
-    expect(addWallets(first, { cp: 5, sp: 8, ep: 0, gp: 0, pp: 0 })).toEqual({
+    expect(copperToWallet(3650)).toEqual({
       cp: 0,
-      sp: 1,
+      sp: 5,
+      ep: 0,
+      gp: 36,
+      pp: 0,
+    });
+    expect(addWallets(first, { cp: 5, sp: 8, ep: 0, gp: 0, pp: 0 })).toEqual({
+      cp: 10,
+      sp: 10,
       ep: 1,
-      gp: 4,
+      gp: 3,
       pp: 1,
     });
     expect(
@@ -70,7 +76,7 @@ describe('Iteration 3.5B package registry and currency', () => {
         { cp: 0, sp: 0, ep: 0, gp: 1, pp: 0 },
         { cp: 1, sp: 0, ep: 0, gp: 0, pp: 0 },
       ),
-    ).toEqual({ cp: 9, sp: 4, ep: 1, gp: 0, pp: 0 });
+    ).toEqual({ cp: 9, sp: 9, ep: 0, gp: 0, pp: 0 });
     expect(first).toEqual(copy);
   });
 

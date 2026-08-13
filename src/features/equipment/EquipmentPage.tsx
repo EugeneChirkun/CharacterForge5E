@@ -1,11 +1,11 @@
 import { useId, useState } from 'react';
 import type { CharacterViewModel } from '../characters/character.types';
 import {
-  equipmentDefinitions,
   equipmentRegistry,
+  getEquipmentCatalogItems,
+  productionEquipmentCategories,
   sortInventoryItems,
   type EquipmentCategory,
-  type EquipmentDefinition,
   equipmentPackageRegistry,
 } from '../../domain/equipment';
 import {
@@ -95,25 +95,22 @@ export function EquipmentPage({
       ),
     ],
   ] as const;
-  const query = search.trim().toLowerCase();
-  const available = (equipmentDefinitions as readonly EquipmentDefinition[])
-    .filter(
-      (d) =>
-        d.source.verified &&
-        [d.name, ...(d.aliases ?? []), d.category].some((value) =>
-          value.toLowerCase().includes(query),
-        ) &&
-        (category === 'all' || d.category === category),
-    )
-    .sort((a, b) =>
-      sort === 'cost'
-        ? (a.priceCopper ?? Number.MAX_SAFE_INTEGER) -
-          (b.priceCopper ?? Number.MAX_SAFE_INTEGER)
-        : sort === 'weight'
-          ? (a.weight ?? Number.MAX_SAFE_INTEGER) -
-            (b.weight ?? Number.MAX_SAFE_INTEGER)
-          : a.name.localeCompare(b.name),
-    );
+  const available = [
+    ...getEquipmentCatalogItems({
+      registry: equipmentRegistry,
+      category,
+      search,
+      verifiedOnly: true,
+    }),
+  ].sort((a, b) =>
+    sort === 'cost'
+      ? (a.priceCopper ?? Number.MAX_SAFE_INTEGER) -
+        (b.priceCopper ?? Number.MAX_SAFE_INTEGER)
+      : sort === 'weight'
+        ? (a.weight ?? Number.MAX_SAFE_INTEGER) -
+          (b.weight ?? Number.MAX_SAFE_INTEGER)
+        : a.name.localeCompare(b.name),
+  );
   return (
     <section className="equipment-page">
       <header className="equipment-heading">
@@ -352,11 +349,9 @@ export function EquipmentPage({
                 }
               >
                 <option value="all">All categories</option>
-                {[...new Set(equipmentDefinitions.map((d) => d.category))].map(
-                  (c) => (
-                    <option key={c}>{c}</option>
-                  ),
-                )}
+                {productionEquipmentCategories(equipmentRegistry).map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
               </select>
             </label>
             <label>
@@ -370,36 +365,44 @@ export function EquipmentPage({
                 <option value="weight">Weight</option>
               </select>
             </label>
-            <ul className="add-items">
-              {available.map((d) => (
-                <li key={d.id}>
-                  <span>
-                    {d.name} <small>{d.category}</small>
-                    <EquipmentMechanicalSummary definition={d} />
-                    {equipmentPackageRegistry[d.id] && (
-                      <EquipmentPackageViewer
-                        definition={equipmentPackageRegistry[d.id]}
-                      />
-                    )}
-                  </span>
-                  <button
-                    onClick={() => {
-                      apply(
-                        addInventoryItem(character.inventory, {
-                          instanceId: `item-${Date.now()}-${d.id}`,
-                          definitionId: d.id,
-                          quantity: 1,
-                          carried: true,
-                        }),
-                      );
-                      setAddOpen(false);
-                    }}
-                  >
-                    Add
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {available.length ? (
+              <ul className="add-items">
+                {available.map((d) => (
+                  <li key={d.id}>
+                    <span>
+                      {d.name} <small>{d.category}</small>
+                      <EquipmentMechanicalSummary definition={d} />
+                      {equipmentPackageRegistry[d.id] && (
+                        <EquipmentPackageViewer
+                          definition={equipmentPackageRegistry[d.id]}
+                        />
+                      )}
+                    </span>
+                    <button
+                      onClick={() => {
+                        apply(
+                          addInventoryItem(character.inventory, {
+                            instanceId: `item-${Date.now()}-${d.id}`,
+                            definitionId: d.id,
+                            quantity: 1,
+                            carried: true,
+                          }),
+                        );
+                        setAddOpen(false);
+                      }}
+                    >
+                      Add
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p role="status">
+                {search.trim()
+                  ? 'No equipment matches the current search and category filters.'
+                  : 'No equipment is available in this category.'}
+              </p>
+            )}
             <button onClick={() => setAddOpen(false)}>Close</button>
           </div>
         </div>

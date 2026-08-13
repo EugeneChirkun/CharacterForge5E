@@ -610,11 +610,9 @@ const spells = Object.fromEntries(
         ritual,
         concentration,
         classIds,
-        castingTime: 'Action',
-        range: 'Varies; see Details',
-        duration: concentration
-          ? 'Concentration, duration in Details'
-          : 'Duration in Details',
+        castingTime: undefined,
+        range: undefined,
+        duration: undefined,
         components: {
           verbal: true,
           somatic: true,
@@ -626,15 +624,9 @@ const spells = Object.fromEntries(
             : []),
           ...(concentration ? (['control'] as const) : (['utility'] as const)),
         ],
-        effects: [
-          {
-            id: `${id}-primary`,
-            kind: 'utility',
-            shortText: `${name}’s primary magical effect`,
-          },
-        ],
-        description: `${name} uses its PHB 2024 rules. Its casting parameters, targets, outcomes, limitations, and any repeatable actions are presented by this bundled definition.`,
-        content: { completeness: 'full', source: 'phb-2024' },
+        effects: undefined,
+        description: undefined,
+        content: { completeness: 'none', source: 'phb-2024' },
         source: phb2024,
         ...richSpellContent[id],
       } satisfies SpellDefinition,

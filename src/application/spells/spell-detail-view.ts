@@ -26,7 +26,8 @@ export interface SpellDetailView {
   readonly damageSummary?: string;
   readonly healingSummary?: string;
   readonly scalingSummary?: string;
-  readonly description: string;
+  readonly summary?: string;
+  readonly description?: string;
   readonly higherLevels?: string;
   readonly sourceLabel: string;
   readonly completeness: ContentCompleteness;
@@ -84,11 +85,11 @@ export function createSpellDetailView(
     level: spell.level,
     levelLabel: spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`,
     schoolLabel: title(spell.school),
-    castingTimeLabel: spell.castingTime,
-    rangeLabel: spell.range,
+    castingTimeLabel: spell.castingTime ?? 'Not available in installed content',
+    rangeLabel: spell.range ?? 'Not available in installed content',
     componentsLabel: componentCodes.join('/'),
     materialComponentText: spell.components.materialRequirement,
-    durationLabel: spell.duration,
+    durationLabel: spell.duration ?? 'Not available in installed content',
     concentration: spell.concentration,
     ritual: spell.ritual,
     attackOrSaveLabel,
@@ -97,10 +98,13 @@ export function createSpellDetailView(
     scalingSummary: spell.scaling?.steps
       .map((s) => `Level ${s.minimumLevel}: ${dice(s.dice)}`)
       .join(' • '),
+    summary: spell.summary,
     description: spell.description,
     higherLevels: spell.higherLevels,
     sourceLabel:
-      sources.map((source) => source.label).join(', ') || 'Bundled content',
+      spell.source.sourceId === 'phb-2024-private'
+        ? 'PHB 2024'
+        : spell.content.source,
     completeness: spell.content.completeness,
     areaLabel,
     effectLabels: (spell.effects ?? [])

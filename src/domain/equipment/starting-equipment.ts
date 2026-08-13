@@ -208,13 +208,13 @@ export function walletToCopper(value: CurrencyWallet): number {
     0,
   );
 }
-/** Explicit canonical change policy: highest denomination first. */
+/** Display change policy: preserve gold semantics; never silently promote GP to PP. */
 export function copperToWallet(value: number): CurrencyWallet {
   if (!Number.isSafeInteger(value) || value < 0)
     throw new Error('Invalid copper value');
   let rest = value;
   const result = emptyWallet() as Record<CurrencyDenomination, number>;
-  for (const key of ['pp', 'gp', 'ep', 'sp', 'cp'] as const) {
+  for (const key of ['gp', 'sp', 'cp'] as const) {
     result[key] = Math.floor(rest / factors[key]);
     rest %= factors[key];
   }
@@ -223,7 +223,15 @@ export function copperToWallet(value: number): CurrencyWallet {
 export const addWallets = (
   ...values: readonly CurrencyWallet[]
 ): CurrencyWallet =>
-  copperToWallet(values.reduce((sum, value) => sum + walletToCopper(value), 0));
+  Object.freeze(
+    (Object.keys(factors) as CurrencyDenomination[]).reduce(
+      (wallet, key) => ({
+        ...wallet,
+        [key]: values.reduce((sum, value) => sum + value[key], 0),
+      }),
+      emptyWallet(),
+    ),
+  );
 export function subtractWallet(
   left: CurrencyWallet,
   right: CurrencyWallet,
