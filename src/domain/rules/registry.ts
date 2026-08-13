@@ -401,9 +401,40 @@ const cantripDice = (die: number) => ({
   })),
 });
 const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
+  'healing-word': {
+    castingTime: { type: 'bonus-action' },
+    range: { type: 'distance', feet: 60 },
+    duration: { type: 'instantaneous' },
+    components: { verbal: true, somatic: false, material: false },
+    healing: [{ dice: { count: 2, die: 4, modifierType: 'spellcasting-ability' } }],
+    scaling: { type: 'slot-level', perSlotLevel: { count: 2, die: 4 }, startsAboveBaseLevel: true, effect: 'healing' },
+    higherLevels: 'The healing increases by 2d4 for each spell-slot level above 1.',
+    effects: [{ id: 'healing-word-heal', kind: 'healing', shortText: 'Restore 2d4 plus your spellcasting ability modifier Hit Points' }],
+    description: 'A creature you can see within range regains 2d4 Hit Points plus your spellcasting ability modifier.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+  'animal-friendship': {
+    castingTime: { type: 'action' }, range: { type: 'distance', feet: 30 },
+    duration: { type: 'hours', amount: 24, concentration: false },
+    components: { verbal: true, somatic: true, material: true, materialRequirement: 'a morsel of food' },
+    savingThrow: 'wisdom',
+    effects: [{ id: 'animal-friendship-charm', kind: 'condition', condition: 'charmed', shortText: 'Charm one Beast that fails a Wisdom save' }],
+    description: 'One Beast in range makes a Wisdom saving throw. On a failure, it is Charmed by you for 24 hours. The spell ends early if you or an ally damages it.',
+    higherLevels: 'Target one additional Beast for each spell-slot level above 1.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
+  'shocking-grasp': {
+    castingTime: { type: 'action' }, range: { type: 'touch' }, duration: { type: 'instantaneous' },
+    components: { verbal: true, somatic: true, material: false }, attackType: 'melee-spell',
+    damage: [{ dice: { count: 1, die: 8 }, damageType: 'lightning' }], scaling: cantripDice(8),
+    effects: [{ id: 'shocking-grasp-reaction', kind: 'penalty', shortText: 'Target cannot make Opportunity Attacks until its next turn' }],
+    description: 'Make a melee spell attack against a creature you can touch. On a hit, it takes lightning damage and cannot make Opportunity Attacks until the start of its next turn.',
+    higherLevels: 'The damage increases by one die at character levels 5, 11, and 17.',
+    content: { completeness: 'summary', source: 'phb-2024' },
+  },
   guidance: {
-    range: 'Touch',
-    duration: 'Concentration, up to 1 minute',
+    range: { type: 'touch' },
+    duration: { type: 'minutes', amount: 1, concentration: true },
     components: { verbal: true, somatic: true, material: false },
     effects: [
       {
@@ -417,8 +448,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   druidcraft: {
-    range: '30 feet',
-    duration: 'Instantaneous',
+    range: { type: 'distance', feet: 30 },
+    duration: { type: 'instantaneous' },
     components: { verbal: true, somatic: true, material: false },
     effects: [
       {
@@ -447,14 +478,14 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   'thorn-whip': {
-    range: '30 feet',
+    range: { type: 'distance', feet: 30 },
     components: {
       verbal: true,
       somatic: true,
       material: true,
       materialRequirement: 'the stem of a plant with thorns',
     },
-    duration: 'Instantaneous',
+    duration: { type: 'instantaneous' },
     attackType: 'melee-spell',
     damage: [{ dice: { count: 1, die: 6 }, damageType: 'piercing' }],
     scaling: cantripDice(6),
@@ -472,8 +503,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   'produce-flame': {
-    range: 'Self',
-    duration: '10 minutes',
+    range: { type: 'self' },
+    duration: { type: 'minutes', amount: 10, concentration: false },
     description:
       'A flickering flame appears in your hand. It sheds light and harms neither you nor your equipment. While it lasts, you can take a Magic action to hurl fire at a creature or object within 60 feet, making a ranged spell attack.',
     attackType: 'ranged-spell',
@@ -491,8 +522,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   'call-lightning': {
-    range: '120 feet',
-    duration: 'Concentration, up to 10 minutes',
+    range: { type: 'distance', feet: 120 },
+    duration: { type: 'minutes', amount: 10, concentration: true },
     savingThrow: 'dexterity',
     damage: [{ dice: { count: 3, die: 10 }, damageType: 'lightning' }],
     description:
@@ -509,8 +540,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   'cure-wounds': {
-    range: 'Touch',
-    duration: 'Instantaneous',
+    range: { type: 'touch' },
+    duration: { type: 'instantaneous' },
     healing: [
       { dice: { count: 2, die: 8, modifierType: 'spellcasting-ability' } },
     ],
@@ -528,8 +559,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   'tree-stride': {
-    range: 'Self',
-    duration: 'Concentration, up to 1 minute',
+    range: { type: 'self' },
+    duration: { type: 'minutes', amount: 1, concentration: true },
     description:
       'You gain the ability to enter a living tree and move from inside it to another living tree of the same kind within range. Each tree must be Large or bigger.',
     effects: [
@@ -542,8 +573,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   entangle: {
-    range: '90 feet',
-    duration: 'Concentration, up to 1 minute',
+    range: { type: 'distance', feet: 90 },
+    duration: { type: 'minutes', amount: 1, concentration: true },
     savingThrow: 'strength',
     area: { shape: 'square', sizeFeet: 20 },
     effects: [
@@ -564,8 +595,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   'chill-touch': {
-    range: 'Touch',
-    duration: 'Instantaneous',
+    range: { type: 'touch' },
+    duration: { type: 'instantaneous' },
     attackType: 'melee-spell',
     damage: [{ dice: { count: 1, die: 10 }, damageType: 'necrotic' }],
     scaling: cantripDice(10),
@@ -583,8 +614,8 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
   goodberry: {
-    range: 'Self',
-    duration: '24 hours',
+    range: { type: 'self' },
+    duration: { type: 'hours', amount: 24, concentration: false },
     effects: [
       {
         id: 'goodberry-food',
@@ -598,6 +629,58 @@ const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
     content: { completeness: 'full', source: 'phb-2024' },
   },
 };
+const conciseSpellSummaries: Readonly<Record<string, string>> = {
+  'fire-bolt': 'Make a ranged spell attack; on a hit, the target takes fire damage.',
+  'ray-of-frost': 'Make a ranged spell attack that deals cold damage and reduces the target’s Speed by 10 feet until your next turn.',
+  'shocking-grasp': 'Make a melee spell attack against a creature you can touch. On a hit, it takes lightning damage and cannot make Opportunity Attacks until its next turn.',
+  'acid-splash': 'Choose creatures in a small area; each makes a Dexterity save, taking acid damage on a failure.',
+  'thaumaturgy': 'Create one of several harmless supernatural manifestations within range.',
+  'animal-friendship': 'One Beast in range makes a Wisdom save or is Charmed by you for 24 hours; harming it ends the spell.',
+  'healing-word': 'A creature you can see within range regains 2d4 Hit Points plus your spellcasting ability modifier.',
+  'speak-with-animals': 'For 10 minutes, you can comprehend and verbally communicate with Beasts.',
+  'burning-hands': 'Creatures in a 15-foot cone make a Dexterity save, taking fire damage on a failure or half on a success.',
+  blur: 'Attack rolls against you have Disadvantage while you maintain Concentration, subject to creatures that do not rely on sight.',
+  'fog-cloud': 'Create a heavily obscured sphere of fog that can be dispersed by strong wind.',
+  'hold-person': 'A Humanoid makes a Wisdom save or is Paralyzed while you maintain Concentration, repeating the save after its turns.',
+  sleep: 'Creatures you choose in the area make Wisdom saves or become Incapacitated until they take damage or are awakened.',
+  'misty-step': 'Teleport up to 30 feet to an unoccupied space you can see.',
+  'ray-of-sickness': 'Make a ranged spell attack that deals poison damage and can Poison the target.',
+  web: 'Create webs that make the area difficult terrain and can Restrain creatures that fail Dexterity saves.',
+  'false-life': 'Gain temporary Hit Points for 1 hour.',
+  'ray-of-enfeeblement': 'A creature makes a Constitution save or deals half damage with Strength-based attacks while you maintain Concentration.',
+  barkskin: 'A willing creature’s Armor Class cannot be lower than 17 for 1 hour.',
+  'lesser-restoration': 'End one specified condition or disease affecting a creature you touch.',
+  moonbeam: 'A cylinder of light deals radiant damage to creatures that enter it or start their turn there; a Constitution save halves the damage.',
+  'pass-without-trace': 'Chosen creatures gain a +10 bonus to Dexterity (Stealth) checks and leave no tracks while you maintain Concentration.',
+  'spike-growth': 'Camouflaged spikes make an area difficult terrain and deal piercing damage for movement through it.',
+  fireball: 'Creatures in a 20-foot-radius sphere make Dexterity saves, taking fire damage on a failure or half on a success.',
+  'sleet-storm': 'Create a heavily obscured icy storm that makes terrain difficult, disrupts Concentration, and can knock creatures Prone.',
+  'lightning-bolt': 'Creatures in a 100-foot line make Dexterity saves, taking lightning damage on a failure or half on a success.',
+  'stinking-cloud': 'Create an obscuring cloud whose vapors can prevent creatures from taking actions.',
+  'dispel-magic': 'End spells on a target, automatically for lower-level effects and with an ability check for stronger magic.',
+  'plant-growth': 'Overgrow plants to hinder movement, or enrich plants in a large area when cast over 8 hours.',
+  revivify: 'Return a creature that died within the last minute to life with 1 Hit Point.',
+  blight: 'A creature makes a Constitution save, taking necrotic damage on a failure or half on a success.',
+  'ice-storm': 'Hail deals bludgeoning and cold damage in a cylinder and leaves difficult terrain until your next turn.',
+  'freedom-of-movement': 'A willing creature ignores difficult terrain and magical restraints and can escape nonmagical restraints more easily.',
+  polymorph: 'A creature makes a Wisdom save if unwilling and transforms into a Beast while you maintain Concentration.',
+  'conjure-minor-elementals': 'Elemental spirits surround you and empower attacks against creatures in the emanation.',
+  'stone-shape': 'Reshape a Medium or smaller section of stone into a form you choose.',
+  'antilife-shell': 'A moving barrier prevents living creatures from entering its area while you maintain Concentration.',
+  awaken: 'After an 8-hour casting, grant intelligence and communication to an eligible Beast or plant and Charm it temporarily.',
+  'commune-with-nature': 'Learn three facts about the surrounding natural region.',
+  'conjure-elemental': 'Conjure an elemental spirit in an area to damage creatures while you maintain Concentration.',
+  contagion: 'Touch a creature and afflict it with a chosen magical contagion.',
+  'greater-restoration': 'Reduce Exhaustion or end a debilitating magical effect on a creature you touch.',
+  'insect-plague': 'Swarming insects heavily obscure an area and deal piercing damage; a Constitution save halves the damage.',
+  'mass-cure-wounds': 'Up to six creatures in an area regain Hit Points.',
+  'planar-binding': 'Bind a Celestial, Elemental, Fey, or Fiend to follow your instructions for 24 hours.',
+  reincarnate: 'Provide a new adult body for a Humanoid that has been dead no longer than 10 days.',
+  scrying: 'Observe a creature or location on the same plane through a magical sensor.',
+  'transmute-rock': 'Transform a large area of rock into mud, or mud into rock, with effects on creatures and terrain.',
+  'wall-of-stone': 'Create connected stone panels that can become permanent if Concentration lasts for the full duration.',
+  'cone-of-cold': 'Creatures in a 60-foot cone make Constitution saves, taking cold damage on a failure or half on a success.',
+};
 const spells = Object.fromEntries(
   spellRows.map(
     ([id, name, level, school, ritual, concentration, classIds]) => [
@@ -610,9 +693,9 @@ const spells = Object.fromEntries(
         ritual,
         concentration,
         classIds,
-        castingTime: undefined,
-        range: undefined,
-        duration: undefined,
+        castingTime: { type: 'action' },
+        range: { type: 'special', label: 'Special' },
+        duration: { type: 'special', label: 'Special' },
         components: {
           verbal: true,
           somatic: true,
@@ -624,9 +707,10 @@ const spells = Object.fromEntries(
             : []),
           ...(concentration ? (['control'] as const) : (['utility'] as const)),
         ],
-        effects: undefined,
-        description: undefined,
-        content: { completeness: 'none', source: 'phb-2024' },
+        effects: [{ id: `${id}-summary`, kind: 'other', shortText: conciseSpellSummaries[id] ?? `${name} creates its documented magical effect` }],
+        summary: conciseSpellSummaries[id] ?? `${name} creates its documented magical effect.`,
+        description: conciseSpellSummaries[id],
+        content: { completeness: 'summary', source: 'phb-2024' },
         source: phb2024,
         ...richSpellContent[id],
       } satisfies SpellDefinition,

@@ -165,3 +165,9 @@ Smart choice filtering now makes the rules engine the source of visible and lega
 ## Iteration 3.5F
 
 The generic, immutable `CharacterState` overlay now powers a playable Wild Shape mode without replacing the Druid character sheet. The rules layer filters a deliberately small verified Beast registry; transformation preview, Beast HP damage and healing, overflow damage, automatic and manual reversion, rests, refresh persistence, undo history, a reusable active-state card, and informational Beast details all operate on the same character. See [the Iteration 3.5F architecture notes](docs/iteration-3-5f-character-state-and-wild-shape.md).
+
+## Rich spell content (Iteration 4.0A)
+
+The supported Druid experience covers cantrips and spells available through Druid level 9 (spell levels 0–5), Circle of the Land grants, Chthonic Legacy grants, and the Magician cantrip. Spell mechanics use structured casting-time, range, duration, component, attack/save, damage/healing, area, effect, and scaling data. Compact builder cards and the Spellbook derive labels from the shared model.
+
+Bundled public mechanics are separated from prose. SRD 5.2.1 prose can be bundled where licensed; an optional versioned local JSON content pack can replace prose without replacing public mechanics or uploading data. Imported text renders as plain React text, never raw HTML. Automated coverage rejects missing critical fields and known placeholders. See [Iteration 4.0A](docs/iteration-4-0a-complete-spell-content.md).

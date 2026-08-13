@@ -93,7 +93,7 @@ export const searchSpells = (
   const term = search.trim().toLocaleLowerCase();
   return term
     ? spells.filter((spell) =>
-        [spell.name, spell.school, spell.sourceLabel, spell.damageSummary ?? '']
+        [spell.name, spell.school, spell.sourceLabel, spell.summary ?? '', ...spell.tags]
           .join(' ')
           .toLocaleLowerCase()
           .includes(term),

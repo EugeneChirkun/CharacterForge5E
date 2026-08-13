@@ -28,18 +28,17 @@ export function auditSpellContent(
   const missing: SpellContentField[] = [];
   if (!spell.id.trim()) missing.push('id');
   if (!spell.name.trim()) missing.push('name');
-  if (!spell.castingTime?.trim()) missing.push('casting-time');
-  if (!spell.range?.trim() || placeholder.test(spell.range))
-    missing.push('range');
+  if (!spell.castingTime) missing.push('casting-time');
+  if (!spell.range || (spell.range.type === 'special' && placeholder.test(spell.range.label))) missing.push('range');
   if (!spell.components) missing.push('components');
   if (
     spell.components.material &&
     !spell.components.materialRequirement?.trim()
   )
     missing.push('material-components');
-  if (!spell.duration?.trim() || placeholder.test(spell.duration))
-    missing.push('duration');
-  if (!spell.description?.trim() || placeholder.test(spell.description))
+  if (!spell.duration || (spell.duration.type === 'special' && placeholder.test(spell.duration.label))) missing.push('duration');
+  const usefulText = spell.description?.trim() || spell.summary?.trim();
+  if (!usefulText || placeholder.test(usefulText))
     missing.push('description');
   if (!spell.source.verified || !spell.content.source) missing.push('source');
   if (!(

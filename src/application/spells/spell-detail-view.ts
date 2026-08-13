@@ -3,6 +3,7 @@ import type {
   DiceExpression,
   SpellDefinition,
 } from '../../domain/rules';
+import { formatCastingTime, formatDiceExpression, formatSpellDuration, formatSpellRange } from '../../domain/spells/spell-formatting';
 
 export interface ResolvedSpellSource {
   readonly type: 'class' | 'subclass' | 'species' | 'primal-order' | 'feat';
@@ -46,8 +47,7 @@ export interface SpellCompactSummaryView {
   readonly areaLabel?: string;
   readonly effectLabels: readonly string[];
 }
-const dice = (value: DiceExpression) =>
-  `${value.count}d${value.die}${value.modifier ? `${value.modifier > 0 ? '+' : ''}${value.modifier}` : ''}${value.modifierType === 'spellcasting-ability' ? ' + spellcasting ability' : ''}`;
+const dice = (value: DiceExpression) => formatDiceExpression(value);
 const title = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1).replaceAll('-', ' ');
 
@@ -68,9 +68,9 @@ export function createSpellDetailView(
     : spell.savingThrow
       ? `${spell.savingThrow.toUpperCase()} Save`
       : undefined;
-  const currentScaling = spell.scaling?.steps
+  const currentScaling = spell.scaling?.type === 'character-level' ? spell.scaling.steps
     .filter((step) => step.minimumLevel <= characterLevel)
-    .at(-1)?.dice;
+    .at(-1)?.dice : undefined;
   const damage =
     spell.damage?.map(
       (d) => `${dice(currentScaling ?? d.dice)} ${title(d.damageType)}`,
@@ -85,19 +85,21 @@ export function createSpellDetailView(
     level: spell.level,
     levelLabel: spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`,
     schoolLabel: title(spell.school),
-    castingTimeLabel: spell.castingTime ?? 'Not available in installed content',
-    rangeLabel: spell.range ?? 'Not available in installed content',
+    castingTimeLabel: formatCastingTime(spell.castingTime),
+    rangeLabel: formatSpellRange(spell.range),
     componentsLabel: componentCodes.join('/'),
     materialComponentText: spell.components.materialRequirement,
-    durationLabel: spell.duration ?? 'Not available in installed content',
+    durationLabel: formatSpellDuration(spell.duration),
     concentration: spell.concentration,
     ritual: spell.ritual,
     attackOrSaveLabel,
     damageSummary: damage.join(', ') || undefined,
     healingSummary: healing.join(', ') || undefined,
-    scalingSummary: spell.scaling?.steps
-      .map((s) => `Level ${s.minimumLevel}: ${dice(s.dice)}`)
-      .join(' • '),
+    scalingSummary: spell.scaling?.type === 'character-level'
+      ? spell.scaling.steps.map((s) => `Level ${s.minimumLevel}: ${dice(s.dice)}`).join(' • ')
+      : spell.scaling
+        ? `Each slot level above the base adds ${dice(spell.scaling.perSlotLevel)} ${spell.scaling.effect}`
+        : undefined,
     summary: spell.summary,
     description: spell.description,
     higherLevels: spell.higherLevels,
