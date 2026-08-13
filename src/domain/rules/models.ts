@@ -33,8 +33,16 @@ export interface DruidPrimalOrderDefinition {
 export type OwnerType =
   'class' | 'subclass' | 'species' | 'background' | 'feat';
 export type DamageType =
-  | 'acid' | 'cold' | 'fire' | 'force' | 'lightning' | 'necrotic'
-  | 'piercing' | 'poison' | 'radiant' | 'thunder';
+  | 'acid'
+  | 'cold'
+  | 'fire'
+  | 'force'
+  | 'lightning'
+  | 'necrotic'
+  | 'piercing'
+  | 'poison'
+  | 'radiant'
+  | 'thunder';
 export type RuleEffect =
   | {
       readonly type: 'grant-saving-throw-proficiency';
@@ -178,6 +186,7 @@ export interface DiceExpression {
   readonly count: number;
   readonly die: number;
   readonly modifier?: number;
+  readonly modifierType?: 'spellcasting-ability';
 }
 export interface SpellDamageDefinition {
   readonly dice: DiceExpression;
@@ -186,11 +195,34 @@ export interface SpellDamageDefinition {
 }
 export interface SpellHealingDefinition {
   readonly dice: DiceExpression;
-  readonly abilityModifier?: AbilityName;
+}
+export interface SpellAreaDefinition {
+  readonly shape:
+    'radius' | 'cone' | 'line' | 'cube' | 'sphere' | 'cylinder' | 'square';
+  readonly sizeFeet: number;
+}
+export interface SpellEffectSummary {
+  readonly id: string;
+  readonly kind:
+    | 'condition'
+    | 'movement'
+    | 'bonus'
+    | 'penalty'
+    | 'utility'
+    | 'defense'
+    | 'healing'
+    | 'summoning'
+    | 'terrain'
+    | 'other';
+  readonly shortText: string;
+  readonly condition?: string;
 }
 export interface CantripScaling {
   readonly type: 'character-level';
-  readonly steps: readonly { readonly minimumLevel: number; readonly dice: DiceExpression }[];
+  readonly steps: readonly {
+    readonly minimumLevel: number;
+    readonly dice: DiceExpression;
+  }[];
 }
 export interface SpellDefinition {
   readonly id: string;
@@ -209,6 +241,8 @@ export interface SpellDefinition {
   readonly savingThrow?: AbilityName;
   readonly damage?: readonly SpellDamageDefinition[];
   readonly healing?: readonly SpellHealingDefinition[];
+  readonly area?: SpellAreaDefinition;
+  readonly effects?: readonly SpellEffectSummary[];
   readonly scaling?: CantripScaling;
   /** Authored prose is content, never input to rules calculations. */
   readonly description: string;

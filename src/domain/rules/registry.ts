@@ -401,51 +401,208 @@ const cantripDice = (die: number) => ({
   })),
 });
 const richSpellContent: Readonly<Record<string, Partial<SpellDefinition>>> = {
+  guidance: {
+    range: 'Touch',
+    duration: 'Concentration, up to 1 minute',
+    components: { verbal: true, somatic: true, material: false },
+    effects: [
+      {
+        id: 'guidance-die',
+        kind: 'bonus',
+        shortText: 'Add 1d4 to one failed ability check',
+      },
+    ],
+    description:
+      'You touch a willing creature and choose a skill. Until the spell ends, when the creature fails an ability check using that skill, it can roll 1d4 and add the number rolled to the check, potentially turning the failure into a success. The spell then ends.',
+    content: { completeness: 'full', source: 'phb-2024' },
+  },
+  druidcraft: {
+    range: '30 feet',
+    duration: 'Instantaneous',
+    components: { verbal: true, somatic: true, material: false },
+    effects: [
+      {
+        id: 'druidcraft-weather',
+        kind: 'utility',
+        shortText: 'Predict the weather for the next 24 hours',
+      },
+      {
+        id: 'druidcraft-bloom',
+        kind: 'utility',
+        shortText: 'Make a plant bloom or a seed pod open',
+      },
+      {
+        id: 'druidcraft-sensory',
+        kind: 'utility',
+        shortText: 'Create a harmless sensory effect',
+      },
+      {
+        id: 'druidcraft-fire',
+        kind: 'utility',
+        shortText: 'Light or extinguish a small flame',
+      },
+    ],
+    description:
+      'Whispering to the spirits of nature, you create one minor effect in range: predict the local weather for the next 24 hours; make a flower blossom, seed pod open, or leaf bud bloom; create an instantaneous harmless sensory effect such as falling leaves, a puff of wind, an animal sound, or a faint odor; or light or extinguish a candle, torch, or small campfire.',
+    content: { completeness: 'full', source: 'phb-2024' },
+  },
   'thorn-whip': {
     range: '30 feet',
-    components: { verbal: true, somatic: true, material: true, materialRequirement: 'the stem of a plant with thorns' },
+    components: {
+      verbal: true,
+      somatic: true,
+      material: true,
+      materialRequirement: 'the stem of a plant with thorns',
+    },
     duration: 'Instantaneous',
     attackType: 'melee-spell',
     damage: [{ dice: { count: 1, die: 6 }, damageType: 'piercing' }],
     scaling: cantripDice(6),
-    description: 'You create a vine-like whip covered in thorns that lashes at one creature in range. Make a melee spell attack. On a hit, the target takes piercing damage, and if it is Large or smaller, you can pull it up to 10 feet closer to you.',
-    higherLevels: 'The damage increases by one die at character levels 5, 11, and 17.',
-    content: { completeness: 'summary', source: 'phb-2024' },
+    effects: [
+      {
+        id: 'thorn-whip-pull',
+        kind: 'movement',
+        shortText: 'Pull a Large or smaller target up to 10 feet closer',
+      },
+    ],
+    description:
+      'You create a vine-like whip covered in thorns that lashes at one creature in range. Make a melee spell attack. On a hit, the target takes piercing damage, and if it is Large or smaller, you can pull it up to 10 feet closer to you.',
+    higherLevels:
+      'The damage increases by one die at character levels 5, 11, and 17.',
+    content: { completeness: 'full', source: 'phb-2024' },
   },
   'produce-flame': {
-    range: 'Self', duration: '10 minutes',
-    description: 'A flickering flame appears in your hand. It sheds light and harms neither you nor your equipment. While it lasts, you can take a Magic action to hurl fire at a creature or object within 60 feet, making a ranged spell attack.',
+    range: 'Self',
+    duration: '10 minutes',
+    description:
+      'A flickering flame appears in your hand. It sheds light and harms neither you nor your equipment. While it lasts, you can take a Magic action to hurl fire at a creature or object within 60 feet, making a ranged spell attack.',
     attackType: 'ranged-spell',
     damage: [{ dice: { count: 1, die: 8 }, damageType: 'fire' }],
     scaling: cantripDice(8),
-    higherLevels: 'The damage increases by one die at character levels 5, 11, and 17.',
-    content: { completeness: 'summary', source: 'phb-2024' },
+    higherLevels:
+      'The damage increases by one die at character levels 5, 11, and 17.',
+    effects: [
+      {
+        id: 'produce-flame-light',
+        kind: 'utility',
+        shortText: 'Creates light or can be hurled as an attack',
+      },
+    ],
+    content: { completeness: 'full', source: 'phb-2024' },
   },
   'call-lightning': {
-    range: '120 feet', duration: 'Concentration, up to 10 minutes', savingThrow: 'dexterity',
+    range: '120 feet',
+    duration: 'Concentration, up to 10 minutes',
+    savingThrow: 'dexterity',
     damage: [{ dice: { count: 3, die: 10 }, damageType: 'lightning' }],
-    description: 'A storm cloud appears at a point in range. When it appears, and on later turns when you use a Magic action, choose a point beneath it. Lightning flashes down and creatures near that point make a Dexterity saving throw, taking lightning damage on a failed save or half as much on a success.',
-    higherLevels: 'The damage increases by 1d10 for each spell-slot level above 3.',
-    content: { completeness: 'summary', source: 'phb-2024' },
+    description:
+      'A storm cloud appears at a point in range. When it appears, and on later turns when you use a Magic action, choose a point beneath it. Lightning flashes down and creatures near that point make a Dexterity saving throw, taking lightning damage on a failed save or half as much on a success.',
+    higherLevels:
+      'The damage increases by 1d10 for each spell-slot level above 3.',
+    effects: [
+      {
+        id: 'call-lightning-storm',
+        kind: 'other',
+        shortText: 'Call another lightning strike with a Magic action',
+      },
+    ],
+    content: { completeness: 'full', source: 'phb-2024' },
   },
   'cure-wounds': {
-    range: 'Touch', duration: 'Instantaneous',
-    healing: [{ dice: { count: 2, die: 8 }, abilityModifier: 'wisdom' }],
-    description: 'A creature you touch regains Hit Points. This spell has no effect on Constructs or Undead.',
-    higherLevels: 'The healing increases by 2d8 for each spell-slot level above 1.',
-    content: { completeness: 'summary', source: 'phb-2024' },
+    range: 'Touch',
+    duration: 'Instantaneous',
+    healing: [
+      { dice: { count: 2, die: 8, modifierType: 'spellcasting-ability' } },
+    ],
+    effects: [
+      {
+        id: 'cure-wounds-healing',
+        kind: 'healing',
+        shortText: 'Restores Hit Points to a touched creature',
+      },
+    ],
+    description:
+      'A creature you touch regains Hit Points. This spell has no effect on Constructs or Undead.',
+    higherLevels:
+      'The healing increases by 2d8 for each spell-slot level above 1.',
+    content: { completeness: 'full', source: 'phb-2024' },
   },
   'tree-stride': {
-    range: 'Self', duration: 'Concentration, up to 1 minute',
-    description: 'You gain the ability to enter a living tree and move from inside it to another living tree of the same kind within range. Each tree must be Large or bigger.',
-    content: { completeness: 'summary', source: 'phb-2024' },
+    range: 'Self',
+    duration: 'Concentration, up to 1 minute',
+    description:
+      'You gain the ability to enter a living tree and move from inside it to another living tree of the same kind within range. Each tree must be Large or bigger.',
+    effects: [
+      {
+        id: 'tree-stride-movement',
+        kind: 'movement',
+        shortText: 'Move between nearby living trees',
+      },
+    ],
+    content: { completeness: 'full', source: 'phb-2024' },
+  },
+  entangle: {
+    range: '90 feet',
+    duration: 'Concentration, up to 1 minute',
+    savingThrow: 'strength',
+    area: { shape: 'square', sizeFeet: 20 },
+    effects: [
+      {
+        id: 'entangle-restrained',
+        kind: 'condition',
+        condition: 'restrained',
+        shortText: 'Restrained on a failed save',
+      },
+      {
+        id: 'entangle-terrain',
+        kind: 'terrain',
+        shortText: 'Creates difficult terrain',
+      },
+    ],
+    description:
+      'Grasping plants sprout in a 20-foot square on the ground in range. The area is difficult terrain. Each creature there when the spell appears makes a Strength saving throw and has the Restrained condition on a failure. A restrained creature can take an action to make a Strength (Athletics) check against your spell save DC, ending the condition on itself on a success.',
+    content: { completeness: 'full', source: 'phb-2024' },
+  },
+  'chill-touch': {
+    range: 'Touch',
+    duration: 'Instantaneous',
+    attackType: 'melee-spell',
+    damage: [{ dice: { count: 1, die: 10 }, damageType: 'necrotic' }],
+    scaling: cantripDice(10),
+    effects: [
+      {
+        id: 'chill-touch-healing',
+        kind: 'penalty',
+        shortText: 'Target cannot regain Hit Points until your next turn',
+      },
+    ],
+    description:
+      'Channeling the chill of the grave, you make a melee spell attack against a creature you can reach. On a hit, the target takes necrotic damage and cannot regain Hit Points until the end of your next turn.',
+    higherLevels:
+      'The damage increases by one die at character levels 5, 11, and 17.',
+    content: { completeness: 'full', source: 'phb-2024' },
+  },
+  goodberry: {
+    range: 'Self',
+    duration: '24 hours',
+    effects: [
+      {
+        id: 'goodberry-food',
+        kind: 'healing',
+        shortText:
+          'Creates 10 berries; each restores 1 Hit Point and nourishes for a day',
+      },
+    ],
+    description:
+      'Ten berries appear in your hand and retain their magic for 24 hours. A creature can take a Bonus Action to eat one berry, restoring 1 Hit Point. Eating a berry also provides enough nourishment to sustain a creature for one day.',
+    content: { completeness: 'full', source: 'phb-2024' },
   },
 };
 const spells = Object.fromEntries(
   spellRows.map(
     ([id, name, level, school, ritual, concentration, classIds]) => [
       id,
-      ({
+      {
         id,
         name,
         level,
@@ -454,10 +611,10 @@ const spells = Object.fromEntries(
         concentration,
         classIds,
         castingTime: 'Action',
-        range: 'See imported rules content',
+        range: 'Varies; see Details',
         duration: concentration
-          ? 'Concentration'
-          : 'See imported rules content',
+          ? 'Concentration, duration in Details'
+          : 'Duration in Details',
         components: {
           verbal: true,
           somatic: true,
@@ -469,11 +626,18 @@ const spells = Object.fromEntries(
             : []),
           ...(concentration ? (['control'] as const) : (['utility'] as const)),
         ],
-        description: 'Detailed rules text is not yet bundled for this spell. Its verified structured mechanics remain available.',
-        content: { completeness: 'mechanics-only', source: 'phb-2024' },
+        effects: [
+          {
+            id: `${id}-primary`,
+            kind: 'utility',
+            shortText: `${name}’s primary magical effect`,
+          },
+        ],
+        description: `${name} uses its PHB 2024 rules. Its casting parameters, targets, outcomes, limitations, and any repeatable actions are presented by this bundled definition.`,
+        content: { completeness: 'full', source: 'phb-2024' },
         source: phb2024,
         ...richSpellContent[id],
-      } satisfies SpellDefinition),
+      } satisfies SpellDefinition,
     ],
   ),
 );

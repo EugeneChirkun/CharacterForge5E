@@ -1,6 +1,6 @@
 # Character Forge 5E
 
-Stage 4 spell experiences include shared rich, expandable details in creation, the Magician picker, preparation flows, and Spellbook. The content schema supports full bundled descriptions plus structured mechanics and completeness metadata; currently installed summaries and mechanics-only entries are identified honestly. Level-up now requires manual preparation review, preserves existing choices without auto-picking, and exposes level-5 spells to level-9 Druids. Circle and species grants remain derived and separate from ordinary preparation. UI content access is routed through registries and selectors for future content packs.
+Stage 4 spell experiences include shared rich, expandable details in creation, the Magician picker, preparation flows, and Spellbook. The supported Druid-through-level-9 registry is audited for complete bundled 2024 content and structured damage, healing, areas, effects, and current-level cantrip scaling. Compact cards show those mechanics immediately while full Details remain available. Level-up requires manual preparation review, preserves existing choices without auto-picking, and exposes level-5 spells to level-9 Druids. Circle and species grants remain derived and separate from ordinary preparation. UI content access is routed through registries, selectors, and the shared presentation layer for future content packs.
 
 > **Current release:** Iteration **3.5D — Druid Subclass and Circle of the Land Completion**, application version **0.1.0**.
 

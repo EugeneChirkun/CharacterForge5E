@@ -44,7 +44,7 @@ export function SpellCard({
                 ? 'Magic Item'
                 : source === 'primal-order'
                   ? 'Primal Order: Magician'
-                : source[0].toUpperCase() + source.slice(1)}
+                  : source[0].toUpperCase() + source.slice(1)}
             </span>
           ))}
         </span>
@@ -54,6 +54,13 @@ export function SpellCard({
         {spell.attackOrSaveLabel && <small>{spell.attackOrSaveLabel}</small>}
         {spell.damageSummary && <small>Damage: {spell.damageSummary}</small>}
         {spell.healingSummary && <small>Healing: {spell.healingSummary}</small>}
+        {(spell.areaLabel || spell.effectLabels.length > 0) && (
+          <small>
+            {[spell.areaLabel, ...spell.effectLabels]
+              .filter(Boolean)
+              .join(' · ')}
+          </small>
+        )}
         <small>
           {spell.components.join(', ') || 'No components listed'}
           {spell.components.includes('Material') ? ' · Material required' : ''}
