@@ -10,7 +10,7 @@ import {
   type RuleRegistry,
 } from '../rules';
 import { abilityNames, type AbilityName } from '../abilities';
-import { maximumSpellLevel, validatePreparedSpells } from '../spells';
+import { maximumSpellLevel } from '../spells';
 import {
   applyGeneralFeatEffects,
   generalFeatRegistry,
@@ -18,6 +18,14 @@ import {
   type FeatNestedChoices,
 } from '../feats';
 import { normalizeSubclassId, validateSubclassChoice } from '../subclasses';
+import {
+  getTargetSpellCapability,
+  validateLevelUpSpellChoices,
+  type LevelUpSpellChoices,
+  type LevelUpSpellDiff,
+  previewLevelUpSpellChanges,
+  spellCapability,
+} from '../../application/spells/level-up-spell-selection';
 export interface LevelUpDraft {
   readonly characterId: string;
   readonly fromLevel: number;
@@ -28,6 +36,8 @@ export interface LevelUpDraft {
   };
   readonly selectedPreparedSpellIds: readonly string[];
   readonly selectedCantripIds: readonly string[];
+  /** Ephemeral choices reviewed before the atomic level-up commit. */
+  readonly spellChoices?: LevelUpSpellChoices;
   readonly subclassId?: string;
   readonly landType?: LandType;
   readonly advancementChoice?: AdvancementChoice;
@@ -204,6 +214,7 @@ export interface LevelUpPreview {
   readonly after?: ComputedCharacter;
   readonly changes: readonly LevelUpChange[];
   readonly diagnostics: readonly LevelUpDiagnostic[];
+  readonly spellDiff?: LevelUpSpellDiff;
 }
 export type ApplyLevelUpResult =
   | {
@@ -252,22 +263,25 @@ export function applyLevelUp(
     (p) => p.level === draft.toLevel,
   );
   if (progression) {
-    const spells = validatePreparedSpells({
+    const choices = draft.spellChoices ?? {
       preparedSpellIds: draft.selectedPreparedSpellIds,
-      classId: 'druid',
-      maximum: progression.preparedSpells,
-      maximumSpellLevel: maximumSpellLevel(progression.spellSlots),
-      grants: [],
+      normalCantripIds: draft.selectedCantripIds,
+    };
+    const capability = getTargetSpellCapability(
+      build,
+      draft.toLevel,
+      draft.landType ?? session.selections?.circleOfTheLand?.landType,
       registry,
-    });
-    if (
-      spells.diagnostics.length ||
-      draft.selectedCantripIds.length !== progression.cantripsKnown
-    )
+    );
+    const spellDiagnostics = validateLevelUpSpellChoices(
+      choices,
+      capability,
+      registry,
+    );
+    if (spellDiagnostics.length)
       diagnostics.push({
         type: 'invalid-spell-choice',
-        message:
-          'Select valid cantrips and no more than the target level’s prepared-spell limit.',
+        message: spellDiagnostics[0].message,
       });
   }
   if (draft.toLevel === 3)
@@ -383,8 +397,13 @@ export function applyLevelUp(
         },
       ],
     },
-    cantripIds: [...draft.selectedCantripIds],
-    preparedSpellIds: [...draft.selectedPreparedSpellIds],
+    cantripIds: [
+      ...(draft.spellChoices?.normalCantripIds ?? draft.selectedCantripIds),
+    ],
+    preparedSpellIds: [
+      ...(draft.spellChoices?.preparedSpellIds ??
+        draft.selectedPreparedSpellIds),
+    ],
   };
   if (draft.advancementChoice?.type === 'general-feat') {
     const definition = generalFeatRegistry[draft.advancementChoice.featId];
@@ -418,10 +437,17 @@ export function previewLevelUp(
   if (!result.success)
     return { before, changes: [], diagnostics: result.diagnostics };
   const after = computeCharacter(result.build, result.session, registry);
+  const spellDiff = previewLevelUpSpellChanges(
+    spellCapability(before),
+    spellCapability(after),
+    build.preparedSpellIds ?? [],
+    result.build.preparedSpellIds ?? [],
+  );
   return {
     before,
     after,
     diagnostics: [],
+    spellDiff,
     changes: [
       {
         label: 'Level',
